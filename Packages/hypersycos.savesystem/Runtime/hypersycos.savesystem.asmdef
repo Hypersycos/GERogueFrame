@@ -1,0 +1,20 @@
+{
+    "name": "SaveSystem",
+    "rootNamespace": "Hypersycos.SaveSystem",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.solidalloy.generic-unity-objects",
+            "expression": "",
+            "define": "USE_GENERIC_SO"
+        }
+    ],
+    "noEngineReferences": false
+}
