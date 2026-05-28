@@ -501,6 +501,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuBehaviour
   networkManager: {fileID: 1863840329}
+  networkTransport: {fileID: 1863840328}
   document: {fileID: 956630852}
 --- !u!1 &1737154462
 GameObject:
@@ -618,7 +619,7 @@ MonoBehaviour:
   m_MaxPayloadSize: 6144
   m_HeartbeatTimeoutMS: 500
   m_ConnectTimeoutMS: 1000
-  m_MaxConnectAttempts: 60
+  m_MaxConnectAttempts: 5
   m_DisconnectTimeoutMS: 30000
   ConnectionData:
     Address: 127.0.0.1
