@@ -1,0 +1,52 @@
+.custom-label {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(68, 138, 255);
+}
+
+.mainMenuButton {
+    font-size: 40px;
+    -unity-text-generator: advanced;
+    -unity-text-auto-size: best-fit 0 100px;
+    margin-bottom: 5%;
+    -unity-text-align: middle-center;
+    width: 80%;
+    align-self: center;
+    align-content: center;
+    height: 20%;
+    padding-bottom: 1%;
+    padding-top: 1%;
+    padding-left: 1%;
+    padding-right: 1%;
+    margin-top: 0;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.mainMenuContainer {
+}
+
+.backButton {
+    flex-shrink: 0;
+    flex-direction: row-reverse;
+    align-self: flex-start;
+    background-image: url("project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=5923138177525885446&guid=3dfe51f11806ed542a96ceca1f765e20&type=3#arrow-left");
+    -unity-background-image-tint-color: rgb(0, 0, 0);
+    width: 7.5%;
+    height: 7.5%;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    -unity-text-align: middle-center;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+}

@@ -1,0 +1,21 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/MainMenu.uss?fileID=7433441132597879392&amp;guid=43747a4304dd5a84f9a422de0c9da7f6&amp;type=3#MainMenu"/>
+    <ui:VisualElement name="Background" style="flex-grow: 1; background-color: rgb(0, 146, 157); top: 0%; bottom: 0%; right: 0%; left: 0%;">
+        <ui:VisualElement name="UIContainer" style="flex-grow: 1; top: 15%; right: auto; bottom: auto; left: 5%; width: 30%; height: 70%; max-height: 70%; max-width: 30%; background-color: rgb(80, 183, 191); margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%; padding-top: 2%; padding-right: 2%; padding-bottom: 2%; padding-left: 2%; border-top-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; border-bottom-left-radius: 15px;">
+            <ui:Label text="Game Title" name="Title" style="-unity-text-align: middle-center; -unity-font-style: bold; font-size: 50%; margin-bottom: 10%; -unity-text-auto-size: best-fit 0 100px; -unity-text-generator: advanced; letter-spacing: -7px; width: 100%; height: 20%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-left: 0; margin-right: 0; margin-top: 0;"/>
+            <ui:VisualElement name="MainMenu" enabled="true" picking-mode="Position" class="mainMenuContainer" style="flex-grow: 1; display: flex;">
+                <ui:Button text="Play" name="Play" class="mainMenuButton"/>
+                <ui:Button text="Builds" name="Builds" class="mainMenuButton"/>
+                <ui:Button text="Settings" name="Settings" class="mainMenuButton"/>
+                <ui:Button text="Quit" name="Quit" class="mainMenuButton"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="JoinOrHost" enabled="true" class="mainMenuContainer" style="flex-grow: 1; display: none;">
+                <ui:Button name="Backbutton" class="backButton" style="position: absolute;"/>
+                <ui:Button text="Host" name="Host" class="mainMenuButton"/>
+                <ui:Label text="" name="ErrorText" class="mainMenuButton" style="color: rgb(255, 0, 0); flex-wrap: nowrap; white-space: normal; -unity-text-align: lower-center;"/>
+                <ui:TextField label="" placeholder-text="localhost" max-length="15" hide-placeholder-on-focus="true" name="IPField" class="mainMenuButton"/>
+                <ui:Button text="Join" name="Join" class="mainMenuButton"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

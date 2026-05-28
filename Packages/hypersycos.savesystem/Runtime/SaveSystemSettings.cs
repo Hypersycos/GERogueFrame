@@ -17,11 +17,15 @@ namespace Hypersycos.SaveSystem
 
         internal static SaveSystemSettings GetOrCreateSettings()
         {
-#if false && UNITY_EDITOR
+#if UNITY_EDITOR
             var settings = AssetDatabase.LoadAssetAtPath<SaveSystemSettings>(customSettingsPath);
             if (settings == null)
             {
                 settings = CreateInstance<SaveSystemSettings>();
+                if (!AssetDatabase.IsValidFolder("Assets/Resources"))
+                {
+                    AssetDatabase.CreateFolder("Assets", "Resources");
+                }
                 AssetDatabase.CreateAsset(settings, customSettingsPath);
                 AssetDatabase.SaveAssets();
             }
