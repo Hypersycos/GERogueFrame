@@ -5,160 +5,163 @@ using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-[RequireComponent(typeof(UIDocument))]
-public class MainMenuBehaviour : MonoBehaviour
+namespace Hypersycos.GERogueFrame
 {
-    [SerializeField] NetworkManager networkManager;
-    [SerializeField] UnityTransport networkTransport;
-    [SerializeField] UIDocument document;
-
-    private void Reset()
+    [RequireComponent(typeof(UIDocument))]
+    public class MainMenuBehaviour : MonoBehaviour
     {
-        document = GetComponent<UIDocument>();
-        networkManager = NetworkManager.Singleton;
-        if (networkManager != null)
-            networkTransport = networkManager.GetComponent<UnityTransport>();
-    }
+        [SerializeField] NetworkManager networkManager;
+        [SerializeField] UnityTransport networkTransport;
+        [SerializeField] UIDocument document;
 
-    string networkAddress { get => networkTransport.ConnectionData.Address; set => networkTransport.ConnectionData.Address = value; }
+        private void Reset()
+        {
+            document = GetComponent<UIDocument>();
+            networkManager = NetworkManager.Singleton;
+            if (networkManager != null)
+                networkTransport = networkManager.GetComponent<UnityTransport>();
+        }
 
-    private Button play;
-    private Button builds;
-    private Button settings;
-    private Button quit;
+        string networkAddress { get => networkTransport.ConnectionData.Address; set => networkTransport.ConnectionData.Address = value; }
 
-    private VisualElement mainMenuContainer;
-    private VisualElement JoinOrHost;
+        private Button play;
+        private Button builds;
+        private Button settings;
+        private Button quit;
 
-    private Button back;
-    private Button host;
-    private TextField ip;
-    string ipValue { get => ip.text == "" ? "localhost" : ip.text; }
-    private Button join;
-    private Label error;
+        private VisualElement mainMenuContainer;
+        private VisualElement JoinOrHost;
 
-    Coroutine errorCoroutine;
+        private Button back;
+        private Button host;
+        private TextField ip;
+        string ipValue { get => ip.text == "" ? "localhost" : ip.text; }
+        private Button join;
+        private Label error;
 
-    private void OnEnable()
-    {
-        VisualElement root = document.rootVisualElement;
-        play = root.Q<Button>("Play");
-        builds = root.Q<Button>("Builds");
-        settings = root.Q<Button>("Settings");
-        quit = root.Q<Button>("Quit");
+        Coroutine errorCoroutine;
 
-        mainMenuContainer = root.Q<VisualElement>("MainMenu");
-        JoinOrHost = root.Q<VisualElement>("JoinOrHost");
+        private void OnEnable()
+        {
+            VisualElement root = document.rootVisualElement;
+            play = root.Q<Button>("Play");
+            builds = root.Q<Button>("Builds");
+            settings = root.Q<Button>("Settings");
+            quit = root.Q<Button>("Quit");
 
-        back = root.Q<Button>("Backbutton");
-        host = root.Q<Button>("Host");
-        ip = root.Q<TextField>("IPField");
-        join = root.Q<Button>("Join");
-        error = root.Q<Label>("ErrorText");
+            mainMenuContainer = root.Q<VisualElement>("MainMenu");
+            JoinOrHost = root.Q<VisualElement>("JoinOrHost");
 
-        play.clicked += PlayClicked;
-        builds.clicked += BuildsClicked;
-        settings.clicked += SettingsClicked;
-        quit.clicked += QuitClicked;
+            back = root.Q<Button>("Backbutton");
+            host = root.Q<Button>("Host");
+            ip = root.Q<TextField>("IPField");
+            join = root.Q<Button>("Join");
+            error = root.Q<Label>("ErrorText");
 
-        back.clicked += BackClicked;
-        host.clicked += HostClicked;
-        join.clicked += JoinClicked;
+            play.clicked += PlayClicked;
+            builds.clicked += BuildsClicked;
+            settings.clicked += SettingsClicked;
+            quit.clicked += QuitClicked;
 
-        BackClicked();
-        this.error.text = "";
-    }
+            back.clicked += BackClicked;
+            host.clicked += HostClicked;
+            join.clicked += JoinClicked;
 
-    private void PlayClicked()
-    {
-        JoinOrHost.style.display = DisplayStyle.Flex;
-        mainMenuContainer.style.display = DisplayStyle.None;
-    }
+            BackClicked();
+            this.error.text = "";
+        }
 
-    private void BuildsClicked()
-    {
+        private void PlayClicked()
+        {
+            JoinOrHost.style.display = DisplayStyle.Flex;
+            mainMenuContainer.style.display = DisplayStyle.None;
+        }
 
-    }
-
-    private void SettingsClicked()
-    {
-
-    }
-
-    private void BackClicked()
-    {
-        JoinOrHost.style.display = DisplayStyle.None;
-        mainMenuContainer.style.display = DisplayStyle.Flex;
-    }
-
-    private void HostClicked()
-    {
-        JoinOrHost.enabledSelf = false;
-        if (networkManager.StartHost())
+        private void BuildsClicked()
         {
 
         }
-        else
-        {
-            JoinOrHost.enabledSelf = true;
-            DisplayError("Failed to host");
-        }
-    }
 
-    private void JoinClicked()
-    {
-        JoinOrHost.enabledSelf = false;
-        networkAddress = ipValue;
-        networkTransport.OnTransportEvent += HandleClientEvent;
-        if (networkManager.StartClient())
+        private void SettingsClicked()
         {
 
         }
-        else
+
+        private void BackClicked()
         {
-            networkTransport.OnTransportEvent -= HandleClientEvent;
-            JoinOrHost.enabledSelf = true;
-            DisplayError("Failed to start network");
+            JoinOrHost.style.display = DisplayStyle.None;
+            mainMenuContainer.style.display = DisplayStyle.Flex;
         }
-    }
 
-    private void HandleClientEvent(NetworkEvent eventType, ulong clientId, ArraySegment<byte> payload, float receiveTime)
-    {
-        if (eventType == NetworkEvent.Disconnect || eventType == NetworkEvent.TransportFailure)
+        private void HostClicked()
         {
-            networkTransport.OnTransportEvent -= HandleClientEvent;
-            JoinOrHost.enabledSelf = true;
-            DisplayError("Couldn't connect to " + ipValue);
+            JoinOrHost.enabledSelf = false;
+            if (networkManager.StartHost())
+            {
+                networkManager.SceneManager.LoadScene("LobbyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            }
+            else
+            {
+                JoinOrHost.enabledSelf = true;
+                DisplayError("Failed to host");
+            }
         }
-    }
 
-    private void DisplayError(string error)
-    {
-        if (errorCoroutine != null)
-            StopCoroutine(errorCoroutine);
-        StartCoroutine(DisplayErrorCoroutine(error));
-    }
+        private void JoinClicked()
+        {
+            JoinOrHost.enabledSelf = false;
+            networkAddress = ipValue;
+            networkTransport.OnTransportEvent += HandleClientEvent;
+            if (networkManager.StartClient())
+            {
 
-    IEnumerator DisplayErrorCoroutine(string error, float duration = 5)
-    {
-        this.error.text = error;
-        yield return new WaitForSecondsRealtime(duration);
-        this.error.text = "";
-    }
+            }
+            else
+            {
+                networkTransport.OnTransportEvent -= HandleClientEvent;
+                JoinOrHost.enabledSelf = true;
+                DisplayError("Failed to start network");
+            }
+        }
 
-    private void QuitClicked()
-    {
-        Application.Quit(0);
-    }
+        private void HandleClientEvent(NetworkEvent eventType, ulong clientId, ArraySegment<byte> payload, float receiveTime)
+        {
+            if (eventType == NetworkEvent.Disconnect || eventType == NetworkEvent.TransportFailure)
+            {
+                networkTransport.OnTransportEvent -= HandleClientEvent;
+                JoinOrHost.enabledSelf = true;
+                DisplayError("Couldn't connect to " + ipValue);
+            }
+        }
 
-    private void OnDisable()
-    {
-        if (play != null) play.clicked -= PlayClicked;
-        if (builds != null) builds.clicked -= BuildsClicked;
-        if (settings != null) settings.clicked -= SettingsClicked;
-        if (quit != null) play.clicked -= QuitClicked;
-        if (back != null) host.clicked -= HostClicked;
-        if (host != null) host.clicked -= HostClicked;
-        if (join != null) join.clicked -= JoinClicked;
+        private void DisplayError(string error)
+        {
+            if (errorCoroutine != null)
+                StopCoroutine(errorCoroutine);
+            StartCoroutine(DisplayErrorCoroutine(error));
+        }
+
+        IEnumerator DisplayErrorCoroutine(string error, float duration = 5)
+        {
+            this.error.text = error;
+            yield return new WaitForSecondsRealtime(duration);
+            this.error.text = "";
+        }
+
+        private void QuitClicked()
+        {
+            Application.Quit(0);
+        }
+
+        private void OnDisable()
+        {
+            if (play != null) play.clicked -= PlayClicked;
+            if (builds != null) builds.clicked -= BuildsClicked;
+            if (settings != null) settings.clicked -= SettingsClicked;
+            if (quit != null) play.clicked -= QuitClicked;
+            if (back != null) host.clicked -= HostClicked;
+            if (host != null) host.clicked -= HostClicked;
+            if (join != null) join.clicked -= JoinClicked;
+        }
     }
 }

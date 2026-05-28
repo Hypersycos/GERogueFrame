@@ -2,34 +2,37 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class MainMenu : EditorWindow
+namespace Hypersycos.GERogueFrame
 {
-    [SerializeField]
-    private VisualTreeAsset m_VisualTreeAsset = default;
-
-    [MenuItem("Window/UI Toolkit/SimpleCustomEditor")]
-    public static void ShowExample()
+    public class MainMenu : EditorWindow
     {
-        MainMenu wnd = GetWindow<MainMenu>();
-        wnd.titleContent = new GUIContent("MainMenu");
-    }
+        [SerializeField]
+        private VisualTreeAsset m_VisualTreeAsset = default;
 
-    public void CreateGUI()
-    {
-        // Each editor window contains a root VisualElement object
-        VisualElement root = rootVisualElement;
+        [MenuItem("Window/UI Toolkit/SimpleCustomEditor")]
+        public static void ShowExample()
+        {
+            MainMenu wnd = GetWindow<MainMenu>();
+            wnd.titleContent = new GUIContent("MainMenu");
+        }
 
-        // VisualElements objects can contain other VisualElement following a tree hierarchy.
-        VisualElement label = new Label("Hello World! From C#");
-        root.Add(label);
+        public void CreateGUI()
+        {
+            // Each editor window contains a root VisualElement object
+            VisualElement root = rootVisualElement;
 
-        // Instantiate UXML
-        VisualElement labelFromUXML = m_VisualTreeAsset.Instantiate();
-        root.Add(labelFromUXML);
-    }
+            // VisualElements objects can contain other VisualElement following a tree hierarchy.
+            VisualElement label = new Label("Hello World! From C#");
+            root.Add(label);
 
-    public void OnEnable()
-    {
-        
+            // Instantiate UXML
+            VisualElement labelFromUXML = m_VisualTreeAsset.Instantiate();
+            root.Add(labelFromUXML);
+        }
+
+        public void OnEnable()
+        {
+
+        }
     }
 }
