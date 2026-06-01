@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.VisualScripting;
@@ -13,13 +14,13 @@ namespace Hypersycos.GERogueFrame
     {
         public ulong id;
         public bool isReady;
-        public uint character;
+        public CharacterSO character;
 
         public PlayerState(ulong id)
         {
             this.id = id;
             isReady = false;
-            character = 0;
+            character = null;
         }
 
         public override bool Equals(object obj)
@@ -46,7 +47,7 @@ namespace Hypersycos.GERogueFrame
         {
             serializer.SerializeValue<ulong>(ref id);
             serializer.SerializeValue<bool>(ref isReady);
-            serializer.SerializeValue<uint>(ref character);
+            serializer.SerializeValue(ref character);
         }
     }
 
@@ -55,6 +56,8 @@ namespace Hypersycos.GERogueFrame
         NetworkManager networkManager;
         [SerializeField] UIDocument document;
         [SerializeField] VisualTreeAsset playerIcon;
+        [SerializeField] VisualTreeAsset characterSelectButton;
+        [SerializeField] Transform spawnTransform;
         private void Reset()
         {
             document = GetComponent<UIDocument>();
@@ -65,9 +68,11 @@ namespace Hypersycos.GERogueFrame
         Button readyButton;
         ListView playerList;
         ListView characterList;
+        Dictionary<PlayerState, GameObject> characterObjs;
 
+        GameObject myCharacterObj;
         bool myReady = false;
-        uint myCharacter = 0;
+        CharacterSO myCharacter;
 
         private void OnEnable()
         {
@@ -138,6 +143,19 @@ namespace Hypersycos.GERogueFrame
             };
             readyData.OnValueChanged += RefreshList;
             playerList.RefreshItems();
+
+            characterList.itemsSource = CharacterLoader.characters;
+            characterList.makeItem = () => characterSelectButton.Instantiate();
+            characterList.bindItem = (element, index) =>
+            {
+                Button btn = element.Q<Button>();
+                CharacterSO charSO = CharacterLoader.characters[index];
+                element.style.backgroundImage = charSO.Icon;
+                //element.style.backgroundColor;
+
+                btn.clicked += () => SelectCharacter(charSO, element);
+            };
+            characterList.RefreshItems();
         }
 
         private void DeletePlayerState(ulong obj)
@@ -155,6 +173,33 @@ namespace Hypersycos.GERogueFrame
             {
                 readyData.Value.Remove(toRemove.Value);
                 readyData.CheckDirtyState();
+            }
+        }
+
+        private void SelectCharacter(CharacterSO character, VisualElement visualElement)
+        {
+            if (gameObject)
+                Destroy(gameObject);
+            myCharacterObj = Instantiate(character.Model, spawnTransform.position, spawnTransform.rotation);
+            myCharacter = character;
+        }
+
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        public void SetCharacterRpc(CharacterSO so, RpcParams rpcParams = default)
+        {
+            ulong senderID = rpcParams.Receive.SenderClientId;
+
+            for (int i = 0; i < readyData.Value.Count; i++)
+            {
+                if (readyData.Value[i].id == senderID)
+                {
+                    var state = readyData.Value[i];
+                    readyData.Value.RemoveAt(i);
+                    state.character = so;
+                    readyData.Value.Insert(i, state);
+                    readyData.CheckDirtyState(true);
+                    break;
+                }
             }
         }
 
