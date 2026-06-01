@@ -10,7 +10,7 @@ namespace Hypersycos.SaveSystem
     public class RegisteredCategory : IRegisteredHolder
     {
         List<RegisteredValue> _Values = new();
-        List<RegisteredCategory> _SubCategories = new();
+        [SerializeReference] List<RegisteredCategory> _SubCategories = new();
         public IReadOnlyList<RegisteredValue> Values;
         public IReadOnlyList<RegisteredCategory> SubCategories;
 

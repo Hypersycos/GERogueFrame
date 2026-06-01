@@ -22,7 +22,7 @@ namespace Hypersycos.SaveSystem
         public string FullyQualifiedName { get; protected set; }
         public string FileQualifiedName { get; protected set; }
 
-        private IRegisteredHolder _Parent;
+        [NonSerialized] private IRegisteredHolder _Parent;
         public virtual IRegisteredHolder Parent
         {
             get => _Parent;

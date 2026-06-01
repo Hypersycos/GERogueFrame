@@ -49,6 +49,7 @@
     border-bottom-left-radius: 10px;
     aspect-ratio: 1;
     width: 7.5%;
+    position: absolute;
 }
 
 #IPField > #unity-text-input {
