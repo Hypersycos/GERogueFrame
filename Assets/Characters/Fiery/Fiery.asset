@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 918491964572bf642b6d9dded0ac6203, type: 3}
+  m_Name: Fiery
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.CharacterSO
+  UUID: 
+  CharacterName: 
+  CharacterDescription: 
+  Icon: {fileID: 3506167780502562645, guid: 3dfe51f11806ed542a96ceca1f765e20, type: 3}
+  Model: {fileID: 3580346940904453998, guid: cc7b9dd94d456f548847c53f6c8e560a, type: 3}
+  MaxHealth: 800
+  MaxShields: 0
+  SpeedMult: 0
+  ability1: {fileID: 11400000, guid: a84cf56a0c9744c48a3061ae3f6f9c59, type: 2}
+  ability2: {fileID: 11400000, guid: eaea8a80e83214c4d9aa529ece89f482, type: 2}
+  ability3: {fileID: 11400000, guid: b244c4f342f5fe04cadc23d14980fe3a, type: 2}
+  ability4: {fileID: 11400000, guid: 3f90f08cd458dd14ab8b85854ccd8da8, type: 2}
+  ultimate: {fileID: 11400000, guid: 6ee1ffba8d0bf71459a4aff0f4e5d9ec, type: 2}
+  upgradeTree: {fileID: 11400000, guid: 16f65a729de583746aba66273b432e41, type: 2}

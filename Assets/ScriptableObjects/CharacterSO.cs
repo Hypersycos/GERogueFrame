@@ -2,14 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Hypersycos.GERogueFrame
 {
     [CreateAssetMenu(fileName = "New Character", menuName = "GERogueFrame/Character", order = 0)]
-    public class CharacterSO : ScriptableObject
+    public class CharacterSO : ScriptableObject, INetworkSerializable
     {
-        public uint UUID;
+        public string UUID;
         public string CharacterName;
         public string CharacterDescription;
         public Texture2D Icon;
@@ -25,6 +26,11 @@ namespace Hypersycos.GERogueFrame
         public AbilitySO ability4;
         public AbilitySO ultimate;
 
-        public AbilitySO upgradeTree;
+        public UpgradeTreeSO upgradeTree;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref UUID);
+        }
     }
 }
