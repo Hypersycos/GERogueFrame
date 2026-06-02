@@ -1,6 +1,6 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/UI/Lobby.uss?fileID=7433441132597879392&amp;guid=efab99042699d3a47a44d168c248b646&amp;type=3#Lobby"/>
+    <Style src="project://database/Assets/UI/Lobby/Lobby.uss?fileID=7433441132597879392&amp;guid=efab99042699d3a47a44d168c248b646&amp;type=3#Lobby"/>
     <ui:Button name="ReadyButton" text="Not Ready" class="playerReadyButton notReadyButton" style="transform-origin: center; translate: 0 0%;"/>
-    <ui:ListView name="PlayerList" item-template="project://database/Assets/UI/PlayerIcon.uxml?fileID=9197481963319205126&amp;guid=eac95ba686eeb644d946c65192cb6252&amp;type=3#PlayerIcon" virtualization-method="DynamicHeight" selection-type="None" focusable="false" style="width: 10%; height: 80%; position: absolute; background-color: rgb(80, 183, 191);"/>
-    <ui:ListView horizontal-scrolling="true" virtualization-method="DynamicHeight" name="CharacterList" style="top: 80%; height: 20%; background-color: rgb(80, 183, 191); position: absolute; width: 100%;"/>
+    <ui:ListView name="PlayerList" item-template="project://database/Assets/UI/Lobby/CharacterSelectButton.uxml?fileID=9197481963319205126&amp;guid=eac95ba686eeb644d946c65192cb6252&amp;type=3#CharacterSelectButton" virtualization-method="DynamicHeight" selection-type="None" focusable="false" style="width: 10%; height: 80%; position: absolute; background-color: rgb(80, 183, 191);"/>
+    <ui:ListView horizontal-scrolling="true" name="CharacterList" focusable="false" virtualization-method="DynamicHeight" style="top: 80%; height: 20%; background-color: rgb(80, 183, 191); position: absolute; width: 100%;"/>
 </ui:UXML>

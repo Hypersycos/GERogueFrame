@@ -150,7 +150,7 @@ namespace Hypersycos.GERogueFrame
             {
                 Button btn = element.Q<Button>();
                 CharacterSO charSO = CharacterLoader.characters[index];
-                element.style.backgroundImage = charSO.Icon;
+                btn.style.backgroundImage = charSO.Icon;
                 //element.style.backgroundColor;
 
                 btn.clicked += () => SelectCharacter(charSO, element);
