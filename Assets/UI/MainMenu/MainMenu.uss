@@ -32,7 +32,7 @@
     flex-shrink: 0;
     flex-direction: row-reverse;
     align-self: flex-start;
-    background-image: url("project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=5923138177525885446&guid=3dfe51f11806ed542a96ceca1f765e20&type=3#arrow-left");
+    background-image: url("project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=-1008301579157283121&guid=3dfe51f11806ed542a96ceca1f765e20&type=3#arrow-left@2x");
     -unity-background-image-tint-color: rgb(0, 0, 0);
     margin-top: 0;
     margin-right: 0;
