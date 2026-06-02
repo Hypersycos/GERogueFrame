@@ -13,7 +13,7 @@ namespace Hypersycos.GERogueFrame
         Playing
     }
 
-    public struct PlayerInfo : IEquatable<PlayerInfo>
+    public struct PlayerInfo : IEquatable<PlayerInfo>, INetworkSerializable
     {
         public uint characterID;
 
@@ -25,6 +25,11 @@ namespace Hypersycos.GERogueFrame
         public bool Equals(PlayerInfo other)
         {
             return characterID == other.characterID;
+        }
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref characterID);
         }
     }
 
@@ -110,6 +115,7 @@ namespace Hypersycos.GERogueFrame
             if (NetworkManager.IsHost)
                 _gameState.Value = GameState.Lobby;
             playerCharacterMap = new(playerIDs, playerCharacters, NetworkManager.IsHost);
+            DontDestroyOnLoad(this);
         }
 
         public void SetPlayerCharacter(ulong id, uint characterID)
@@ -123,23 +129,23 @@ namespace Hypersycos.GERogueFrame
                 return;
             _gameState.Value = GameState.LoadingGame;
 
-            NetworkManager.SceneManager.OnLoadComplete += OnGameSceneLoaded;
+            NetworkManager.SceneManager.OnLoadEventCompleted += OnGameSceneLoaded;
             NetworkManager.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
 
-        private void OnGameSceneLoaded(ulong clientId, string sceneName, LoadSceneMode loadSceneMode)
+        private void OnGameSceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
         {
             _gameState.Value = GameState.Playing;
 
-            float rotation = Mathf.PI * 2 / playerCharacterMap.Count;
-            float distance = playerCharacterMap.Count * 5 / (2 * Mathf.PI);
+            float rotation = 360 / playerCharacterMap.Count;
+            float distance = playerCharacterMap.Count * 15 / (2 * Mathf.PI);
             int i = 0;
 
-            foreach(var playerInfo in playerCharacterMap)
+            foreach (ulong playerID in clientsCompleted)
             {
-                Quaternion rot = Quaternion.AngleAxis(rotation * i, Vector3.up);
-                Vector3 pos = rot * (Vector3.forward * distance);
-                NetworkManager.Singleton.SpawnManager.InstantiateAndSpawn(PlayerPrefab, playerInfo.Key, false, true,
+                Quaternion rot = Quaternion.AngleAxis(rotation * i++, Vector3.up);
+                Vector3 pos = rot * (Vector3.forward * distance) + Vector3.up * 2;
+                NetworkManager.Singleton.SpawnManager.InstantiateAndSpawn(PlayerPrefab, playerID, false, true,
                                                                           position: pos, rotation: Quaternion.Inverse(rot));
             }
         }

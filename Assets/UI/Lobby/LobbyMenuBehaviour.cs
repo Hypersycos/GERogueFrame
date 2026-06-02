@@ -187,6 +187,7 @@ namespace Hypersycos.GERogueFrame
             {
                 case ConnectionEvent.ClientConnected:
                     readyData.Add(data.ClientId, new PlayerState(data.ClientId));
+                    StopCountdown();
                     break;
                 case ConnectionEvent.PeerConnected:
                     break;
