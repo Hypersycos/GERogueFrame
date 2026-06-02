@@ -1,10 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Unity.Netcode;
-using Unity.Netcode.Transports.UTP;
-using Unity.VisualScripting;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -14,13 +11,13 @@ namespace Hypersycos.GERogueFrame
     {
         public ulong id;
         public bool isReady;
-        public CharacterSO character;
+        public uint characterID;
 
         public PlayerState(ulong id)
         {
             this.id = id;
             isReady = false;
-            character = null;
+            characterID = uint.MaxValue;
         }
 
         public override bool Equals(object obj)
@@ -28,14 +25,14 @@ namespace Hypersycos.GERogueFrame
             return obj is PlayerState state &&
                    id == state.id &&
                    isReady == state.isReady &&
-                   character == state.character;
+                   characterID == state.characterID;
         }
 
         public bool Equals(PlayerState other)
         {
             return id == other.id &&
                    isReady == other.isReady &&
-                   character == other.character;
+                   characterID == other.characterID;
         }
 
         public override int GetHashCode()
@@ -45,9 +42,9 @@ namespace Hypersycos.GERogueFrame
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
-            serializer.SerializeValue<ulong>(ref id);
-            serializer.SerializeValue<bool>(ref isReady);
-            serializer.SerializeValue(ref character);
+            serializer.SerializeValue(ref id);
+            serializer.SerializeValue(ref isReady);
+            serializer.SerializeValue(ref characterID);
         }
     }
 
@@ -63,16 +60,19 @@ namespace Hypersycos.GERogueFrame
             document = GetComponent<UIDocument>();
         }
 
-        NetworkVariable<List<PlayerState>> readyData = new();
+        BetterNetworkList<KeyIndexPair<ulong>> readyKeys = new();
+        BetterNetworkList<PlayerState> readyValues = new();
+        NetworkDict<ulong, PlayerState> readyData;
+        int readyCount = 0;
+        bool countdownCanStop = true;
 
         Button readyButton;
         ListView playerList;
-        ListView characterList;
-        Dictionary<PlayerState, GameObject> characterObjs;
+        ScrollView characterList;
+        Label countdown;
 
         GameObject myCharacterObj;
-        bool myReady = false;
-        CharacterSO myCharacter;
+        Dictionary<PlayerState, GameObject> characterObjs;
 
         private void OnEnable()
         {
@@ -80,55 +80,67 @@ namespace Hypersycos.GERogueFrame
 
             readyButton = root.Q<Button>("ReadyButton");
             playerList = root.Q<ListView>("PlayerList");
-            characterList = root.Q<ListView>("CharacterList");
+            characterList = root.Q<ScrollView>("CharacterList");
+            countdown = root.Q<Label>("Countdown");
 
             readyButton.clicked += ReadyClicked;
+            readyValues.OnListChanged += OnReadyDataChanged;
         }
-        private void ReadyClicked()
+
+        private void OnReadyDataChanged(NetworkListEvent<PlayerState> changeEvent)
         {
-            myReady = !myReady;
-            SetReadyServerRpc(myReady);
-            if (myReady)
+            if (changeEvent.Type == NetworkListEvent<PlayerState>.EventType.Value)
             {
-                readyButton.RemoveFromClassList("notReadyButton");
-                readyButton.AddToClassList("readyButton");
-                readyButton.text = "Ready";
-            }
-            else
-            {
-                readyButton.AddToClassList("notReadyButton");
-                readyButton.RemoveFromClassList("readyButton");
-                readyButton.text = "Not Ready";
+                if (readyValues[changeEvent.Index].id == networkManager.LocalClientId)
+                {
+                    if (changeEvent.Value.isReady)
+                    {
+                        readyButton.RemoveFromClassList("notReadyButton");
+                        readyButton.AddToClassList("readyButton");
+                        readyButton.text = "Ready";
+                    }
+                    else
+                    {
+                        readyButton.AddToClassList("notReadyButton");
+                        readyButton.RemoveFromClassList("readyButton");
+                        readyButton.text = "Not Ready";
+                    }
+                }
             }
         }
 
-        private void RefreshList(List<PlayerState> previousValue, List<PlayerState> newValue)
+        private void ReadyClicked()
         {
-            playerList.Clear();
+            SetReadyServerRpc(!readyData[networkManager.LocalClientId].isReady);
+        }
+
+        private void RefreshList(NetworkListEvent<PlayerState> changeEvent)
+        {
+            //playerList.Clear();
             playerList.RefreshItems();
         }
 
         public override void OnNetworkSpawn()
         {
+            base.OnNetworkSpawn();
             networkManager = NetworkManager.Singleton;
+
+            readyData = new(readyKeys, readyValues, !networkManager.IsHost);
 
             if (networkManager.IsHost)
             {
-                readyData.Value = new();
-                networkManager.OnClientConnectedCallback += CreatePlayerState;
-                networkManager.OnClientDisconnectCallback += DeletePlayerState;
+                networkManager.OnConnectionEvent += HandlePlayerConnection;
                 foreach (ulong playerID in networkManager.ConnectedClientsIds)
                 {
-                    readyData.Value.Add(new PlayerState(playerID));
+                    readyData.Add(playerID, new PlayerState(playerID));
                 }
-                readyData.CheckDirtyState();
             }
 
-            playerList.itemsSource = readyData.Value;
+            playerList.itemsSource = readyValues;
             playerList.makeItem = () => playerIcon.Instantiate();
             playerList.bindItem = (element, index) =>
             {
-                PlayerState state = readyData.Value[index];
+                PlayerState state = readyValues[index];
                 VisualElement readyIcon = element.Q<VisualElement>("ReadyStatus");
                 if (state.isReady)
                 {
@@ -141,72 +153,71 @@ namespace Hypersycos.GERogueFrame
                     readyIcon.AddToClassList("playerNotReady");
                 }
             };
-            readyData.OnValueChanged += RefreshList;
+            readyValues.OnListChanged += RefreshList;
             playerList.RefreshItems();
 
-            characterList.itemsSource = CharacterLoader.characters;
-            characterList.makeItem = () => characterSelectButton.Instantiate();
-            characterList.bindItem = (element, index) =>
-            {
-                Button btn = element.Q<Button>();
-                CharacterSO charSO = CharacterLoader.characters[index];
-                element.style.backgroundImage = charSO.Icon;
-                //element.style.backgroundColor;
-
-                btn.clicked += () => SelectCharacter(charSO, element);
-            };
-            characterList.RefreshItems();
+            StartCoroutine(CreateCharacterIcons());
         }
 
-        private void DeletePlayerState(ulong obj)
+        public IEnumerator CreateCharacterIcons()
         {
-            PlayerState? toRemove = null;
-            foreach (PlayerState state in readyData.Value)
+            while (!PersistentStateManager.Singleton.IsSpawned)
             {
-                if (state.id == obj)
-                {
-                    toRemove = state;
-                    break;
-                }
+                yield return null;
             }
-            if (toRemove != null)
+            Debug.Log($"Creating buttons");
+            characterList.Clear();
+            foreach (CharacterSO so in PersistentStateManager.Singleton.availableCharacters)
             {
-                readyData.Value.Remove(toRemove.Value);
-                readyData.CheckDirtyState();
+                Debug.Log($"Creating button for {so.UUID}");
+
+                var template = characterSelectButton.Instantiate();
+                Button btn = template.Q<Button>();
+                btn.style.backgroundImage = so.Icon;
+                //element.style.backgroundColor;
+
+                btn.clicked += () => SelectCharacter(so, btn);
+                characterList.Add(template);
+            }
+        }
+
+        private void HandlePlayerConnection(NetworkManager manager, ConnectionEventData data)
+        {
+            switch (data.EventType)
+            {
+                case ConnectionEvent.ClientConnected:
+                    readyData.Add(data.ClientId, new PlayerState(data.ClientId));
+                    break;
+                case ConnectionEvent.PeerConnected:
+                    break;
+                case ConnectionEvent.ClientDisconnected:
+                    if (readyData[data.ClientId].isReady)
+                        readyCount--;
+                    readyData.Remove(data.ClientId);
+                    break;
+                case ConnectionEvent.PeerDisconnected:
+                    break;
+                default:
+                    break;
             }
         }
 
         private void SelectCharacter(CharacterSO character, VisualElement visualElement)
         {
-            if (gameObject)
-                Destroy(gameObject);
+            if (myCharacterObj)
+                Destroy(myCharacterObj);
             myCharacterObj = Instantiate(character.Model, spawnTransform.position, spawnTransform.rotation);
-            myCharacter = character;
+            SetCharacterRpc(character);
+            readyButton.enabledSelf = true;
         }
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         public void SetCharacterRpc(CharacterSO so, RpcParams rpcParams = default)
         {
             ulong senderID = rpcParams.Receive.SenderClientId;
-
-            for (int i = 0; i < readyData.Value.Count; i++)
-            {
-                if (readyData.Value[i].id == senderID)
-                {
-                    var state = readyData.Value[i];
-                    readyData.Value.RemoveAt(i);
-                    state.character = so;
-                    readyData.Value.Insert(i, state);
-                    readyData.CheckDirtyState(true);
-                    break;
-                }
-            }
-        }
-
-        private void CreatePlayerState(ulong obj)
-        {
-            readyData.Value.Add(new PlayerState(obj));
-            readyData.CheckDirtyState();
+            PlayerState state = readyData[senderID];
+            state.characterID = PersistentStateManager.Singleton.GetCharacterID(so);
+            readyData[senderID] = state;
         }
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
@@ -214,17 +225,96 @@ namespace Hypersycos.GERogueFrame
         {
             ulong senderID = rpcParams.Receive.SenderClientId;
 
-            for (int i = 0; i < readyData.Value.Count; i++)
+            PlayerState state = readyData[senderID];
+            bool oldReady = state.isReady;
+            state.isReady = ready && state.characterID != uint.MaxValue;
+
+            if (oldReady != state.isReady)
             {
-                if (readyData.Value[i].id == senderID)
-                {
-                    var state = readyData.Value[i];
-                    readyData.Value.RemoveAt(i);
-                    state.isReady = ready;
-                    readyData.Value.Insert(i, state);
-                    readyData.CheckDirtyState(true);
-                    break;
-                }
+                if (state.isReady)
+                    readyCount++;
+                else
+                    readyCount--;
+            }
+
+            if (readyCount == readyData.Count)
+            {
+                StartCountdown();
+            }
+            else
+            {
+                StopCountdown();
+            }
+
+            readyData[senderID] = state;
+            return;
+        }
+
+        void StartCountdown()
+        {
+            Debug.Log("Starting countdown");
+            if (serverCoroutine != null)
+                StopCoroutine(serverCoroutine);
+
+            serverCoroutine = StartCoroutine(ServerCountdown());
+            SetCountdownRpc(true);
+        }
+
+        void StopCountdown()
+        {
+            if (!countdownCanStop)
+                return;
+
+            Debug.Log("Stopping countdown");
+
+            if (serverCoroutine != null)
+                StopCoroutine(serverCoroutine);
+            serverCoroutine = null;
+            SetCountdownRpc(false);
+        }
+
+        Coroutine serverCoroutine;
+
+        IEnumerator ServerCountdown()
+        {
+            yield return new WaitForSecondsRealtime(5);
+            countdownCanStop = false;
+
+            foreach(var item in readyData)
+            {
+                PersistentStateManager.Singleton.SetPlayerCharacter(item.Key, item.Value.characterID);
+            }
+            PersistentStateManager.Singleton.StartGame();
+        }
+
+        Coroutine clientCoroutine;
+
+        IEnumerator ClientCountdown()
+        {
+            for (int i = 5; i > 0; i--)
+            {
+                countdown.text = i.ToString();
+                yield return new WaitForSecondsRealtime(1);
+            }
+        }
+
+        [Rpc(SendTo.ClientsAndHost)]
+        void SetCountdownRpc(bool doCountdown, RpcParams rpcParams = default)
+        {
+            if (doCountdown)
+            {
+                Debug.Log("Starting client countdown");
+                if (clientCoroutine != null)
+                    StopCoroutine(clientCoroutine);
+                clientCoroutine = StartCoroutine(ClientCountdown());
+            }
+            else
+            {
+                Debug.Log("Stopping client countdown");
+                if (clientCoroutine != null)
+                    StopCoroutine(clientCoroutine);
+                clientCoroutine = null;
+                countdown.text = "";
             }
         }
     }

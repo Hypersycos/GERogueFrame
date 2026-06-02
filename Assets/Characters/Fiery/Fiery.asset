@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Fiery
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.CharacterSO
   UUID: 
-  CharacterName: 
+  CharacterName: Fiery
   CharacterDescription: 
   Icon: {fileID: 3506167780502562645, guid: 3dfe51f11806ed542a96ceca1f765e20, type: 3}
   Model: {fileID: 3580346940904453998, guid: cc7b9dd94d456f548847c53f6c8e560a, type: 3}

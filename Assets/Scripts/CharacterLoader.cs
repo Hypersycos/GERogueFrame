@@ -9,21 +9,22 @@ namespace Hypersycos.GERogueFrame
     {
         public static List<CharacterSO> characters = new();
         public static Dictionary<string, CharacterSO> characterDict = new();
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void Load()
         {
 #if UNITY_EDITOR
-            CharacterDatabase db = AssetDatabase.LoadAssetAtPath<CharacterDatabase>("Assets/Resources/BaseCharacterDatabase.asset");
+            //CharacterDatabase db = AssetDatabase.LoadAssetAtPath<CharacterDatabase>("Assets/Resources/BaseCharacterDatabase.asset");
             characters.Clear();
             characterDict.Clear();
-#else
-            CharacterDatabase db = Resources.Load<CharacterDatabase>("BaseCharacterDatabase");
 #endif
+            CharacterDatabase db = Resources.Load<CharacterDatabase>("BaseCharacterDatabase");
             foreach (CharacterSO ch in db.characterList)
             {
-                characters.Add(ch);
-                characterDict.Add(ch.name, ch);
                 ch.UUID = ch.CharacterName;
+                characters.Add(ch);
+                characterDict.Add(ch.UUID, ch);
+                Debug.Log($"Added {ch.UUID} to characters");
             }
         }
     }
