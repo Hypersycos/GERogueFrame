@@ -24,7 +24,6 @@ namespace Hypersycos.GERogueFrame
                 ch.UUID = ch.CharacterName;
                 characters.Add(ch);
                 characterDict.Add(ch.UUID, ch);
-                Debug.Log($"Added {ch.UUID} to characters");
             }
         }
     }

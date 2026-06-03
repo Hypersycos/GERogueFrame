@@ -96,7 +96,7 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""name"": ""Close Menu"",
                     ""type"": ""Button"",
                     ""id"": ""4013b8d7-8769-4942-8ced-220c10e34861"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false

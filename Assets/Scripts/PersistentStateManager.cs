@@ -104,7 +104,6 @@ namespace Hypersycos.GERogueFrame
                 {
                     characterMap.Add(so.UUID, count++);
                     availableCharacters.Add(so);
-                    Debug.Log($"Added {so.UUID} to availableCharacters");
                 }
             }
         }
@@ -153,18 +152,23 @@ namespace Hypersycos.GERogueFrame
 
         private void OnGameSceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
         {
+            NetworkManager.SceneManager.OnLoadEventCompleted -= OnGameSceneLoaded;
             _gameState.Value = GameState.Playing;
 
             float rotation = 360 / playerCharacterMap.Count;
             float distance = playerCharacterMap.Count * 15 / (2 * Mathf.PI);
             int i = 0;
 
-            foreach (ulong playerID in clientsCompleted)
+            foreach (var player in playerCharacterMap)
             {
                 Quaternion rot = Quaternion.AngleAxis(rotation * i++, Vector3.up);
                 Vector3 pos = rot * (Vector3.forward * distance) + Vector3.up * 2;
-                NetworkManager.Singleton.SpawnManager.InstantiateAndSpawn(PlayerPrefab, playerID, false, true,
-                                                                          position: pos, rotation: Quaternion.Inverse(rot));
+
+                NetworkObject spawned = NetworkManager.Singleton.SpawnManager
+                                        .InstantiateAndSpawn(PlayerPrefab, player.Key, true, true,
+                                                             position: pos, rotation: Quaternion.Inverse(rot));
+
+                spawned.GetComponent<PlayerCharacterManager>().characterID.Value = playerCharacterMap[player.Key].characterID;
             }
         }
     }

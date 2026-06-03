@@ -168,12 +168,9 @@ namespace Hypersycos.GERogueFrame
             {
                 yield return null;
             }
-            Debug.Log($"Creating buttons");
             characterList.Clear();
             foreach (CharacterSO so in PersistentStateManager.Singleton.availableCharacters)
             {
-                Debug.Log($"Creating button for {so.UUID}");
-
                 var template = characterSelectButton.Instantiate();
                 Button btn = template.Q<Button>();
                 btn.style.backgroundImage = so.Icon;
@@ -200,6 +197,7 @@ namespace Hypersycos.GERogueFrame
                     if (readyData[data.ClientId].isReady)
                         readyCount--;
                     readyData.Remove(data.ClientId);
+                    StopCountdown();
                     break;
                 case ConnectionEvent.PeerDisconnected:
                     break;
@@ -258,7 +256,6 @@ namespace Hypersycos.GERogueFrame
 
         void StartCountdown()
         {
-            Debug.Log("Starting countdown");
             if (serverCoroutine != null)
                 StopCoroutine(serverCoroutine);
 
@@ -270,8 +267,6 @@ namespace Hypersycos.GERogueFrame
         {
             if (!countdownCanStop)
                 return;
-
-            Debug.Log("Stopping countdown");
 
             if (serverCoroutine != null)
                 StopCoroutine(serverCoroutine);
@@ -309,14 +304,12 @@ namespace Hypersycos.GERogueFrame
         {
             if (doCountdown)
             {
-                Debug.Log("Starting client countdown");
                 if (clientCoroutine != null)
                     StopCoroutine(clientCoroutine);
                 clientCoroutine = StartCoroutine(ClientCountdown());
             }
             else
             {
-                Debug.Log("Stopping client countdown");
                 if (clientCoroutine != null)
                     StopCoroutine(clientCoroutine);
                 clientCoroutine = null;

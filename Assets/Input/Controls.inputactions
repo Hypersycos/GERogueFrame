@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "Controls",
     "maps": [
         {
@@ -9,7 +10,7 @@
                     "name": "Close Menu",
                     "type": "Button",
                     "id": "4013b8d7-8769-4942-8ced-220c10e34861",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
