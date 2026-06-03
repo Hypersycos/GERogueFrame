@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43e1455b57458c34688c6a490c941be4, type: 3}
+  m_Name: Proj2
+  m_EditorClassIdentifier: 
+  <Name>k__BackingField: 
+  <Description>k__BackingField: 
+  NeedsRedraw: 0
+  Requirements:
+  - rid: 1155016498055479296
+  CastEffects:
+  - rid: 1155016517560565766
+  DelayedCastEffects: []
+  IconPainters: []
+  <CastTime>k__BackingField: 0
+  <AnimationTime>k__BackingField: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 1155016498055479296
+      type: {class: EnergyCost, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
+      data:
+        <Energy>k__BackingField: 10
+    - rid: 1155016517560565766
+      type: {class: ProjectileCastType, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
+      data:
+        Effects:
+        - {fileID: 11400000, guid: 4239691b30526014fb453023168c52d7, type: 2}
+        Projectile: {fileID: 5850607621077856237, guid: 3ea6c72ea64e7df479844f3ba872f5eb,
+          type: 3}

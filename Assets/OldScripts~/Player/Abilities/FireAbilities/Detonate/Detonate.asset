@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43e1455b57458c34688c6a490c941be4, type: 3}
+  m_Name: Detonate
+  m_EditorClassIdentifier: 
+  <Name>k__BackingField: Detonate
+  <Description>k__BackingField: Cause a radial explosion based on heat procs
+  NeedsRedraw: 0
+  Requirements:
+  - rid: 1155016549767315458
+  CastEffects:
+  - rid: 1155016549767315459
+  DelayedCastEffects: []
+  IconPainters: []
+  <CastTime>k__BackingField: 0
+  <AnimationTime>k__BackingField: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 1155016549767315458
+      type: {class: ConditionalEnergyCost, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
+      data:
+        <Energy>k__BackingField: 50
+        <ValidHits>k__BackingField: 0000000001000000
+    - rid: 1155016549767315459
+      type: {class: HitscanCastType, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
+      data:
+        Effects:
+        - {fileID: 11400000, guid: 1532d1f2c7661f14095f1698e8615e43, type: 2}
+        ResultDeterminer: {fileID: 11400000, guid: 8920278954063da48b7b1f9b7f4f17a1,
+          type: 2}
+        MaxLength: 50
+        Layers:
+          serializedVersion: 2
+          m_Bits: 257
+        HitTriggers: 1

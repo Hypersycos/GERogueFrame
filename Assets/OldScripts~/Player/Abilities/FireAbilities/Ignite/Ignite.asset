@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43e1455b57458c34688c6a490c941be4, type: 3}
+  m_Name: Ignite
+  m_EditorClassIdentifier: 
+  <Name>k__BackingField: Ignite
+  <Description>k__BackingField: Causes all incoming damage to proc heat
+  NeedsRedraw: 0
+  Requirements:
+  - rid: 1155016549767315457
+  CastEffects:
+  - rid: 1155016517560565770
+  DelayedCastEffects: []
+  IconPainters: []
+  <CastTime>k__BackingField: 0
+  <AnimationTime>k__BackingField: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 1155016517560565770
+      type: {class: HitscanCastType, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
+      data:
+        Effects:
+        - {fileID: 11400000, guid: bebc4fb94ef2ad34a91d4af2709f59b7, type: 2}
+        - {fileID: 11400000, guid: ad522486c03565b4aa1d3daaa87c60f5, type: 2}
+        ResultDeterminer: {fileID: 11400000, guid: fa5d3ef4cf4f269438aa30a708db5625,
+          type: 2}
+        MaxLength: 200
+        Layers:
+          serializedVersion: 2
+          m_Bits: 256
+        HitTriggers: 1
+    - rid: 1155016549767315457
+      type: {class: ConditionalEnergyCost, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
+      data:
+        <Energy>k__BackingField: 25
+        <ValidHits>k__BackingField: 00000000

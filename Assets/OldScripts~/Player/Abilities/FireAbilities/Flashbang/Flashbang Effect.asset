@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d400d31e1e39a894b87c35993944fbd8, type: 3}
+  m_Name: Flashbang Effect
+  m_EditorClassIdentifier: 
+  <statusEffect>k__BackingField:
+    rid: 1155016549767315473
+  references:
+    version: 2
+    RefIds:
+    - rid: 1155016549767315473
+      type: {class: BlindStatusInstance, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
+      data:
+        <StatusEffect>k__BackingField: {fileID: 11400000, guid: 19e66c4b155537f428447c83da2730d3,
+          type: 2}
+        Amount: 0
+        OneTimeEffects: []
+        duration: 2

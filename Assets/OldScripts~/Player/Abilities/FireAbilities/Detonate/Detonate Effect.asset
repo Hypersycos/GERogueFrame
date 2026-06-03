@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e98f042ecf80ea04995eda131c4a07d1, type: 3}
+  m_Name: Detonate Effect
+  m_EditorClassIdentifier: 
+  Heat: {fileID: 11400000, guid: 408a6fd48e8a0784da3cecc525b4ff3b, type: 2}
+  ExplosionRange: 4
+  LayerMask:
+    serializedVersion: 2
+    m_Bits: 256
+  VisualEffect: {fileID: 11400000, guid: 1d320bacf627b704285aa464de727a17, type: 2}
