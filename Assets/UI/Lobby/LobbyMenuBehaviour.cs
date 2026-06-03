@@ -70,6 +70,7 @@ namespace Hypersycos.GERogueFrame
         ListView playerList;
         ScrollView characterList;
         Label countdown;
+        Button backButton;
 
         GameObject myCharacterObj;
         Dictionary<PlayerState, GameObject> characterObjs;
@@ -82,6 +83,7 @@ namespace Hypersycos.GERogueFrame
             playerList = root.Q<ListView>("PlayerList");
             characterList = root.Q<ScrollView>("CharacterList");
             countdown = root.Q<Label>("Countdown");
+            backButton = root.Q<Button>("BackButton");
 
             readyButton.clicked += ReadyClicked;
             readyValues.OnListChanged += OnReadyDataChanged;
@@ -157,6 +159,7 @@ namespace Hypersycos.GERogueFrame
             playerList.RefreshItems();
 
             StartCoroutine(CreateCharacterIcons());
+            backButton.clicked += PersistentStateManager.SingletonQuitToMenu;
         }
 
         public IEnumerator CreateCharacterIcons()
@@ -183,6 +186,8 @@ namespace Hypersycos.GERogueFrame
 
         private void HandlePlayerConnection(NetworkManager manager, ConnectionEventData data)
         {
+            if (manager.ShutdownInProgress)
+                return;
             switch (data.EventType)
             {
                 case ConnectionEvent.ClientConnected:
@@ -317,6 +322,12 @@ namespace Hypersycos.GERogueFrame
                 clientCoroutine = null;
                 countdown.text = "";
             }
+        }
+
+        public override void OnDestroy()
+        {
+            networkManager.OnConnectionEvent -= HandlePlayerConnection;
+            base.OnDestroy();
         }
     }
 }

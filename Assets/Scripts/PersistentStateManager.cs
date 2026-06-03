@@ -133,6 +133,24 @@ namespace Hypersycos.GERogueFrame
             NetworkManager.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
 
+        public static void SingletonQuitToMenu() => Singleton?.QuitToMenu();
+
+        public void QuitToMenu()
+        {
+            NetworkManager.Singleton.Shutdown();
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+            Destroy(NetworkManager.Singleton.gameObject);
+            DestroySingleton();
+        }
+
+        public static void DestroySingleton()
+        {
+            if (Singleton != null)
+            {
+                Destroy(Singleton.gameObject);
+            }
+        }
+
         private void OnGameSceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
         {
             _gameState.Value = GameState.Playing;

@@ -114,7 +114,7 @@ namespace Hypersycos.GERogueFrame
             networkTransport.OnTransportEvent += HandleClientEvent;
             if (networkManager.StartClient())
             {
-
+                networkTransport.OnTransportEvent -= HandleClientEvent;
             }
             else
             {
