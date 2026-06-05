@@ -210,7 +210,9 @@ namespace Hypersycos.GERogueFrame
         {
             if (myCharacterObj)
                 Destroy(myCharacterObj);
-            myCharacterObj = Instantiate(character.Model, spawnTransform.position, spawnTransform.rotation);
+            myCharacterObj = Instantiate(character.Model,
+                                         spawnTransform.position + character.Model.transform.position,
+                                         spawnTransform.rotation * character.Model.transform.rotation);
             SetCharacterRpc(character);
             readyButton.enabledSelf = true;
         }

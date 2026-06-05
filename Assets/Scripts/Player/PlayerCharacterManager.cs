@@ -45,8 +45,9 @@ namespace Hypersycos.GERogueFrame
 
             if (IsOwner)
             {
-                GameObject.FindWithTag("MainCamera").GetComponent<CameraManager>().SetTarget(gameObject);
+                GameObject.FindWithTag("MainCamera").GetComponent<CameraManager>().SetTarget(myModel.transform.Find("CameraTarget").gameObject);
                 GetComponent<CharacterController>().enabled = true;
+                gameObject.AddComponent<PlayerMovementController>();
             }
 
             return;

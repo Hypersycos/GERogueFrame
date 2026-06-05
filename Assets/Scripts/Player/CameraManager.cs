@@ -36,7 +36,10 @@ namespace Hypersycos.GERogueFrame
         {
             if (target == null)
             {
-                target = NetworkManager.Singleton.LocalClient.PlayerObject.gameObject;
+                NetworkObject localPlayer = NetworkManager.Singleton.LocalClient.PlayerObject;
+                if (localPlayer != null)
+                    target = localPlayer.transform.Find("CameraTarget").gameObject;
+
                 if (target == null)
                     return;
             }
@@ -54,16 +57,16 @@ namespace Hypersycos.GERogueFrame
 
             offsetWithDist = cameraOffset + new Vector3(0, 0, -cameraDistance);
 
-            target.transform.rotation = Quaternion.Euler(0, yaw, 0);
+            //target.transform.rotation = Quaternion.Euler(0, yaw, 0);
             Vector3 position = target.transform.position + gameObject.transform.rotation * offsetWithDist;
 
             Vector3 dir = position - target.transform.position;
             dir.Normalize();
 
-            LayerMask layerMask = 1 << 6 | 1 << 7;
+            LayerMask layerMask = 0xFFFF ^ (1 << 6 | 1 << 7);
 
             Debug.DrawRay(target.transform.position, dir * cameraDistance, Color.hotPink);
-            if (Physics.Raycast(target.transform.position, dir, out RaycastHit hit, cameraDistance))
+            if (Physics.Raycast(target.transform.position, dir, out RaycastHit hit, cameraDistance, layerMask))
             {
                 gameObject.transform.position = hit.point;
                 Debug.DrawLine(target.transform.position, hit.point, Color.red);
