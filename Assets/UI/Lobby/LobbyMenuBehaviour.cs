@@ -7,49 +7,49 @@ using UnityEngine.UIElements;
 
 namespace Hypersycos.GERogueFrame
 {
-    public struct PlayerState : IEquatable<PlayerState>, INetworkSerializable
-    {
-        public ulong id;
-        public bool isReady;
-        public uint characterID;
-
-        public PlayerState(ulong id)
-        {
-            this.id = id;
-            isReady = false;
-            characterID = uint.MaxValue;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is PlayerState state &&
-                   id == state.id &&
-                   isReady == state.isReady &&
-                   characterID == state.characterID;
-        }
-
-        public bool Equals(PlayerState other)
-        {
-            return id == other.id &&
-                   isReady == other.isReady &&
-                   characterID == other.characterID;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(id, isReady);
-        }
-
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref id);
-            serializer.SerializeValue(ref isReady);
-            serializer.SerializeValue(ref characterID);
-        }
-    }
-
     public class LobbyMenuBehaviour : NetworkBehaviour
     {
+        private struct LobbyPlayerState : IEquatable<LobbyPlayerState>, INetworkSerializable
+        {
+            public ulong id;
+            public bool isReady;
+            public uint characterID;
+
+            public LobbyPlayerState(ulong id)
+            {
+                this.id = id;
+                isReady = false;
+                characterID = uint.MaxValue;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is LobbyPlayerState state &&
+                       id == state.id &&
+                       isReady == state.isReady &&
+                       characterID == state.characterID;
+            }
+
+            public bool Equals(LobbyPlayerState other)
+            {
+                return id == other.id &&
+                       isReady == other.isReady &&
+                       characterID == other.characterID;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(id, isReady);
+            }
+
+            public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+            {
+                serializer.SerializeValue(ref id);
+                serializer.SerializeValue(ref isReady);
+                serializer.SerializeValue(ref characterID);
+            }
+        }
+
         NetworkManager networkManager;
         [SerializeField] UIDocument document;
         [SerializeField] VisualTreeAsset playerIcon;
@@ -61,8 +61,8 @@ namespace Hypersycos.GERogueFrame
         }
 
         BetterNetworkList<KeyIndexPair<ulong>> readyKeys = new();
-        BetterNetworkList<PlayerState> readyValues = new();
-        NetworkDict<ulong, PlayerState> readyData;
+        BetterNetworkList<LobbyPlayerState> readyValues = new();
+        NetworkDict<ulong, LobbyPlayerState> readyData;
         int readyCount = 0;
         bool countdownCanStop = true;
 
@@ -73,7 +73,7 @@ namespace Hypersycos.GERogueFrame
         Button backButton;
 
         GameObject myCharacterObj;
-        Dictionary<PlayerState, GameObject> characterObjs;
+        Dictionary<LobbyPlayerState, GameObject> characterObjs;
 
         private void OnEnable()
         {
@@ -89,9 +89,9 @@ namespace Hypersycos.GERogueFrame
             readyValues.OnListChanged += OnReadyDataChanged;
         }
 
-        private void OnReadyDataChanged(NetworkListEvent<PlayerState> changeEvent)
+        private void OnReadyDataChanged(NetworkListEvent<LobbyPlayerState> changeEvent)
         {
-            if (changeEvent.Type == NetworkListEvent<PlayerState>.EventType.Value)
+            if (changeEvent.Type == NetworkListEvent<LobbyPlayerState>.EventType.Value)
             {
                 if (readyValues[changeEvent.Index].id == networkManager.LocalClientId)
                 {
@@ -116,7 +116,7 @@ namespace Hypersycos.GERogueFrame
             SetReadyServerRpc(!readyData[networkManager.LocalClientId].isReady);
         }
 
-        private void RefreshList(NetworkListEvent<PlayerState> changeEvent)
+        private void RefreshList(NetworkListEvent<LobbyPlayerState> changeEvent)
         {
             //playerList.Clear();
             playerList.RefreshItems();
@@ -127,14 +127,14 @@ namespace Hypersycos.GERogueFrame
             base.OnNetworkSpawn();
             networkManager = NetworkManager.Singleton;
 
-            readyData = new(readyKeys, readyValues, !networkManager.IsHost);
+            readyData = new(readyKeys, readyValues, !networkManager.IsServer);
 
-            if (networkManager.IsHost)
+            if (networkManager.IsServer)
             {
                 networkManager.OnConnectionEvent += HandlePlayerConnection;
                 foreach (ulong playerID in networkManager.ConnectedClientsIds)
                 {
-                    readyData.Add(playerID, new PlayerState(playerID));
+                    readyData.Add(playerID, new LobbyPlayerState(playerID));
                 }
             }
 
@@ -142,7 +142,7 @@ namespace Hypersycos.GERogueFrame
             playerList.makeItem = () => playerIcon.Instantiate();
             playerList.bindItem = (element, index) =>
             {
-                PlayerState state = readyValues[index];
+                LobbyPlayerState state = readyValues[index];
                 VisualElement readyIcon = element.Q<VisualElement>("ReadyStatus");
                 if (state.isReady)
                 {
@@ -169,7 +169,7 @@ namespace Hypersycos.GERogueFrame
                 yield return null;
             }
             characterList.Clear();
-            foreach (CharacterSO so in PersistentStateManager.Singleton.availableCharacters)
+            foreach (BaseCharacterSO so in PersistentStateManager.Singleton.availableCharacters)
             {
                 var template = characterSelectButton.Instantiate();
                 Button btn = template.Q<Button>();
@@ -188,7 +188,7 @@ namespace Hypersycos.GERogueFrame
             switch (data.EventType)
             {
                 case ConnectionEvent.ClientConnected:
-                    readyData.Add(data.ClientId, new PlayerState(data.ClientId));
+                    readyData.Add(data.ClientId, new LobbyPlayerState(data.ClientId));
                     StopCountdown();
                     break;
                 case ConnectionEvent.PeerConnected:
@@ -206,7 +206,7 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
-        private void SelectCharacter(CharacterSO character, VisualElement visualElement)
+        private void SelectCharacter(BaseCharacterSO character, VisualElement visualElement)
         {
             if (myCharacterObj)
                 Destroy(myCharacterObj);
@@ -218,10 +218,10 @@ namespace Hypersycos.GERogueFrame
         }
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-        public void SetCharacterRpc(CharacterSO so, RpcParams rpcParams = default)
+        public void SetCharacterRpc(BaseCharacterSO so, RpcParams rpcParams = default)
         {
             ulong senderID = rpcParams.Receive.SenderClientId;
-            PlayerState state = readyData[senderID];
+            LobbyPlayerState state = readyData[senderID];
             state.characterID = PersistentStateManager.Singleton.GetCharacterID(so);
             readyData[senderID] = state;
         }
@@ -231,7 +231,7 @@ namespace Hypersycos.GERogueFrame
         {
             ulong senderID = rpcParams.Receive.SenderClientId;
 
-            PlayerState state = readyData[senderID];
+            LobbyPlayerState state = readyData[senderID];
             bool oldReady = state.isReady;
             state.isReady = ready && state.characterID != uint.MaxValue;
 

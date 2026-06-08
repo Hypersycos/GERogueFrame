@@ -7,8 +7,8 @@ namespace Hypersycos.GERogueFrame
 {
     public static class CharacterLoader
     {
-        public static List<CharacterSO> characters = new();
-        public static Dictionary<string, CharacterSO> characterDict = new();
+        public static List<BaseCharacterSO> characters = new();
+        public static Dictionary<string, BaseCharacterSO> characterDict = new();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void Load()
@@ -19,7 +19,7 @@ namespace Hypersycos.GERogueFrame
             characterDict.Clear();
 #endif
             CharacterDatabase db = Resources.Load<CharacterDatabase>("BaseCharacterDatabase");
-            foreach (CharacterSO ch in db.characterList)
+            foreach (BaseCharacterSO ch in db.characterList)
             {
                 ch.UUID = ch.CharacterName;
                 characters.Add(ch);

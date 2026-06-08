@@ -37,7 +37,7 @@ namespace Hypersycos.GERogueFrame
     {
 
         readonly Dictionary<string, uint> characterMap = new();
-        public readonly List<CharacterSO> availableCharacters = new();
+        public readonly List<BaseCharacterSO> availableCharacters = new();
 
         NetworkVariable<GameState> _gameState = new NetworkVariable<GameState>(GameState.Lobby);
         public GameState gameState => _gameState.Value;
@@ -48,12 +48,12 @@ namespace Hypersycos.GERogueFrame
 
         [SerializeField] NetworkObject PlayerPrefab;
 
-        public uint GetCharacterID(CharacterSO so)
+        public uint GetCharacterID(BaseCharacterSO so)
         {
             return characterMap[so.UUID];
         }
 
-        public CharacterSO GetCharacterFromID(string id) => CharacterLoader.characterDict[id];
+        public BaseCharacterSO GetCharacterFromID(string id) => CharacterLoader.characterDict[id];
 
         public static PersistentStateManager Singleton { get; private set; }
 
@@ -96,11 +96,11 @@ namespace Hypersycos.GERogueFrame
 
         protected override void OnNetworkPreSpawn(ref NetworkManager networkManager)
         {
-            if (networkManager.IsHost)
+            if (networkManager.IsServer)
             {
                 characterMap.Clear();
                 uint count = 0;
-                foreach (CharacterSO so in CharacterLoader.characters)
+                foreach (BaseCharacterSO so in CharacterLoader.characters)
                 {
                     characterMap.Add(so.UUID, count++);
                     availableCharacters.Add(so);
@@ -111,9 +111,9 @@ namespace Hypersycos.GERogueFrame
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
-            if (NetworkManager.IsHost)
+            if (NetworkManager.IsServer)
                 _gameState.Value = GameState.Lobby;
-            playerCharacterMap = new(playerIDs, playerCharacters, NetworkManager.IsHost);
+            playerCharacterMap = new(playerIDs, playerCharacters, NetworkManager.IsServer);
             DontDestroyOnLoad(this);
         }
 

@@ -14,7 +14,7 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] public string FriendlyName = "";
         [SerializeField] public string ShortDescription = "";
         [SerializeField] public string LongDescription = "";
-        public bool UseLocal => !IsNetworked || NetworkManager.Singleton.IsHost;
+        public bool UseLocal => !IsNetworked || NetworkManager.Singleton.IsServer;
         public override T Value
         {
             get => (UseLocal) ? base.Value : ServerValue;
