@@ -186,11 +186,9 @@ namespace Hypersycos.GERogueFrame
 
         public void RemoveStats(List<BoundedStatInstance> stats)
         {
-            //TODO: Fix
-            throw new System.Exception("Don't remove stats lol");
-#pragma warning disable CS0162 // Unreachable code detected
-            foreach (BoundedStatInstance statInstance in stats)
+            for (int i = stats.Count - 1; i >= 0; i--)
             {
+                BoundedStatInstance statInstance = stats[i];
                 int index = StatInstances.IndexOf(statInstance);
                 StatInstances.Remove(statInstance);
                 Images.RemoveAt(index);
@@ -202,8 +200,19 @@ namespace Hypersycos.GERogueFrame
                 statInstance.OnIncrease.RemoveListener(UpdateOne);
                 statInstance.OnFill.RemoveListener((stat, change, _) => UpdateOne(stat, change));
             }
-#pragma warning restore CS0162 // Unreachable code detected
             Redraw();
+        }
+
+        public void Clear()
+        {
+            RemoveStats(StatInstances);
+        }
+
+        public void SetStats(List<BoundedStatInstance> stats)
+        {
+            if (StatInstances.Count > 0)
+                Clear();
+            AddStats(stats);
         }
 
         void CalculateTotal()

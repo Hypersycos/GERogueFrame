@@ -39,15 +39,21 @@ namespace Hypersycos.GERogueFrame
                 Destroy(myModel);
             }
 
-            GameObject model = PersistentStateManager.Singleton.availableCharacters[(int)characterID.Value].Model;
+            BaseCharacterSO so = PersistentStateManager.Singleton.availableCharacters[(int)characterID.Value];
+            GameObject model = so.Model;
 
             myModel = Instantiate(model, transform);
+            so.Apply(GetComponent<PlayerState>());
 
             if (IsOwner)
             {
                 GameObject.FindWithTag("MainCamera").GetComponent<CameraManager>().SetTarget(myModel.transform.Find("CameraTarget").gameObject);
                 GetComponent<CharacterController>().enabled = true;
                 gameObject.AddComponent<PlayerMovementController>();
+            }
+            else
+            {
+
             }
 
             return;

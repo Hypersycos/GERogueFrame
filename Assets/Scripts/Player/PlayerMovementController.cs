@@ -265,7 +265,6 @@ namespace Hypersycos.GERogueFrame
                 else
                 {
                     Vector3 targetVelocity = Vector3.zero;
-                    Debug.Log(maxSpeed);
                     targetVelocity += moveInput.x * maxSpeed * GetHorizontalCameraRight(playerCamera);
                     targetVelocity += moveInput.y * maxSpeed * GetHorizontalCameraForward(playerCamera);
                     Vector3 diff = targetVelocity - horizontalVelocity;

@@ -19,7 +19,7 @@ namespace Hypersycos.GERogueFrame
         float EHP => Value * EHPMultiplier;
         [SerializeField] protected List<DefenseGate> defenseGates = new();
         public virtual bool IsActive => MaxValue > 0 && (Value > 0 || defenseGates.Exists(gate => gate.IsActive));
-        public DefenseStatInstance(float maxValue, SemiBoundedStatInstance reductionStat = null) : base(maxValue, 0, maxValue, 0)
+        public DefenseStatInstance(float maxValue, SemiBoundedStatInstance reductionStat = null, StatType statType = null) : base(maxValue, 0, maxValue, statType, 0)
         {
             ReductionStat = reductionStat;
         }

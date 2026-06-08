@@ -7,7 +7,7 @@ using Hypersycos.Utils;
 namespace Hypersycos.GERogueFrame
 {
     [System.Serializable]
-    public class BoundedStatInstance : StatInstance
+    public class BoundedStatInstance : StatInstance, ISyncStat
     {
         [field: SerializeField] public StatType StatType { get; protected set; }
         public class BoundedStatEvent : UnityEvent<BoundedStatInstance, float> { }
@@ -34,16 +34,17 @@ namespace Hypersycos.GERogueFrame
         public BoundedStatEvent OnMaxDecrease = new();
         public CappedBoundedStatEvent OnEmpty = new();
 
-        public BoundedStatInstance(float value, float minValue, float maxValue, float minMaxValue=0)
+        public BoundedStatInstance(float value, float minValue, float maxValue, StatType statType, float minMaxValue=0)
         {
             Value = value;
             MinValue = minValue;
             MaxValue = maxValue;
             MinMaxValue = minMaxValue;
             BaseMax = maxValue;
+            StatType = statType;
         }
 
-        public BoundedStatInstance() : this(0, 0, 100, 0) { }
+        public BoundedStatInstance() : this(0, 0, 100, null, 0) { }
 
         public virtual void Tick(float deltaTime)
         {
@@ -284,6 +285,70 @@ namespace Hypersycos.GERogueFrame
                     break;
                 default:
                     throw new System.Exception("Attempt to remove invalid modifier from bounded stat");
+            }
+        }
+
+        protected void ClientSetMax(float newVal)
+        {
+            float change = newVal - MaxValue;
+            MaxValue += change;
+            if (change > 0)
+            {
+                OnMaxIncrease.Invoke(this, change);
+            }
+            else
+            {
+                OnMaxDecrease.Invoke(this, change);
+            }
+        }
+
+        protected void ClientSetValue(float newVal)
+        {
+            ApplyChange(newVal - Value);
+        }
+
+        UnityAction<BoundedStatInstance, float> syncDelegate;
+        UnityAction<BoundedStatInstance, float> syncDelegate2;
+        UnityAction<BoundedStatInstance, float, float> syncDelegate3;
+
+        public void StartSync(Action<int, SyncChange> syncFunc, int index)
+        {
+            if (syncDelegate != null)
+                StopSync();
+
+            syncDelegate = (_, _) => syncFunc(index, new SyncChange(true, Value));
+            syncDelegate2 = (_, _) => syncFunc(index, new SyncChange(true, MaxValue));
+            syncDelegate3 = (_, _, _) => syncFunc(index, new SyncChange(true, Value));
+
+            OnDecrease.AddListener(syncDelegate);
+            OnIncrease.AddListener(syncDelegate);
+            OnEmpty.AddListener(syncDelegate3);
+            OnFill.AddListener(syncDelegate3);
+            OnMaxDecrease.AddListener(syncDelegate2);
+            OnMaxIncrease.AddListener(syncDelegate2);
+        }
+
+        public void StopSync()
+        {
+            OnDecrease.RemoveListener(syncDelegate);
+            OnIncrease.RemoveListener(syncDelegate);
+            OnEmpty.RemoveListener(syncDelegate3);
+            OnFill.RemoveListener(syncDelegate3);
+            OnMaxDecrease.RemoveListener(syncDelegate2);
+            OnMaxIncrease.RemoveListener(syncDelegate2);
+
+            syncDelegate = null;
+        }
+
+        public void ApplySync(SyncChange change)
+        {
+            if (change.IsValueChange)
+            {
+                ClientSetValue(change.NewValue);
+            }
+            else
+            {
+                ClientSetMax(change.NewValue);
             }
         }
     }

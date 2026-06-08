@@ -7,6 +7,15 @@ namespace Hypersycos.GERogueFrame
     [CreateAssetMenu(fileName = "New Stat Type", menuName = "Character/Stat Type")]
     public class StatType : ScriptableObject
     {
+#if UNITY_EDITOR
+        public static Dictionary<string, StatType> StatTypeMap = new();
+
+        public void Awake()
+        {
+            StatTypeMap.TryAdd(Name, this);
+        }
+#endif
+
         [field: SerializeField] public string Name { get; private set; }
         [field: SerializeField] public string Description { get; private set; }
         [field: SerializeField] public Color Color { get; private set; }

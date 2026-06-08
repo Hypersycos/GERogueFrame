@@ -17,12 +17,79 @@ MonoBehaviour:
   CharacterDescription: 
   Icon: {fileID: 3506167780502562645, guid: 3dfe51f11806ed542a96ceca1f765e20, type: 3}
   Model: {fileID: 3580346940904453998, guid: cc7b9dd94d456f548847c53f6c8e560a, type: 3}
-  MaxHealth: 800
-  MaxShields: 0
   SpeedMult: 0
-  ability1: {fileID: 11400000, guid: a84cf56a0c9744c48a3061ae3f6f9c59, type: 2}
-  ability2: {fileID: 11400000, guid: eaea8a80e83214c4d9aa529ece89f482, type: 2}
-  ability3: {fileID: 11400000, guid: b244c4f342f5fe04cadc23d14980fe3a, type: 2}
-  ability4: {fileID: 11400000, guid: 3f90f08cd458dd14ab8b85854ccd8da8, type: 2}
-  ultimate: {fileID: 11400000, guid: 6ee1ffba8d0bf71459a4aff0f4e5d9ec, type: 2}
-  upgradeTree: {fileID: 11400000, guid: 16f65a729de583746aba66273b432e41, type: 2}
+  Ability1: {fileID: 0}
+  Ability2: {fileID: 0}
+  Ability3: {fileID: 0}
+  Ability4: {fileID: 0}
+  Ultimate: {fileID: 0}
+  UpgradeTree: {fileID: 0}
+  Energy:
+    Max: 100
+    FlatRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    MaxRegen:
+      Value: 0.25
+      Delay: 0.2
+      ReducedRate: 0
+    CurrentRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    StatType: {fileID: 11400000, guid: e31924feea1e91e4a8e3eb09122090d0, type: 2}
+  Health:
+    Max: 80
+    HasResist: 0
+    Resist: 0
+    FlatRegen:
+      Value: 5
+      Delay: 4
+      ReducedRate: 0.25
+    MaxRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    CurrentRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    StatType: {fileID: 11400000, guid: 4d08cedfe6dbc144e873a312b724f912, type: 2}
+    ResistStatType: {fileID: 11400000, guid: f1b2bec13add6a14c8b64d438aca814e, type: 2}
+  Shields:
+    Max: 0
+    HasResist: 0
+    Resist: 0
+    FlatRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    MaxRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    CurrentRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    StatType: {fileID: 11400000, guid: f8d9d82d83a878e469014a0d2ccb56b1, type: 2}
+    ResistStatType: {fileID: 0}
+  Overhealth:
+    Max: 400
+    HasResist: 0
+    Resist: 0
+    FlatRegen:
+      Value: -5
+      Delay: 2
+      ReducedRate: 0
+    MaxRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    CurrentRegen:
+      Value: -0.2
+      Delay: 2
+      ReducedRate: 0
+    StatType: {fileID: 11400000, guid: cd45451e1ec50f34ebb52bac39983dd4, type: 2}
+    ResistStatType: {fileID: 0}

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8090230090801172785}
   - component: {fileID: 8618706438777983137}
   - component: {fileID: 3266949855191128660}
+  - component: {fileID: 3428713651054331859}
   m_Layer: 6
   m_Name: PlayerCharacter
   m_TagString: Untagged
@@ -47,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 487246515
+  GlobalObjectIdHash: 2780797773
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -103,7 +104,7 @@ CharacterController:
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &3266949855191128660
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -150,3 +151,76 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &3428713651054331859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5753914494448562973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc271879e4b65c945b177d4d202cf89f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.PlayerState
+  ShowTopMostFoldoutHeaderGroup: 1
+  Team: 0
+  BeforeStatusAdded:
+    m_PersistentCalls:
+      m_Calls: []
+  AfterStatusAdded:
+    m_PersistentCalls:
+      m_Calls: []
+  BeforeStatusRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  AfterStatusRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  DamageTickPrefab: {fileID: 0}
+  Energy:
+    <StatType>k__BackingField: {fileID: 0}
+    <Value>k__BackingField: 0
+    <MinValue>k__BackingField: 0
+    <MaxValue>k__BackingField: 100
+    <MinMaxValue>k__BackingField: 0
+    <BaseMax>k__BackingField: 100
+  Health:
+    <StatType>k__BackingField: {fileID: 0}
+    <Value>k__BackingField: 100
+    <MinValue>k__BackingField: 0
+    <MaxValue>k__BackingField: 100
+    <MinMaxValue>k__BackingField: 0
+    <BaseMax>k__BackingField: 100
+    <ReductionStat>k__BackingField:
+      <StatType>k__BackingField: {fileID: 0}
+      <Value>k__BackingField: 50
+      <BaseValue>k__BackingField: 50
+      <Bound>k__BackingField: 0
+    <IsOverhealth>k__BackingField: 0
+  Shields:
+    <StatType>k__BackingField: {fileID: 0}
+    <Value>k__BackingField: 100
+    <MinValue>k__BackingField: 0
+    <MaxValue>k__BackingField: 100
+    <MinMaxValue>k__BackingField: 0
+    <BaseMax>k__BackingField: 100
+    <ReductionStat>k__BackingField:
+      <StatType>k__BackingField: {fileID: 0}
+      <Value>k__BackingField: 50
+      <BaseValue>k__BackingField: 50
+      <Bound>k__BackingField: 0
+    <IsOverhealth>k__BackingField: 0
+  OverHealth:
+    <StatType>k__BackingField: {fileID: 0}
+    <Value>k__BackingField: 100
+    <MinValue>k__BackingField: 0
+    <MaxValue>k__BackingField: 100
+    <MinMaxValue>k__BackingField: 0
+    <BaseMax>k__BackingField: 100
+    <ReductionStat>k__BackingField:
+      <StatType>k__BackingField: {fileID: 0}
+      <Value>k__BackingField: 50
+      <BaseValue>k__BackingField: 50
+      <Bound>k__BackingField: 0
+    <IsOverhealth>k__BackingField: 0

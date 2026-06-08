@@ -13,6 +13,9 @@ namespace Hypersycos.GERogueFrame
         readonly Dictionary<StatusEffect, List<StatusInstance>> statusInstances = new();
         public int Team;
 
+        int syncStatCount = 0;
+        protected Dictionary<int, ISyncStat> SyncedStats = new();
+
         public DefensePool HitPoints { get; protected set; }
 
         public CharacterStateHealthEvent OnDamaged = new();
@@ -35,6 +38,27 @@ namespace Hypersycos.GERogueFrame
         public CharacterStateStatusEvent AfterStatusAdded = new();
         public CharacterStateStatusEvent BeforeStatusRemoved = new();
         public CharacterStateStatusEvent AfterStatusRemoved = new();
+
+        public void StartSyncingValues(List<ISyncStat> stats)
+        {
+            for (int i = 0; i < stats.Count; i++)
+            {
+                SyncedStats.Add(syncStatCount, stats[i]);
+                stats[i].StartSync(SyncStat, syncStatCount++);
+            }
+        }
+
+        protected virtual void SyncStat(int index, SyncChange data)
+        {
+            SyncStatClientRpc(index, data);
+        }
+
+        [ClientRpc]
+        protected void SyncStatClientRpc(int index, SyncChange data, ClientRpcParams clientRpcParams = default)
+        {
+            if (IsServer) return;
+            SyncedStats[index].ApplySync(data);
+        }
 
         protected virtual void FixedUpdate()
         {

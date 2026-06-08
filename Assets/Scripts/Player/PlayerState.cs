@@ -58,6 +58,11 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
+        public void ApplyDefensePool(List<DefenseStatInstance> stats)
+        {
+            HitPoints = new DefensePool(stats, this);
+        }
+
         protected override void FixedUpdate()
         {
             if (IsServer)

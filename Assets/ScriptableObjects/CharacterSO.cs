@@ -11,6 +11,7 @@ namespace Hypersycos.GERogueFrame
     [CreateAssetMenu(fileName = "New Character", menuName = "GERogueFrame/Character", order = 0)]
     public class BaseCharacterSO : ScriptableObject, IEquatable<BaseCharacterSO>
     {
+        [Serializable]
         public struct ResourceRegen
         {
             public float Value;
@@ -18,14 +19,17 @@ namespace Hypersycos.GERogueFrame
             public float ReducedRate;
         }
 
+        [Serializable]
         public struct Resource
         {
             public float Max;
             public ResourceRegen FlatRegen;
             public ResourceRegen MaxRegen;
             public ResourceRegen CurrentRegen;
+            public StatType StatType;
         }
 
+        [Serializable]
         public struct Defense
         {
             public float Max;
@@ -34,6 +38,8 @@ namespace Hypersycos.GERogueFrame
             public ResourceRegen FlatRegen;
             public ResourceRegen MaxRegen;
             public ResourceRegen CurrentRegen;
+            public StatType StatType;
+            public StatType ResistStatType;
         }
 
         public string UUID;
@@ -84,53 +90,54 @@ namespace Hypersycos.GERogueFrame
 
         public void Reset()
         {
-            Energy = new Resource { Max = 100, MaxRegen = new ResourceRegen { Value = .25f, Delay = 0.2f } };
-            Health = new Defense { Max = 1000, FlatRegen = new ResourceRegen { Value = 2, Delay = 4, ReducedRate = .25f } };
-            Shields = new Defense { Max = 0, MaxRegen = new ResourceRegen { Value = .25f, Delay = 3 } };
-            Overhealth = new Defense { Max = 400, FlatRegen = new ResourceRegen { Value = -5, Delay = 2 }, CurrentRegen = new ResourceRegen { Value = -0.2f, Delay = 2 } };
+            Energy = new Resource { StatType = StatType.StatTypeMap["Energy"], Max = 100, MaxRegen = new ResourceRegen { Value = .25f, Delay = 0.2f } };
+            Health = new Defense { StatType = StatType.StatTypeMap["Health"], ResistStatType = StatType.StatTypeMap["Armour"], Max = 1000, FlatRegen = new ResourceRegen { Value = 2, Delay = 4, ReducedRate = .25f } };
+            Shields = new Defense { StatType = StatType.StatTypeMap["Shields"], Max = 0, MaxRegen = new ResourceRegen { Value = .25f, Delay = 3 } };
+            Overhealth = new Defense { StatType = StatType.StatTypeMap["OverHealth"], Max = 400, FlatRegen = new ResourceRegen { Value = -5, Delay = 2 }, CurrentRegen = new ResourceRegen { Value = -0.2f, Delay = 2 } };
         }
 
         public void Apply(PlayerState state)
         {
-            state.Energy = new(Energy.Max, 0, Energy.Max);
+            state.Energy = new(Energy.Max, 0, Energy.Max, Energy.StatType);
             if (Energy.Max > 0)
             {
                 ApplyResource(state.Energy, ref Energy, 0);
             }
 
             if (Health.HasResist)
-                state.Health = new(Health.Max, new SemiBoundedStatInstance(Health.Resist, 0));
+                state.Health = new(Health.Max, new SemiBoundedStatInstance(Health.Resist, 0, Health.ResistStatType), Health.StatType);
             else
-                state.Health = new(Health.Max);
+                state.Health = new(Health.Max, null, Health.StatType);
             if (Health.Max > 0)
             {
                 ApplyDefense(state.Health, ref Health, 0);
             }
 
             if (Shields.HasResist)
-                state.Shields = new(Shields.Max, new SemiBoundedStatInstance(Shields.Resist, 0));
+                state.Shields = new(Shields.Max, new SemiBoundedStatInstance(Shields.Resist, 0, Shields.ResistStatType), Shields.StatType);
             else
-                state.Shields = new(Shields.Max);
+                state.Shields = new(Shields.Max, null, Shields.StatType);
             if (Shields.Max > 0)
             {
                 ApplyDefense(state.Shields, ref Shields, 0);
             }
 
             if (Overhealth.HasResist)
-                state.OverHealth = new(Overhealth.Max, new SemiBoundedStatInstance(Overhealth.Resist, 0));
+                state.OverHealth = new(Overhealth.Max, new SemiBoundedStatInstance(Overhealth.Resist, 0, Overhealth.ResistStatType), Overhealth.StatType);
             else
-                state.OverHealth = new(Overhealth.Max);
+                state.OverHealth = new(Overhealth.Max, null, Overhealth.StatType);
             if (Overhealth.Max > 0)
             {
                 ApplyDefense(state.OverHealth, ref Overhealth, 0);
             }
 
-/*            state.HitPoints = new DefensePool(new List<DefenseStatInstance>() { Health, Shields, OverHealth }, this);
-            if (IsOwner)
+            state.ApplyDefensePool(new List<DefenseStatInstance>() { state.Health, state.Shields, state.OverHealth });
+            state.StartSyncingValues(new List<ISyncStat>() { state.Health, state.Shields, state.OverHealth, state.Energy });
+            if (state.IsOwner && false)
             {
-                GameObject.FindWithTag("HealthBar").GetComponent<StatBarScript>().AddStats(new List<BoundedStatInstance>() { Health, Shields, OverHealth });
-                GameObject.FindWithTag("EnergyBar").GetComponent<StatBarScript>().AddStats(new List<BoundedStatInstance>() { state.Energy });
-            }*/
+                GameObject.FindWithTag("HealthBar").GetComponent<StatBarScript>().SetStats(new List<BoundedStatInstance>() { state.Health, state.Shields, state.OverHealth });
+                GameObject.FindWithTag("EnergyBar").GetComponent<StatBarScript>().SetStats(new List<BoundedStatInstance>() { state.Energy });
+            }
         }
     }
 
