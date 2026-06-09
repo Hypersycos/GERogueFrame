@@ -178,7 +178,7 @@ MonoBehaviour:
   AfterStatusRemoved:
     m_PersistentCalls:
       m_Calls: []
-  DamageTickPrefab: {fileID: 0}
+  DamageTickPrefab: {fileID: 6979534173382537496, guid: 7afacd02c809b0746afdee6393056e0e, type: 3}
   Energy:
     <StatType>k__BackingField: {fileID: 0}
     <Value>k__BackingField: 0
