@@ -1,10 +1,16 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
+using Unity.Netcode.Components;
+using UnityEngine.UIElements;
+using TMPro;
+
+
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Hypersycos.GERogueFrame
 {
@@ -47,9 +53,10 @@ namespace Hypersycos.GERogueFrame
         public string CharacterDescription;
         public Texture2D Icon;
         public GameObject Model;
+        public NetworkObject NetworkPrefab;
         public List<Canvas> UI;
 
-        public float SpeedMult;
+        public float Speed;
 
         public AbilitySO Ability1;
         public AbilitySO Ability2;
@@ -63,6 +70,14 @@ namespace Hypersycos.GERogueFrame
         public Defense Health;
         public Defense Shields;
         public Defense Overhealth;
+
+        public void Reset()
+        {
+            Energy = new Resource { StatType = StatType.StatTypeMap["Energy"], Max = 100, MaxRegen = new ResourceRegen { Value = .25f, Delay = 0.2f } };
+            Health = new Defense { StatType = StatType.StatTypeMap["Health"], ResistStatType = StatType.StatTypeMap["Armour"], Max = 1000, FlatRegen = new ResourceRegen { Value = 2, Delay = 4, ReducedRate = .25f } };
+            Shields = new Defense { StatType = StatType.StatTypeMap["Shields"], Max = 0, MaxRegen = new ResourceRegen { Value = .25f, Delay = 3 } };
+            Overhealth = new Defense { StatType = StatType.StatTypeMap["OverHealth"], Max = -1, FlatRegen = new ResourceRegen { Value = -5, Delay = 0 }, CurrentRegen = new ResourceRegen { Value = -0.2f, Delay = 0 } };
+        }
 
         public bool Equals(BaseCharacterSO other)
         {
@@ -89,12 +104,23 @@ namespace Hypersycos.GERogueFrame
                 inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.MultiplicativeAdditive, null, values.CurrentRegen.Value, null, tickRate, values.CurrentRegen.Delay, values.CurrentRegen.ReducedRate));
         }
 
-        public void Reset()
+        protected void CreateDefense(ref DefenseStatInstance inst, ref Defense def, bool isOverhealth)
         {
-            Energy = new Resource { StatType = StatType.StatTypeMap["Energy"], Max = 100, MaxRegen = new ResourceRegen { Value = .25f, Delay = 0.2f } };
-            Health = new Defense { StatType = StatType.StatTypeMap["Health"], ResistStatType = StatType.StatTypeMap["Armour"], Max = 1000, FlatRegen = new ResourceRegen { Value = 2, Delay = 4, ReducedRate = .25f } };
-            Shields = new Defense { StatType = StatType.StatTypeMap["Shields"], Max = 0, MaxRegen = new ResourceRegen { Value = .25f, Delay = 3 } };
-            Overhealth = new Defense { StatType = StatType.StatTypeMap["OverHealth"], Max = 400, FlatRegen = new ResourceRegen { Value = -5, Delay = 2 }, CurrentRegen = new ResourceRegen { Value = -0.2f, Delay = 2 } };
+            if (def.Max < 0)
+            {
+                if (isOverhealth)
+                    def.Max = float.MaxValue;
+                else
+                    def.Max = 0;
+            }
+            if (def.HasResist)
+                inst = new(def.Max, new SemiBoundedStatInstance(def.Resist, 0, def.ResistStatType), def.StatType, isOverhealth);
+            else
+                inst = new(def.Max, null, def.StatType, isOverhealth);
+            if (def.Max > 0)
+            {
+                ApplyDefense(inst, ref def, 0);
+            }
         }
 
         public void Apply(PlayerState state, ref List<BoundedStatInstance> defenses)
@@ -105,33 +131,10 @@ namespace Hypersycos.GERogueFrame
                 ApplyResource(state.Energy, ref Energy, 0);
             }
 
-            if (Health.HasResist)
-                state.Health = new(Health.Max, new SemiBoundedStatInstance(Health.Resist, 0, Health.ResistStatType), Health.StatType);
-            else
-                state.Health = new(Health.Max, null, Health.StatType);
-            if (Health.Max > 0)
-            {
-                ApplyDefense(state.Health, ref Health, 0);
-            }
-
-            if (Shields.HasResist)
-                state.Shields = new(Shields.Max, new SemiBoundedStatInstance(Shields.Resist, 0, Shields.ResistStatType), Shields.StatType);
-            else
-                state.Shields = new(Shields.Max, null, Shields.StatType);
-            if (Shields.Max > 0)
-            {
-                ApplyDefense(state.Shields, ref Shields, 0);
-            }
-
-            if (Overhealth.HasResist)
-                state.OverHealth = new(Overhealth.Max, new SemiBoundedStatInstance(Overhealth.Resist, 0, Overhealth.ResistStatType), Overhealth.StatType, true);
-            else
-                state.OverHealth = new(Overhealth.Max, null, Overhealth.StatType, true);
-            if (Overhealth.Max > 0)
-            {
-                ApplyDefense(state.OverHealth, ref Overhealth, 0);
-                state.OverHealth.AddValue(100);
-            }
+            CreateDefense(ref state.Health, ref Health, false);
+            CreateDefense(ref state.Shields, ref Shields, false);
+            CreateDefense(ref state.OverHealth, ref Overhealth, true);
+            state.OverHealth.AddValue(100);
 
             state.ApplyDefensePool(new List<DefenseStatInstance>() { state.Health, state.Shields, state.OverHealth });
             state.StartSyncingValues(new List<ISyncStat>() { state.Health, state.Shields, state.OverHealth, state.Energy });
@@ -150,8 +153,39 @@ namespace Hypersycos.GERogueFrame
                     EnergyBar.GetComponentInChildren<StatBarScript>().SetStats(new List<BoundedStatInstance>() { state.Energy });
                 }
             }
-            
         }
+
+#if UNITY_EDITOR
+        [ContextMenu("Generate Network Prefab")]
+        public void RegenerateNetworkPrefab()
+        {
+            GameObject copy = PrefabUtility.LoadPrefabContents(AssetDatabase.GetAssetPath(Model));
+            Transform cameraTarget = copy.transform.Find("CameraTarget");
+
+            copy.AddComponent<NetworkObject>();
+            var manager = copy.AddComponent<PlayerCharacterManager>();
+            manager.so = this;
+            manager.netAnimator = copy.AddComponent<NetworkAnimator>();
+            manager.netAnimator.Animator = copy.GetComponent<Animator>();
+            manager.controller = copy.GetComponent<CharacterController>();
+            manager.bar = AssetDatabase.LoadAssetAtPath<Transform>("Assets/Prefabs/FriendlyBar.prefab");
+            manager.bar.SetParent(cameraTarget);
+            manager.bar.localPosition = new Vector3(0, 0.5f, 0);
+            manager.bar.gameObject.SetActive(false);
+            copy.AddComponent<NetworkTransform>();
+            copy.AddComponent<PlayerState>().DamageTickPrefab = AssetDatabase.LoadAssetAtPath<TMPro.TMP_Text>("Assets/UI/DamageNumber.prefab");
+
+            GameObject basePrefab = PrefabUtility.SaveAsPrefabAsset(copy, $"Assets/NetworkPrefabs/{CharacterName}Net.prefab", out bool success);
+
+            if (success)
+            {
+                NetworkPrefab = basePrefab.GetComponent<NetworkObject>();
+                EditorUtility.SetDirty(this);
+            }
+            PrefabUtility.UnloadPrefabContents(copy);
+            Debug.Log($"Generated Assets/NetworkPrefabs/{CharacterName}Net.prefab");
+        }
+#endif
     }
 
 

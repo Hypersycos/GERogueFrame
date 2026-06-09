@@ -12,12 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 918491964572bf642b6d9dded0ac6203, type: 3}
   m_Name: Fiery
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.CharacterSO
-  UUID: 
+  UUID: Fiery
   CharacterName: Fiery
   CharacterDescription: 
   Icon: {fileID: 3506167780502562645, guid: 3dfe51f11806ed542a96ceca1f765e20, type: 3}
-  Model: {fileID: 3580346940904453998, guid: cc7b9dd94d456f548847c53f6c8e560a, type: 3}
-  SpeedMult: 0
+  Model: {fileID: 7511950717358091015, guid: 4b7e6241c3e5ecc4aae9dcec18702617, type: 3}
+  NetworkPrefab: {fileID: 4724389780327334411, guid: 53c128ead6b5a0342a2dd44d21165f53, type: 3}
+  UI: []
+  Speed: 4
   Ability1: {fileID: 0}
   Ability2: {fileID: 0}
   Ability3: {fileID: 0}
@@ -76,12 +78,12 @@ MonoBehaviour:
     StatType: {fileID: 11400000, guid: f8d9d82d83a878e469014a0d2ccb56b1, type: 2}
     ResistStatType: {fileID: 0}
   Overhealth:
-    Max: 400
+    Max: 3.4028235e+38
     HasResist: 0
     Resist: 0
     FlatRegen:
       Value: -5
-      Delay: 2
+      Delay: 0
       ReducedRate: 0
     MaxRegen:
       Value: 0
@@ -89,7 +91,7 @@ MonoBehaviour:
       ReducedRate: 0
     CurrentRegen:
       Value: -0.2
-      Delay: 2
+      Delay: 0
       ReducedRate: 0
     StatType: {fileID: 11400000, guid: cd45451e1ec50f34ebb52bac39983dd4, type: 2}
     ResistStatType: {fileID: 0}

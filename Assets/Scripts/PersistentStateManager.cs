@@ -16,10 +16,12 @@ namespace Hypersycos.GERogueFrame
     public struct PlayerInfo : IEquatable<PlayerInfo>, INetworkSerializable
     {
         public uint characterID;
+        public NetworkObjectReference playerObj;
 
         public PlayerInfo(uint characterID)
         {
             this.characterID = characterID;
+            playerObj = new();
         }
 
         public bool Equals(PlayerInfo other)
@@ -30,6 +32,7 @@ namespace Hypersycos.GERogueFrame
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
             serializer.SerializeValue(ref characterID);
+            serializer.SerializeValue(ref playerObj);
         }
     }
 
@@ -45,8 +48,6 @@ namespace Hypersycos.GERogueFrame
         BetterNetworkList<KeyIndexPair<ulong>> playerIDs = new();
         BetterNetworkList<PlayerInfo> playerCharacters = new();
         NetworkDict<ulong, PlayerInfo> playerCharacterMap;
-
-        [SerializeField] NetworkObject PlayerPrefab;
 
         public uint GetCharacterID(BaseCharacterSO so)
         {
@@ -159,16 +160,28 @@ namespace Hypersycos.GERogueFrame
             float distance = playerCharacterMap.Count * 15 / (2 * Mathf.PI);
             int i = 0;
 
+            Dictionary<ulong, NetworkObject> spawns = new();
+
             foreach (var player in playerCharacterMap)
             {
                 Quaternion rot = Quaternion.AngleAxis(rotation * i++, Vector3.up);
                 Vector3 pos = rot * (Vector3.forward * distance) + Vector3.up * 2;
 
+                NetworkObject PlayerPrefab = availableCharacters[(int)player.Value.characterID].NetworkPrefab;
+
                 NetworkObject spawned = NetworkManager.Singleton.SpawnManager
                                         .InstantiateAndSpawn(PlayerPrefab, player.Key, true, true,
                                                              position: pos, rotation: Quaternion.Inverse(rot));
 
-                spawned.GetComponent<PlayerCharacterManager>().characterID.Value = playerCharacterMap[player.Key].characterID;
+                spawned.GetComponent<PlayerCharacterManager>().characterID = player.Value.characterID;
+                spawns.Add(player.Key, spawned);
+            }
+
+            foreach(var spawn in spawns)
+            {
+                var copy = playerCharacterMap[spawn.Key];
+                copy.playerObj = spawn.Value;
+                playerCharacterMap[spawn.Key] = copy;
             }
         }
     }

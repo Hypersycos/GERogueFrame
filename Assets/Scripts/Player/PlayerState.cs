@@ -23,7 +23,7 @@ namespace Hypersycos.GERogueFrame
                 this.angle = angle;
             }
         }
-        [SerializeField] TMP_Text DamageTickPrefab;
+        public TMP_Text DamageTickPrefab;
         ClientRpcParams clientRpcParams;
 
         float DamageNumberThreshold = 1;

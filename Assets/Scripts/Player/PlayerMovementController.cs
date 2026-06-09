@@ -14,13 +14,13 @@ namespace Hypersycos.GERogueFrame
         Controls controls;
 
         [Header("Stats")]
-        [SerializeField] float movementSpeed = 4f;
+        [SerializeField] public float movementSpeed = 4f;
         [SerializeField] float airStrafeRate = 0.4f;
         [SerializeField] float drag = 0.7f;
         [SerializeField] float smoothing = 0.1f;
         [SerializeField] float overspeedControl = 0.4f;
         [SerializeField] float overspeedCarry = 0.25f;
-        [SerializeField] float crouchSpeed = 0.4f;
+        [field: SerializeField] public float crouchSpeed { get; private set; } = 0.4f;
         [SerializeField] float slideThreshold = 0.5f;
         [SerializeField] float slideImpulse = 0f;
         [SerializeField] float jumpHeight = 1f;
@@ -29,28 +29,28 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] float airSuperJumpHeight = 3f;
         [SerializeField] int maxJumps = 2;
         [SerializeField] bool canSlide;
-        [SerializeField] bool canSuperJump;
+        [field: SerializeField] public bool canSuperJump { get; private set; }
 
         [Header("Live Values")]
-        [SerializeField] float movementModifiers = 1f;
+        [field: SerializeField] public float movementModifiers { get; private set; } = 1f;
         [SerializeField] float gravityMultiplier = 1f;
         [SerializeField] Vector3 velocity = Vector3.zero;
-        [SerializeField] bool crouching = false;
-        [SerializeField] bool superJumpAvailable = false;
+        [field: SerializeField] public bool crouching { get; private set; } = false;
+        [field: SerializeField] public bool superJumpAvailable { get; private set; } = false;
         [SerializeField] int jumpsAvailable = 0;
         [SerializeField] float lastJump = 0f;
 
         Dictionary<string, float> movementModifierTracker = new Dictionary<string, float>();
         Dictionary<string, float> gravityModifierTracker = new Dictionary<string, float>();
 
-        float maxSpeed => movementSpeed * movementModifiers * (grounded && crouching ? crouchSpeed : 1);
+        public float maxSpeed => movementSpeed * movementModifiers * (grounded && crouching ? crouchSpeed : 1);
         float moveForce => maxSpeed / (smoothing / (movementModifiers < 1 ? movementModifiers : 1)) * (grounded ? 1 : airStrafeRate);
         float jumpForce => Mathf.Sqrt(-2f * gravityForce * (grounded ? jumpHeight : airJumpHeight));
-        Vector3 intendedVelocity => velocity;
-        Vector3 horizontalVelocity => new Vector3(velocity.x, 0, velocity.z);
+        public Vector3 intendedVelocity => velocity;
+        public Vector3 horizontalVelocity => new Vector3(velocity.x, 0, velocity.z);
         float superJumpForce => Mathf.Sqrt(-2f * gravityForce * (grounded ? superJumpHeight : airSuperJumpHeight) * (movementModifiers > 1 ? movementModifiers : 1));
         float gravityForce => Physics.gravity.y * gravityMultiplier;
-        bool grounded
+        public bool grounded
         {
             get
             {
@@ -61,6 +61,10 @@ namespace Hypersycos.GERogueFrame
                     return characterController.isGrounded;
             }
         }
+
+        public event Action OnJump;
+        public event Action<bool> OnCrouch;
+        public event Action<bool> CanSuperJumpChanged;
 
         void Awake()
         {
@@ -112,7 +116,14 @@ namespace Hypersycos.GERogueFrame
                         velocity.z += impulse.z;
                     }
                 }
+                else if (horizontalVelocity.magnitude <= oldMaxSpeed)
+                {
+                    velocity.x *= crouchSpeed;
+                    velocity.z *= crouchSpeed;
+                }
             }
+
+            OnCrouch?.Invoke(crouching);
         }
 
         private void DoJump(InputAction.CallbackContext context)
@@ -141,6 +152,7 @@ namespace Hypersycos.GERogueFrame
 
                 velocity = direction * jumpMagnitude;
                 superJumpAvailable = false;
+                CanSuperJumpChanged?.Invoke(superJumpAvailable);
             }
             else
             {
@@ -157,8 +169,11 @@ namespace Hypersycos.GERogueFrame
                 velocity.x = inputForce.x * component * magnitude;
                 velocity.z = inputForce.z * component * magnitude;
             }
+
             jumpsAvailable--;
             lastJump = 0.5f;
+            Debug.Log($"{lastJump}: {velocity.y}");
+            OnJump?.Invoke();
         }
 
         public void AddMovementModifier(float modifier, string name)
@@ -299,7 +314,11 @@ namespace Hypersycos.GERogueFrame
                     {
                         velocity.y = 0f;
                         jumpsAvailable = maxJumps;
-                        superJumpAvailable = true;
+                        if (!superJumpAvailable)
+                        {
+                            superJumpAvailable = true;
+                            CanSuperJumpChanged?.Invoke(superJumpAvailable);
+                        }
                         Ray ray = new Ray(transform.position + Vector3.up * 0.25f, Vector3.down);
                         if (Physics.Raycast(ray, out RaycastHit hit, 0.3f, 0xFFFF ^ (1 << 6 | 1 << 7)))
                         {
@@ -310,7 +329,7 @@ namespace Hypersycos.GERogueFrame
             }
             else
             {
-                if (velocity.y == 0f)
+                if (velocity.y <= 0f)
                 { //check if stairs
                     Ray ray = new Ray(this.transform.position + Vector3.up * 0.25f, Vector3.down);
                     if (Physics.Raycast(ray, out RaycastHit hit, 0.3f + characterController.stepOffset))
@@ -328,12 +347,13 @@ namespace Hypersycos.GERogueFrame
                 }
             }
 
+            characterController.Move(velocity * Time.fixedDeltaTime + forcedMove);
+
             if (lastJump > 0f)
             {
                 lastJump -= Time.fixedDeltaTime;
+                Debug.Log($"{lastJump}: {velocity.y} / {characterController.velocity}");
             }
-
-            characterController.Move(velocity * Time.fixedDeltaTime + forcedMove);
         }
     }
 }
