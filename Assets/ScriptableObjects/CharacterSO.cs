@@ -47,6 +47,7 @@ namespace Hypersycos.GERogueFrame
         public string CharacterDescription;
         public Texture2D Icon;
         public GameObject Model;
+        public List<Canvas> UI;
 
         public float SpeedMult;
 
@@ -70,21 +71,21 @@ namespace Hypersycos.GERogueFrame
 
         protected void ApplyResource(BoundedStatInstance inst, ref Resource values, float tickRate)
         {
-            if (values.FlatRegen.Value > 0)
+            if (values.FlatRegen.Value != 0)
                 inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.Flat, null, values.FlatRegen.Value, null, tickRate, values.FlatRegen.Delay, values.FlatRegen.ReducedRate));
-            if (values.MaxRegen.Value > 0)
+            if (values.MaxRegen.Value != 0)
                 inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.Multiplicative, null, values.MaxRegen.Value, null, tickRate, values.MaxRegen.Delay, values.MaxRegen.ReducedRate));
-            if (values.CurrentRegen.Value > 0)
+            if (values.CurrentRegen.Value != 0)
                 inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.MultiplicativeAdditive, null, values.CurrentRegen.Value, null, tickRate, values.CurrentRegen.Delay, values.CurrentRegen.ReducedRate));
         }
 
         protected void ApplyDefense(DefenseStatInstance inst, ref Defense values, float tickRate)
         {
-            if (values.FlatRegen.Value > 0)
+            if (values.FlatRegen.Value != 0)
                 inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.Flat, null, values.FlatRegen.Value, null, tickRate, values.FlatRegen.Delay, values.FlatRegen.ReducedRate));
-            if (values.MaxRegen.Value > 0)
+            if (values.MaxRegen.Value != 0)
                 inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.Multiplicative, null, values.MaxRegen.Value, null, tickRate, values.MaxRegen.Delay, values.MaxRegen.ReducedRate));
-            if (values.CurrentRegen.Value > 0)
+            if (values.CurrentRegen.Value != 0)
                 inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.MultiplicativeAdditive, null, values.CurrentRegen.Value, null, tickRate, values.CurrentRegen.Delay, values.CurrentRegen.ReducedRate));
         }
 
@@ -96,7 +97,7 @@ namespace Hypersycos.GERogueFrame
             Overhealth = new Defense { StatType = StatType.StatTypeMap["OverHealth"], Max = 400, FlatRegen = new ResourceRegen { Value = -5, Delay = 2 }, CurrentRegen = new ResourceRegen { Value = -0.2f, Delay = 2 } };
         }
 
-        public void Apply(PlayerState state)
+        public void Apply(PlayerState state, ref List<BoundedStatInstance> defenses)
         {
             state.Energy = new(Energy.Max, 0, Energy.Max, Energy.StatType);
             if (Energy.Max > 0)
@@ -123,21 +124,33 @@ namespace Hypersycos.GERogueFrame
             }
 
             if (Overhealth.HasResist)
-                state.OverHealth = new(Overhealth.Max, new SemiBoundedStatInstance(Overhealth.Resist, 0, Overhealth.ResistStatType), Overhealth.StatType);
+                state.OverHealth = new(Overhealth.Max, new SemiBoundedStatInstance(Overhealth.Resist, 0, Overhealth.ResistStatType), Overhealth.StatType, true);
             else
-                state.OverHealth = new(Overhealth.Max, null, Overhealth.StatType);
+                state.OverHealth = new(Overhealth.Max, null, Overhealth.StatType, true);
             if (Overhealth.Max > 0)
             {
                 ApplyDefense(state.OverHealth, ref Overhealth, 0);
+                state.OverHealth.AddValue(100);
             }
 
             state.ApplyDefensePool(new List<DefenseStatInstance>() { state.Health, state.Shields, state.OverHealth });
             state.StartSyncingValues(new List<ISyncStat>() { state.Health, state.Shields, state.OverHealth, state.Energy });
-            if (state.IsOwner && false)
+
+            defenses = new List<BoundedStatInstance>() { state.Health, state.Shields, state.OverHealth };
+            if (state.IsOwner)
             {
-                GameObject.FindWithTag("HealthBar").GetComponent<StatBarScript>().SetStats(new List<BoundedStatInstance>() { state.Health, state.Shields, state.OverHealth });
-                GameObject.FindWithTag("EnergyBar").GetComponent<StatBarScript>().SetStats(new List<BoundedStatInstance>() { state.Energy });
+                GameObject UICanvas = GameObject.FindWithTag("PlayerUI");
+                Transform HealthBar = UICanvas.transform.Find("HealthBar");
+                HealthBar.gameObject.SetActive(true);
+                HealthBar.GetComponentInChildren<StatBarScript>().SetStats(defenses);
+                if (Energy.Max > 0)
+                {
+                    Transform EnergyBar = UICanvas.transform.Find("EnergyBar");
+                    EnergyBar.gameObject.SetActive(true);
+                    EnergyBar.GetComponentInChildren<StatBarScript>().SetStats(new List<BoundedStatInstance>() { state.Energy });
+                }
             }
+            
         }
     }
 

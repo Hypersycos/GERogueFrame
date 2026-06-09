@@ -280,7 +280,11 @@ namespace Hypersycos.GERogueFrame
                         velocity += diffForce;
                     }
                     if (horizontalVelocity.magnitude > maxSpeed)
-                        Debug.Log($"HMag: {horizontalVelocity.magnitude}, HVel: {horizontalVelocity}");
+                    {
+                        Vector3 corrected = horizontalVelocity * maxSpeed / horizontalVelocity.magnitude * 0.999f;
+                        velocity.x = corrected.x;
+                        velocity.z = corrected.z;
+                    }
                 }
             }
 
@@ -300,7 +304,6 @@ namespace Hypersycos.GERogueFrame
                         if (Physics.Raycast(ray, out RaycastHit hit, 0.3f, 0xFFFF ^ (1 << 6 | 1 << 7)))
                         {
                             forcedMove.y = 0.25f - hit.distance;
-                            Debug.Log($"moving {forcedMove.y}, from {transform.position.y} to {transform.position.y + forcedMove.y}");
                         }
                     }
                 }
@@ -313,6 +316,10 @@ namespace Hypersycos.GERogueFrame
                     if (Physics.Raycast(ray, out RaycastHit hit, 0.3f + characterController.stepOffset))
                     { //force player down fast
                         velocity.y = -1;
+                    }
+                    else
+                    {
+                        velocity.y += gravityForce * Time.fixedDeltaTime;
                     }
                 }
                 else

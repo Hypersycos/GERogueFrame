@@ -75,6 +75,7 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
+        bool initialized = false;
         [SerializeField] private List<BoundedStatInstance> StatInstances;
         [SerializeField] private RectTransform BarPrefab;
         [SerializeField] private RectTransform Backing;
@@ -90,6 +91,7 @@ namespace Hypersycos.GERogueFrame
         // Start is called before the first frame update
         void Start()
         {
+            initialized = true;
             foreach(BoundedStatInstance statInstance in StatInstances)
             {
                 AddStat(statInstance);
@@ -148,6 +150,10 @@ namespace Hypersycos.GERogueFrame
         {
             if (!StatInstances.Contains(stat))
                 StatInstances.Add(stat);
+
+            if (!initialized)
+                return;
+
             CreateBar(stat);
             if (stat is DefenseStatInstance)
             {

@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
+using static Hypersycos.GERogueFrame.BaseCharacterSO;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -43,17 +45,24 @@ namespace Hypersycos.GERogueFrame
             GameObject model = so.Model;
 
             myModel = Instantiate(model, transform);
-            so.Apply(GetComponent<PlayerState>());
+            List<BoundedStatInstance> defenses = new();
+            so.Apply(GetComponent<PlayerState>(), ref defenses);
+
+            GameObject cameraTarget = myModel.transform.Find("CameraTarget").gameObject;
 
             if (IsOwner)
             {
-                GameObject.FindWithTag("MainCamera").GetComponent<CameraManager>().SetTarget(myModel.transform.Find("CameraTarget").gameObject);
+                GameObject.FindWithTag("MainCamera").GetComponent<CameraManager>().SetTarget(cameraTarget);
                 GetComponent<CharacterController>().enabled = true;
                 gameObject.AddComponent<PlayerMovementController>();
             }
             else
             {
-
+                Transform bar = transform.GetChild(0);
+                bar.SetParent(cameraTarget.transform);
+                bar.transform.localPosition = new Vector3(0, 0.5f, 0);
+                bar.gameObject.SetActive(true);
+                bar.GetComponentInChildren<StatBarScript>().SetStats(defenses);
             }
 
             return;
