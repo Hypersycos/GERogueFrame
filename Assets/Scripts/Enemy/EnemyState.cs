@@ -12,8 +12,9 @@ namespace Hypersycos.GERogueFrame
             if (IsServer)
             {
                 Health.OnEmpty.AddListener((_, _, _) => StartCoroutine(FullHealAfter(3)));
-                StartSyncingValues(new List<ISyncStat> { Health });
             }
+            StartSyncingValues(new List<ISyncStat> { Health });
+            Health.AddModifier(new StatRegenerationModifier(StatModifier.StackType.Flat, null, 5, null, 0, 2, 0));
             HitPoints = new DefensePool(new List<DefenseStatInstance> { Health }, this);
             GetComponentInChildren<StatBarScript>().AddStats(new List<BoundedStatInstance>() { Health });
         }

@@ -166,13 +166,17 @@ namespace Hypersycos.GERogueFrame
             var manager = copy.AddComponent<PlayerCharacterManager>();
             manager.so = this;
             manager.netAnimator = copy.AddComponent<NetworkAnimator>();
+            manager.netAnimator.AuthorityMode = NetworkAnimator.AuthorityModes.Owner;
             manager.netAnimator.Animator = copy.GetComponent<Animator>();
             manager.controller = copy.GetComponent<CharacterController>();
-            manager.bar = AssetDatabase.LoadAssetAtPath<Transform>("Assets/Prefabs/FriendlyBar.prefab");
+            manager.bar = PrefabUtility.LoadPrefabContents("Assets/Prefabs/FriendlyBar.prefab").transform;
             manager.bar.SetParent(cameraTarget);
             manager.bar.localPosition = new Vector3(0, 0.5f, 0);
             manager.bar.gameObject.SetActive(false);
-            copy.AddComponent<NetworkTransform>();
+            NetworkTransform netTransform = copy.AddComponent<NetworkTransform>();
+            netTransform.AuthorityMode = NetworkTransform.AuthorityModes.Owner;
+            netTransform.SyncRotAngleX = false;
+            netTransform.SyncRotAngleZ = false;
             copy.AddComponent<PlayerState>().DamageTickPrefab = AssetDatabase.LoadAssetAtPath<TMPro.TMP_Text>("Assets/UI/DamageNumber.prefab");
 
             GameObject basePrefab = PrefabUtility.SaveAsPrefabAsset(copy, $"Assets/NetworkPrefabs/{CharacterName}Net.prefab", out bool success);
