@@ -28,7 +28,6 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] float superJumpHeight = 4f;
         [SerializeField] float airSuperJumpHeight = 3f;
         [SerializeField] int maxJumps = 2;
-        [SerializeField] bool canSlide;
         [field: SerializeField] public bool canSuperJump { get; private set; }
 
         [Header("Live Values")]
@@ -105,7 +104,12 @@ namespace Hypersycos.GERogueFrame
             if (crouching)
             {
                 float oldMaxSpeed = (maxSpeed / crouchSpeed);
-                if (canSlide && horizontalVelocity.magnitude / oldMaxSpeed > slideThreshold && grounded)
+                if (horizontalVelocity.magnitude <= oldMaxSpeed && context.action.name == "Toggle Crouch")
+                {
+                    velocity.x *= crouchSpeed;
+                    velocity.z *= crouchSpeed;
+                }
+                else if (horizontalVelocity.magnitude / oldMaxSpeed > slideThreshold && grounded)
                 {
                     //TODO: should slide just use velocity? Should falling really far into slide work?
                     if (horizontalVelocity.magnitude < oldMaxSpeed * (1 + slideImpulse))
@@ -115,11 +119,6 @@ namespace Hypersycos.GERogueFrame
                         velocity.x += impulse.x;
                         velocity.z += impulse.z;
                     }
-                }
-                else if (horizontalVelocity.magnitude <= oldMaxSpeed)
-                {
-                    velocity.x *= crouchSpeed;
-                    velocity.z *= crouchSpeed;
                 }
             }
 

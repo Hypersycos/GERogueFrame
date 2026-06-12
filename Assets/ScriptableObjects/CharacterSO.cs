@@ -58,6 +58,9 @@ namespace Hypersycos.GERogueFrame
 
         public float Speed;
 
+        public AbilitySO Weapon;
+        public AbilitySO WeaponAlt;
+
         public AbilitySO Ability1;
         public AbilitySO Ability2;
         public AbilitySO Ability3;
@@ -153,6 +156,16 @@ namespace Hypersycos.GERogueFrame
                     EnergyBar.GetComponentInChildren<StatBarScript>().SetStats(new List<BoundedStatInstance>() { state.Energy });
                 }
             }
+
+            state.weapon = (Weapon as IAbility).CreateAbility();
+            state.weaponAlt = (WeaponAlt as IAbility).CreateAbility();
+
+            state.ability1 = (Ability1 as IAbility).CreateAbility();
+            state.ability2 = (Ability2 as IAbility).CreateAbility();
+            state.ability3 = (Ability3 as IAbility).CreateAbility();
+            state.ability4 = (Ability4 as IAbility).CreateAbility();
+
+            state.ultimate = (Ultimate as IAbility).CreateAbility();
         }
 
 #if UNITY_EDITOR
