@@ -1,31 +1,38 @@
-﻿using System;
+﻿using Sirenix.OdinInspector;
+using Sirenix.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
 namespace Hypersycos.GERogueFrame
 {
-    public abstract class CastCostCheckerSO : ScriptableObject, ICastCostChecker
+    [CreateAssetMenu(fileName = "New CostChecker", menuName = "GERogueFrame/Abilities/Cost", order = 0)]
+    public class CastCostCheckerSO : SerializedScriptableObject, ICastCostChecker
     {
-        public ITargetChecker Checker;
+        [ShowInInspector]
+        [OdinSerialize] ICastCostChecker CastCostCheckers;
 
-        [SerializeField] private int _priority;
-        public int priority => priority;
+        public int Priority => CastCostCheckers.Priority;
 
-        public virtual ITargetChecker CanCast(CharacterState state)
+        public bool CanCast(CharacterState state, Ability ability)
         {
-            return Checker;
+            return CastCostCheckers.CanCast(state, ability);
         }
-        public virtual ICastCostChecker Clone()
+
+        public bool CanCast(CharacterState state, Ability ability, out ITargetChecker checker)
         {
-            CastCostCheckerSO clone = Instantiate(this);
-            clone.Checker = clone.Checker.Clone();
-            return clone;
+            return CastCostCheckers.CanCast(state, ability, out checker);
+        }
+
+        public ICastCostChecker Clone()
+        {
+            return CastCostCheckers.Clone();
         }
 
         public ICastEffect GetEffect()
         {
-            return Checker.GetEffect();
+            return CastCostCheckers.GetEffect();
         }
     }
 }

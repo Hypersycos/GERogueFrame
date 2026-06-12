@@ -1,30 +1,31 @@
-﻿using System;
+﻿using Sirenix.OdinInspector;
+using Sirenix.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
 namespace Hypersycos.GERogueFrame
 {
-    public abstract class TargetCheckerSO : ScriptableObject, ITargetChecker
+    [CreateAssetMenu(fileName = "New TargetChecker", menuName = "GERogueFrame/Abilities/Target", order = 0)]
+    public class TargetCheckerSO : SerializedScriptableObject, ITargetChecker
     {
-        [SerializeField] private ICastEffect effect;
+        [ShowInInspector]
+        [OdinSerialize] ITargetChecker TargetChecker;
 
-        [SerializeField] private int _priority;
-        public int priority { get => _priority; }
-
-        public ICastEffect castEffect;
-        public virtual ITargetChecker Clone()
+        public ITargetChecker Clone()
         {
-            TargetCheckerSO clone = Instantiate(this);
-            clone.effect = clone.effect.Clone();
-            return clone;
+            return TargetChecker.Clone();
         }
-
-        public abstract ICastEffect HasValidTarget(Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState);
 
         public ICastEffect GetEffect()
         {
-            return effect;
+            return TargetChecker.GetEffect();
+        }
+
+        public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out object hit, out ICastEffect castEffect)
+        {
+            return TargetChecker.HasValidTarget(direction, position, camPosition, myState, out hit, out castEffect);
         }
     }
 }

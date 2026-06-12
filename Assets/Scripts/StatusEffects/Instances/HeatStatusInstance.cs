@@ -6,16 +6,17 @@ using static Hypersycos.GERogueFrame.DefensePool;
 namespace Hypersycos.GERogueFrame
 {
     public class HeatStatusInstance : DotStatusInstance
-    {   //Sets fixed tickdelay, still requires Heat to be passed in
-        //TODO: Is there a better way of implementing this?
-        public HeatStatusInstance(float amount, CharacterState owner, StatusEffect statusEffect, float duration)
-            : base(amount, owner, statusEffect, duration, 1, StatTypeTarget.AllValid)
+    {
+        static StatusEffect _heat = null;
+        static StatusEffect Heat => _heat ?? (_heat = StatusEffect.StatusDict["Heat"]);
+        public HeatStatusInstance(float amount, CharacterState owner, float duration = 1)
+            : base(amount, owner, Heat, duration * Heat.DefaultDuration, 1, StatTypeTarget.AllValid)
         {
         }
-        public HeatStatusInstance(float amount, StatusEffect statusEffect, float duration)
-            : base(amount, statusEffect, duration, 1, StatTypeTarget.AllValid)
+        public HeatStatusInstance(float amount, float duration = 1)
+            : base(amount, Heat, duration * Heat.DefaultDuration, 1, StatTypeTarget.AllValid)
         {
         }
-        public HeatStatusInstance() : base(1, StatTypeTarget.AllValid) { }
+        public HeatStatusInstance() : base(1, Heat, StatTypeTarget.AllValid) { }
     }
 }

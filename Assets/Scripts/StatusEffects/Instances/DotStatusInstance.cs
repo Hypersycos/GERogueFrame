@@ -24,7 +24,7 @@ namespace Hypersycos.GERogueFrame
             ValidStatTypes = validTargets;
         }
 
-        public DotStatusInstance(float tickDelay, StatTypeTarget validTargets) : base()
+        public DotStatusInstance(float tickDelay, StatusEffect statusEffect, StatTypeTarget validTargets) : base(statusEffect)
         {
             TickDelay = tickDelay;
             ValidStatTypes = validTargets;

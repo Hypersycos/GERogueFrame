@@ -1,0 +1,127 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdd64b538fb4b1c4780c6fb0225a8210, type: 3}
+  m_Name: Ignite
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.AbilitySO
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 11400000, guid: 408a6fd48e8a0784da3cecc525b4ff3b, type: 2}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: AbilityData
+      Entry: 7
+      Data: 0|Hypersycos.GERogueFrame.BaseAbilityData, Assembly-CSharp
+    - Name: AbilityName
+      Entry: 1
+      Data: Ignite
+    - Name: AbilityDescription
+      Entry: 6
+      Data: 
+    - Name: AbilityIcon
+      Entry: 6
+      Data: 
+    - Name: Cooldown
+      Entry: 4
+      Data: 3
+    - Name: EnergyCost
+      Entry: 4
+      Data: 15
+    - Name: ExtraCheckers
+      Entry: 7
+      Data: 1|System.Collections.Generic.List`1[[Hypersycos.GERogueFrame.ICastCostChecker,
+        Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TargetChecker
+      Entry: 7
+      Data: 2|Hypersycos.GERogueFrame.HitscanChecker, Assembly-CSharp
+    - Name: CastEffect
+      Entry: 7
+      Data: 3|Hypersycos.GERogueFrame.ApplyStatus, Assembly-CSharp
+    - Name: statusEffect
+      Entry: 7
+      Data: 4|Hypersycos.GERogueFrame.HeatStatusInstance, Assembly-CSharp
+    - Name: <StatusEffect>k__BackingField
+      Entry: 10
+      Data: 0
+    - Name: Amount
+      Entry: 4
+      Data: 5
+    - Name: OneTimeEffects
+      Entry: 7
+      Data: 5|System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: duration
+      Entry: 4
+      Data: 6
+    - Name: TickDelay
+      Entry: 4
+      Data: 1
+    - Name: ValidStatTypes
+      Entry: 7
+      Data: 6|Hypersycos.GERogueFrame.StatTypeTarget, Assembly-CSharp
+    - Name: IsExclusive
+      Entry: 5
+      Data: false
+    - Name: Types
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: MaxRange
+      Entry: 4
+      Data: 100
+    - Name: LayerMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 247
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TriggerInteraction
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 

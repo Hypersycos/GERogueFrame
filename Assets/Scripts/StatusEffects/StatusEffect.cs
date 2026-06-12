@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Hypersycos.GERogueFrame
 {
-    [CreateAssetMenu(fileName = "New Status Effect", menuName = "Combat/Status Effect")]
+    [CreateAssetMenu(fileName = "New Status Effect", menuName = "GERogueFrame/Combat/Status Effect")]
     public class StatusEffect : ScriptableObject
     {
         public enum StackMethod
@@ -20,5 +21,13 @@ namespace Hypersycos.GERogueFrame
         [field: SerializeField] public string Description { get; private set; }
         [field: SerializeField] public StackMethod StackType { get; private set; }
         [field: SerializeField] public float DefaultDuration { get; private set; }
+        [field: SerializeField] public Texture2D Icon { get; private set; }
+
+        public static Dictionary<string, StatusEffect> StatusDict = new();
+
+        private void OnEnable()
+        {
+            StatusDict.TryAdd(Name, this);
+        }
     }
 }

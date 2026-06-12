@@ -1,28 +1,26 @@
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Hypersycos.GERogueFrame
 {
-    public struct ResourceCost
+    [CreateAssetMenu(fileName = "New Ability", menuName = "GERogueFrame/Abilities/Ability", order = 0)]
+    public class AbilitySO : SerializedScriptableObject, IAbilityData
     {
-        public string Resource;
-        public float Cost;
-    }
+        [ShowInInspector]
+        [OdinSerialize] IAbilityData AbilityData;
 
-    [CreateAssetMenu(fileName = "New Ability", menuName = "GERogueFrame/Ability", order = 0)]
-    public class AbilitySO : ScriptableObject, IAbility
-    {
-        public string AbilityName;
-        public string AbilityDescription;
-        public Texture2D AbilityIcon;
-        public List<ResourceCost> AbilityResources;
-        public float AbilityCooldown;
-
-        [SerializeField] List<ICastCostChecker> castCostCheckers;
+        public Ability CreateAbility()
+        {
+            return AbilityData.CreateAbility();
+        }
 
         public IEnumerable<ICastCostChecker> GetCheckers()
         {
-            return castCostCheckers;
+            return AbilityData.GetCheckers();
         }
     }
 }

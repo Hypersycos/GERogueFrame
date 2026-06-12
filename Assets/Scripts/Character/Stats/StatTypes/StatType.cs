@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Hypersycos.GERogueFrame
 {
-    [CreateAssetMenu(fileName = "New Stat Type", menuName = "Character/Stat Type")]
+    [CreateAssetMenu(fileName = "New Stat Type", menuName = "GERogueFrame/Character/Stat Type")]
     public class StatType : ScriptableObject
     {
 #if UNITY_EDITOR

@@ -8,7 +8,7 @@ namespace Hypersycos.GERogueFrame
 {
 	public interface ITargetChecker
 	{
-        ICastEffect HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState);
+        bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out object hit, out ICastEffect castEffect);
         ICastEffect GetEffect();
         ITargetChecker Clone();
     }

@@ -5,6 +5,10 @@ using UnityEngine;
 using Unity.Netcode.Components;
 using UnityEngine.UIElements;
 using TMPro;
+using Sirenix.Serialization;
+using Sirenix.OdinInspector;
+
+
 
 
 
@@ -15,7 +19,7 @@ using UnityEditor;
 namespace Hypersycos.GERogueFrame
 {
     [CreateAssetMenu(fileName = "New Character", menuName = "GERogueFrame/Character", order = 0)]
-    public class BaseCharacterSO : ScriptableObject, IEquatable<BaseCharacterSO>
+    public class BaseCharacterSO : SerializedScriptableObject, IEquatable<BaseCharacterSO>
     {
         [Serializable]
         public struct ResourceRegen
@@ -58,14 +62,14 @@ namespace Hypersycos.GERogueFrame
 
         public float Speed;
 
-        public AbilitySO Weapon;
-        public AbilitySO WeaponAlt;
+        [OdinSerialize] public IAbilityData Weapon;
+        [OdinSerialize] public IAbilityData WeaponAlt;
 
-        public AbilitySO Ability1;
-        public AbilitySO Ability2;
-        public AbilitySO Ability3;
-        public AbilitySO Ability4;
-        public AbilitySO Ultimate;
+        [OdinSerialize] public IAbilityData Ability1;
+        [OdinSerialize] public IAbilityData Ability2;
+        [OdinSerialize] public IAbilityData Ability3;
+        [OdinSerialize] public IAbilityData Ability4;
+        [OdinSerialize] public IAbilityData Ultimate;
 
         public UpgradeTreeSO UpgradeTree;
 
@@ -157,15 +161,17 @@ namespace Hypersycos.GERogueFrame
                 }
             }
 
-            state.weapon = (Weapon as IAbility).CreateAbility();
-            state.weaponAlt = (WeaponAlt as IAbility).CreateAbility();
+            PlayerAbilityManager aManager = state.GetComponent<PlayerAbilityManager>();
 
-            state.ability1 = (Ability1 as IAbility).CreateAbility();
-            state.ability2 = (Ability2 as IAbility).CreateAbility();
-            state.ability3 = (Ability3 as IAbility).CreateAbility();
-            state.ability4 = (Ability4 as IAbility).CreateAbility();
+/*            aManager.weapon = (Weapon).CreateAbility();
+            aManager.weaponAlt = (WeaponAlt).CreateAbility();*/
 
-            state.ultimate = (Ultimate as IAbility).CreateAbility();
+            aManager.ability1 = (Ability1).CreateAbility();/*
+            aManager.ability2 = (Ability2).CreateAbility();
+            aManager.ability3 = (Ability3).CreateAbility();
+            aManager.ability4 = (Ability4).CreateAbility();
+
+            aManager.ultimate = (Ultimate).CreateAbility();*/
         }
 
 #if UNITY_EDITOR
@@ -191,6 +197,7 @@ namespace Hypersycos.GERogueFrame
             netTransform.SyncRotAngleX = false;
             netTransform.SyncRotAngleZ = false;
             copy.AddComponent<PlayerState>().DamageTickPrefab = AssetDatabase.LoadAssetAtPath<TMPro.TMP_Text>("Assets/UI/DamageNumber.prefab");
+            copy.AddComponent<PlayerAbilityManager>();
 
             GameObject basePrefab = PrefabUtility.SaveAsPrefabAsset(copy, $"Assets/NetworkPrefabs/{CharacterName}Net.prefab", out bool success);
 
