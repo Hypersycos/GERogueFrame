@@ -14,49 +14,58 @@ namespace Hypersycos.GERogueFrame
             this.statusEffect = statusEffect;
         }
 
-        public void ClientCastEnd(object payload) { }
+        void ICastEffect.ClientCastEnd(AbilityPayload payload) { }
 
-        public void ClientCastFixedUpdate() { }
+        void ICastEffect.ClientCastFixedUpdate() { }
 
-        public void ClientCastStart(object payload) { }
+        void ICastEffect.ClientCastStart(AbilityPayload payload) { }
 
-        public void ClientCastUpdate() { }
+        void ICastEffect.ClientCastUpdate() { }
 
-        public ICastEffect Clone()
+        void ICastEffect.ClientNetworkUpdate(AbilityPayload payload) { }
+
+        ICastEffect ICastEffect.Clone()
         {
             return new ApplyStatus(statusEffect.CloneInstance());
         }
 
-        public void OwnerCastEnd(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState) { }
+        AbilityPayload ICastEffect.OwnerCastEnd(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState) => null;
 
-        public void OwnerCastFixedUpdate() { }
+        void ICastEffect.OwnerCastFixedUpdate() { }
 
-        public void OwnerCastStart(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState) { }
-
-        public void OwnerCastUpdate() { }
-
-        public void ServerCastEnd(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState) { }
-
-        public void ServerCastFixedUpdate() { }
-
-        public void ServerCastStart(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        AbilityPayload ICastEffect.OwnerCastStart(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
             Collider coll = target as Collider;
             if (coll == null)
-                return;
+                return null;
 
             CharacterState victim = coll.GetComponent<CharacterState>();
             if (victim == null)
                 victim = coll.GetComponentInParent<CharacterState>();
 
-            if (victim != null)
-            {
-                StatusInstance statusInst = statusEffect.CloneInstance();
-                statusInst.SetOwner(myState);
-                victim.AddStatus(statusInst);
-            }
+            if (victim == null)
+                return null;
+
+            return new VictimPayload(victim);
         }
 
-        public void ServerCastUpdate() { }
+        void ICastEffect.OwnerCastUpdate() { }
+
+        AbilityPayload ICastEffect.ServerCastEnd(AbilityPayload payload, object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState) => null;
+
+        void ICastEffect.ServerCastFixedUpdate() { }
+
+        AbilityPayload ICastEffect.ServerCastStart(AbilityPayload payload, object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        {
+            //TODO: validate victim
+            StatusInstance statusInst = statusEffect.CloneInstance();
+            statusInst.SetOwner(myState);
+            (payload as VictimPayload)?.victim.AddStatus(statusInst);
+            return null;
+        }
+
+        void ICastEffect.ServerCastUpdate() { }
+
+        void ICastEffect.ServerNetworkUpdate(AbilityPayload payload) { }
     }
 }

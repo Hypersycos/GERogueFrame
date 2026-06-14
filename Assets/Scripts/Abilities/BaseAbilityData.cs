@@ -23,9 +23,11 @@ namespace Hypersycos.GERogueFrame
 
         [OdinSerialize] ITargetChecker TargetChecker;
 
+        public bool TargetOnStart = true;
+
         public Ability CreateAbility()
         {
-            return new BaseAbility(GetCheckers(), Cooldown);
+            return new BaseAbility(GetCheckers(), Cooldown, TargetOnStart);
         }
 
         public IEnumerable<ICastCostChecker> GetCheckers()

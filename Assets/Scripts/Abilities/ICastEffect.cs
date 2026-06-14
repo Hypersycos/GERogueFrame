@@ -7,20 +7,22 @@ namespace Hypersycos.GERogueFrame
 {
     public interface ICastEffect
     {
-        void ServerCastStart(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState);
+        AbilityPayload ServerCastStart(AbilityPayload payload, object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState);
         void ServerCastUpdate();
+        void ServerNetworkUpdate(AbilityPayload payload);
         void ServerCastFixedUpdate();
-        void ServerCastEnd(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState);
+        AbilityPayload ServerCastEnd(AbilityPayload payload, object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState);
 
-        void ClientCastStart(object payload);
+        void ClientCastStart(AbilityPayload payload);
         void ClientCastUpdate();
+        void ClientNetworkUpdate(AbilityPayload payload);
         void ClientCastFixedUpdate();
-        void ClientCastEnd(object payload);
+        void ClientCastEnd(AbilityPayload payload);
 
-        void OwnerCastStart(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState);
+        AbilityPayload OwnerCastStart(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState);
         void OwnerCastUpdate();
         void OwnerCastFixedUpdate();
-        void OwnerCastEnd(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState);
+        AbilityPayload OwnerCastEnd(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState);
 
         ICastEffect Clone();
     }

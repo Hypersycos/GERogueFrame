@@ -107,12 +107,21 @@ MonoBehaviour:
     - Name: MaxRange
       Entry: 4
       Data: 100
-    - Name: LayerMask
+    - Name: HitLayerMask
       Entry: 7
       Data: UnityEngine.LayerMask, UnityEngine.CoreModule
     - Name: 
       Entry: 3
-      Data: 247
+      Data: 128
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TargetLayerMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 183
     - Name: 
       Entry: 8
       Data: 
@@ -122,6 +131,9 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: TargetOnStart
+      Entry: 5
+      Data: true
     - Name: 
       Entry: 8
       Data: 

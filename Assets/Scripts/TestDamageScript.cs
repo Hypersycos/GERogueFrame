@@ -16,8 +16,8 @@ namespace Hypersycos.GERogueFrame
             controls = new();
             enemyState = GetComponent<EnemyState>();
 
-            controls.Player.Fire.started += DoDamage;
-            controls.Player.Altfire.started += DoDamageRandom;
+            //controls.Player.Fire.started += DoDamage;
+            //controls.Player.Altfire.started += DoDamageRandom;
             controls.Player.Enable();
         }
 

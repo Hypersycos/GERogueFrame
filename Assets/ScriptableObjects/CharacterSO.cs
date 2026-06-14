@@ -172,6 +172,7 @@ namespace Hypersycos.GERogueFrame
             aManager.ability4 = (Ability4).CreateAbility();
 
             aManager.ultimate = (Ultimate).CreateAbility();*/
+            aManager.BuildMap();
         }
 
 #if UNITY_EDITOR

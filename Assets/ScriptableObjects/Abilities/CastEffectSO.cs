@@ -13,7 +13,7 @@ namespace Hypersycos.GERogueFrame
         [ShowInInspector]
         [OdinSerialize] ICastEffect CastEffect;
 
-        public void ClientCastEnd(object payload)
+        public void ClientCastEnd(AbilityPayload payload)
         {
             CastEffect.ClientCastEnd(payload);
         }
@@ -23,7 +23,7 @@ namespace Hypersycos.GERogueFrame
             CastEffect.ClientCastFixedUpdate();
         }
 
-        public void ClientCastStart(object payload)
+        public void ClientCastStart(AbilityPayload payload)
         {
             CastEffect.ClientCastStart(payload);
         }
@@ -33,14 +33,19 @@ namespace Hypersycos.GERogueFrame
             CastEffect.ClientCastUpdate();
         }
 
+        public void ClientNetworkUpdate(AbilityPayload payload)
+        {
+            CastEffect.ClientNetworkUpdate(payload);
+        }
+
         public ICastEffect Clone()
         {
             return CastEffect.Clone();
         }
 
-        public void OwnerCastEnd(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        public AbilityPayload OwnerCastEnd(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
-            CastEffect.OwnerCastEnd(target, position, cameraPosition, direction, myState);
+            return CastEffect.OwnerCastEnd(target, position, cameraPosition, direction, myState);
         }
 
         public void OwnerCastFixedUpdate()
@@ -48,9 +53,9 @@ namespace Hypersycos.GERogueFrame
             CastEffect.OwnerCastFixedUpdate();
         }
 
-        public void OwnerCastStart(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        public AbilityPayload OwnerCastStart(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
-            CastEffect.OwnerCastStart(target, position, cameraPosition, direction, myState);
+            return CastEffect.OwnerCastStart(target, position, cameraPosition, direction, myState);
         }
 
         public void OwnerCastUpdate()
@@ -58,9 +63,9 @@ namespace Hypersycos.GERogueFrame
             CastEffect.OwnerCastUpdate();
         }
 
-        public void ServerCastEnd(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        public AbilityPayload ServerCastEnd(AbilityPayload payload, object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
-            CastEffect.ServerCastEnd(target, position, cameraPosition, direction, myState);
+            return CastEffect.ServerCastEnd(payload, target, position, cameraPosition, direction, myState);
         }
 
         public void ServerCastFixedUpdate()
@@ -68,14 +73,19 @@ namespace Hypersycos.GERogueFrame
             CastEffect.ServerCastFixedUpdate();
         }
 
-        public void ServerCastStart(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        public AbilityPayload ServerCastStart(AbilityPayload payload, object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
-            CastEffect.ServerCastStart(target, position, cameraPosition, direction, myState);
+            return CastEffect.ServerCastStart(payload, target, position, cameraPosition, direction, myState);
         }
 
         public void ServerCastUpdate()
         {
             CastEffect.ServerCastUpdate();
+        }
+
+        public void ServerNetworkUpdate(AbilityPayload payload)
+        {
+            CastEffect.ServerNetworkUpdate(payload);
         }
     }
 }
