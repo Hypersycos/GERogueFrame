@@ -8,22 +8,31 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.StatusEffects.Instances
 {
     class AccelerantStatusInstance : DurationStatusInstance
     {
-        static StatusEffect _heat = null;
-        static StatusEffect Heat => _heat ?? (_heat = StatusEffect.StatusDict["Heat"]);
+        static StatusEffect Heat => HeatStatusInstance.Heat;
 
         static StatusEffect _accelerant = null;
-        static StatusEffect Accelerant => _accelerant ?? (_accelerant = StatusEffect.StatusDict["Accelerant"]);
+        public static StatusEffect Accelerant => _accelerant != null ? _accelerant : (_accelerant = StatusEffect.StatusDict["Accelerant"]);
 
-        public float Strength;
-        public float Duration;
+        float OwnerDuration = 1;
 
-        public AccelerantStatusInstance(float strength, float duration, CharacterState owner) : base(strength, owner, Accelerant, duration * Accelerant.DefaultDuration)
+        public AccelerantStatusInstance(CharacterState owner) : base(1, owner, Accelerant, Accelerant.DefaultDuration)
         {
-            Strength = strength;
-            Duration = duration;
+            SetOwner(owner);
         }
 
-        public AccelerantStatusInstance() : base(0, null) { }
+        public AccelerantStatusInstance() : base(1, Accelerant) { }
+
+        public override void SetOwner(CharacterState Owner)
+        {
+            base.SetOwner(Owner);
+            PlayerState pState = Owner as PlayerState;
+            if (pState != null)
+            {
+                //TODO: Implement Dur & Str
+                OwnerDuration = 1;// pState.Duration;
+                Amount = 1;// pState.Strength;
+            }
+        }
 
         public void AddHeat(CharacterState victim, DamageInstance damage)
         {
@@ -32,14 +41,14 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.StatusEffects.Instances
             if (damage.OneTimeEffects.Contains("NoScaleIgnite"))
             { //NoScaleIgnite applies the damage exactly again
               //Notably scales inversely with greater duration, and doesn't scale with str
-                int numTicks = (int)(Heat.DefaultDuration * Duration) + 1;
+                int numTicks = (int)(Heat.DefaultDuration * OwnerDuration) + 1;
                 damageTick = damage.Amount / numTicks;
             }
             else
             { //Normal application applies double damage over time, scaling with str & dur
-                damageTick = damage.Amount / Heat.DefaultDuration * 2 * Strength;
+                damageTick = damage.Amount / Heat.DefaultDuration * 2 * Amount;
             }
-            StatusInstance HeatInstance = new HeatStatusInstance(damageTick, damage.owner, Heat.DefaultDuration * Duration);
+            StatusInstance HeatInstance = new HeatStatusInstance(damageTick, damage.owner, OwnerDuration);
             HeatInstance.OneTimeEffects = new HashSet<string>(damage.OneTimeEffects);
             //Don't allow ignite to chain
             HeatInstance.OneTimeEffects.Add("Ignite");
@@ -48,22 +57,18 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.StatusEffects.Instances
 
         public override void Combine(StatusInstance other)
         {
-            if (other.Amount > Amount)
-            {
-                AccelerantStatusInstance castOther = (AccelerantStatusInstance)other;
-                Duration = castOther.Duration;
-                Strength = castOther.Strength;
-            }
+            AccelerantStatusInstance castOther = (AccelerantStatusInstance)other;
+            OwnerDuration = Mathf.Max(OwnerDuration, castOther.OwnerDuration);
+            duration = Mathf.Max(duration, castOther.duration);
+            Amount = Mathf.Max(Amount, castOther.Amount);
         }
 
         public override void Refresh(StatusInstance other)
         {
-            if (other.Amount > Amount)
-            {
-                AccelerantStatusInstance castOther = (AccelerantStatusInstance)other;
-                Duration = castOther.Duration;
-                Strength = castOther.Strength;
-            }
+            AccelerantStatusInstance castOther = (AccelerantStatusInstance)other;
+            OwnerDuration = Mathf.Max(OwnerDuration, castOther.OwnerDuration);
+            duration = Mathf.Max(duration, castOther.duration);
+            Amount = Mathf.Max(Amount, castOther.Amount);
         }
 
         public override void Apply(CharacterState victim, Func<IEnumerator, Coroutine> Start)

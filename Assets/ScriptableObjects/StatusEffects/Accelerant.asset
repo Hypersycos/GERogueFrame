@@ -15,5 +15,5 @@ MonoBehaviour:
   <Name>k__BackingField: Accelerant
   <Description>k__BackingField: Causes incoming damage to apply a Heat status effect
   <StackType>k__BackingField: 5
-  <DefaultDuration>k__BackingField: 1
+  <DefaultDuration>k__BackingField: 6
   <Icon>k__BackingField: {fileID: 0}

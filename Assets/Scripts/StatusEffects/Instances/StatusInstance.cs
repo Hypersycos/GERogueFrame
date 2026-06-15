@@ -34,7 +34,7 @@ namespace Hypersycos.GERogueFrame
             return CloneMembers(clone);
         }
 
-        public void SetOwner(CharacterState Owner)
+        public virtual void SetOwner(CharacterState Owner)
         {
             if (owner != null)
                 Debug.Log("Attempted to set status instance owner twice");

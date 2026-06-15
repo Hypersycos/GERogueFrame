@@ -13,14 +13,11 @@ namespace Hypersycos.GERogueFrame
         [ShowInInspector]
         [OdinSerialize] ITargetChecker TargetChecker;
 
+        public ICastEffect Effect { get => TargetChecker.Effect; set => TargetChecker.Effect = value; }
+
         public ITargetChecker Clone()
         {
             return TargetChecker.Clone();
-        }
-
-        public ICastEffect GetEffect()
-        {
-            return TargetChecker.GetEffect();
         }
 
         public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out TargetPayload hit, out ICastEffect castEffect)

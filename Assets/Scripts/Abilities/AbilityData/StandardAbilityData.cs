@@ -8,29 +8,27 @@ using UnityEngine;
 
 namespace Hypersycos.GERogueFrame
 {
-    public class BaseAbilityData : IAbilityData
+    public class StandardAbilityData : BaseAbilityData
     {
-        public string AbilityName;
-        public string AbilityDescription;
-        public Texture2D AbilityIcon;
-
         public float Cooldown;
         public float EnergyCost;
+        public int priority;
 
         [ShowInInspector]
         [ListDrawerSettings(ShowFoldout = true)]
-        [OdinSerialize] List<ICastCostChecker> ExtraCheckers;
+        [OdinSerialize] protected List<ICastCostChecker> ExtraCheckers;
 
         [OdinSerialize] ITargetChecker TargetChecker;
 
-        public bool TargetOnStart = true;
-
-        public Ability CreateAbility()
+        public override Ability CreateAbility()
         {
-            return new BaseAbility(GetCheckers(), Cooldown, TargetOnStart);
+            if (Cooldown > 0)
+                return new CooldownAbility(GetCheckers(), Cooldown, TargetOnStart);
+            else
+                return new Ability(GetCheckers(), TargetOnStart);
         }
 
-        public IEnumerable<ICastCostChecker> GetCheckers()
+        public override IEnumerable<ICastCostChecker> GetCheckers()
         {
             List<ICastCostChecker> baseChecks = new List<ICastCostChecker>();
             if (EnergyCost > 0)
@@ -42,13 +40,20 @@ namespace Hypersycos.GERogueFrame
 
             if (baseChecks.Count > 1)
             {
-                MultiCostChecker multiChecker = new(baseChecks, TargetChecker, 0);
+                MultiCostChecker multiChecker = new(baseChecks, TargetChecker, priority);
                 return new List<ICastCostChecker>() { multiChecker };
             }
-            else
+            else if (baseChecks.Count == 1)
             {
+                baseChecks[0].TargetChecker = TargetChecker;
                 return baseChecks;
             }
+            else if (TargetChecker != null)
+            {
+                baseChecks.Add(new NoCheck(priority, TargetChecker));
+                return baseChecks;
+            }
+            return baseChecks;
         }
     }
 }

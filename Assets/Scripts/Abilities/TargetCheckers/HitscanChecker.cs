@@ -25,14 +25,11 @@ namespace Hypersycos.GERogueFrame
             TriggerInteraction = triggerInteraction;
         }
 
+        public ICastEffect Effect { get => CastEffect; set => CastEffect = value; }
+
         public ITargetChecker Clone()
         {
             return new HitscanChecker(CastEffect.Clone(), MaxRange, HitLayerMask, TargetLayerMask, TriggerInteraction);
-        }
-
-        public ICastEffect GetEffect()
-        {
-            return CastEffect;
         }
 
         public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out TargetPayload hit, out ICastEffect castEffect)

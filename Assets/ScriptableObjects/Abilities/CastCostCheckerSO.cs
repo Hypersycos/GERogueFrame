@@ -14,6 +14,8 @@ namespace Hypersycos.GERogueFrame
         [OdinSerialize] ICastCostChecker CastCostCheckers;
 
         public int Priority => CastCostCheckers.Priority;
+        public ICastEffect Effect { get => CastCostCheckers.Effect; set => CastCostCheckers.Effect = value; }
+        public ITargetChecker TargetChecker { get => CastCostCheckers.TargetChecker; set => CastCostCheckers.TargetChecker = value; }
 
         public bool CanCast(CharacterState state, Ability ability)
         {
@@ -33,11 +35,6 @@ namespace Hypersycos.GERogueFrame
         public ICastCostChecker Clone()
         {
             return CastCostCheckers.Clone();
-        }
-
-        public ICastEffect GetEffect()
-        {
-            return CastCostCheckers.GetEffect();
         }
     }
 }

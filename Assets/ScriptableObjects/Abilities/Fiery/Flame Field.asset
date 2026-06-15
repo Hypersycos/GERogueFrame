@@ -15,7 +15,8 @@ MonoBehaviour:
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
-    ReferencedUnityObjects: []
+    ReferencedUnityObjects:
+    - {fileID: 2325073028489156595, guid: a1ff330a5ebdb314599b2cb28d2603c4, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -23,31 +24,179 @@ MonoBehaviour:
     SerializationNodes:
     - Name: AbilityData
       Entry: 7
-      Data: 0|Hypersycos.GERogueFrame.BaseAbilityData, Assembly-CSharp
+      Data: 0|Hypersycos.GERogueFrame.StandardMultiAbilityData, Assembly-CSharp
     - Name: AbilityName
-      Entry: 6
-      Data: 
+      Entry: 1
+      Data: Flame Field
     - Name: AbilityDescription
-      Entry: 6
-      Data: 
+      Entry: 1
+      Data: Creates a fire hazard which shares {{S|Heat}} procs between enemies,
+        or teleports to the target patch
     - Name: AbilityIcon
-      Entry: 6
-      Data: 
-    - Name: Cooldown
-      Entry: 4
-      Data: 0
-    - Name: EnergyCost
-      Entry: 4
-      Data: 0
-    - Name: ExtraCheckers
-      Entry: 6
-      Data: 
-    - Name: TargetChecker
       Entry: 6
       Data: 
     - Name: TargetOnStart
       Entry: 5
-      Data: true
+      Data: false
+    - Name: Checkers
+      Entry: 7
+      Data: 1|System.Collections.Generic.List`1[[Hypersycos.GERogueFrame.StandardMultiAbilityData+CheckerCostTuple,
+        Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 2
+    - Name: 
+      Entry: 7
+      Data: Hypersycos.GERogueFrame.StandardMultiAbilityData+CheckerCostTuple, Assembly-CSharp
+    - Name: priority
+      Entry: 3
+      Data: 0
+    - Name: Cooldown
+      Entry: 4
+      Data: 3
+    - Name: EnergyCost
+      Entry: 4
+      Data: 25
+    - Name: ExtraCostCheckers
+      Entry: 6
+      Data: 
+    - Name: TargetChecker
+      Entry: 7
+      Data: 2|Hypersycos.GERogueFrame.TargetCheckerChain, Assembly-CSharp
+    - Name: BaseChecker
+      Entry: 7
+      Data: 3|Hypersycos.GERogueFrame.HitscanChecker, Assembly-CSharp
+    - Name: CastEffect
+      Entry: 7
+      Data: 4|Hypersycos.GERogueFrame.Teleport, Assembly-CSharp
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: MaxRange
+      Entry: 4
+      Data: 50
+    - Name: HitLayerMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TargetLayerMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TriggerInteraction
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TargetCheckerList
+      Entry: 7
+      Data: 5|System.Collections.Generic.List`1[[Hypersycos.GERogueFrame.ISecondaryTargetChecker,
+        Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 6|Hypersycos.GERogueFrame.TargetHasComponent, Assembly-CSharp
+    - Name: type
+      Entry: 7
+      Data: 7|System.RuntimeType, mscorlib
+    - Name: 
+      Entry: 1
+      Data: Hypersycos.GERogueFrame.FirePatchScript, Assembly-CSharp
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Hypersycos.GERogueFrame.StandardMultiAbilityData+CheckerCostTuple, Assembly-CSharp
+    - Name: priority
+      Entry: 3
+      Data: 1
+    - Name: Cooldown
+      Entry: 4
+      Data: 6
+    - Name: EnergyCost
+      Entry: 4
+      Data: 50
+    - Name: ExtraCostCheckers
+      Entry: 6
+      Data: 
+    - Name: TargetChecker
+      Entry: 7
+      Data: 8|Hypersycos.GERogueFrame.HitscanChecker, Assembly-CSharp
+    - Name: CastEffect
+      Entry: 7
+      Data: 9|Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects.CreateObject,
+        Assembly-CSharp
+    - Name: obj
+      Entry: 10
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: MaxRange
+      Entry: 4
+      Data: 25
+    - Name: HitLayerMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TargetLayerMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TriggerInteraction
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: 
       Entry: 8
       Data: 

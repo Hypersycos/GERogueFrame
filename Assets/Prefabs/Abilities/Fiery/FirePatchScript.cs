@@ -13,13 +13,11 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] float Strength;
         [SerializeField] float Duration;
 
-        [SerializeField] StatusEffect Ignite;
-        [SerializeField] StatusEffect Heat;
+        StatusEffect Heat => HeatStatusInstance.Heat;
 
         List<CharacterState> victims = new();
         List<float> timers = new();
         StatTypeTarget ValidStatTypes = StatTypeTarget.AllValid;
-        bool SharingIgnite = false;
 
         private void Start()
         {
@@ -43,25 +41,11 @@ namespace Hypersycos.GERogueFrame
             victims.Add(state);
             timers.Add(TickDelay);
 
-            if (!SharingIgnite && state.GetStatusCount(Ignite) > 0)
-            {
-                foreach (CharacterState victim in victims)
-                {
-                    victim.AddStatus(new AccelerantStatusInstance(Strength, Duration, SpawnedBy));
-                }
-                SharingIgnite = true;
-            }
-            else if (SharingIgnite)
-            {
-                state.AddStatus(new AccelerantStatusInstance(Strength, Duration, SpawnedBy));
-            }
             foreach(StatusInstance heatProc in state.GetStatusInstances(Heat))
             {
                 ShareHeatProcs(state, heatProc);
             }    
             state.AfterStatusAdded.AddListener(ShareHeatProcs);
-            //TODO: On death remove victim
-            //TODO: On cleanse stop sharing ignite
 
             state.ApplyDamageInstance(new DamageInstance(true, Damage, SpawnedBy, ValidStatTypes));
         }
@@ -81,17 +65,6 @@ namespace Hypersycos.GERogueFrame
                     }
                 }
             }
-            else if (proc is AccelerantStatusInstance && !SharingIgnite)
-            {
-                SharingIgnite = true;
-                foreach (CharacterState victim in victims)
-                {
-                    if (victim != progenitor)
-                    {
-                        victim.AddStatus(new AccelerantStatusInstance(Strength, Duration, SpawnedBy));
-                    }
-                }
-            }
         }
 
         private void OnTriggerExit(Collider other)
@@ -101,11 +74,6 @@ namespace Hypersycos.GERogueFrame
             CharacterState state = other.GetComponent<CharacterState>();
             if (state == null || state.Team == SpawnedBy.Team) return;
 
-            if (SharingIgnite && victims.Count == 1)
-            { //only way ignite sharing can end (currently) is if all victims leave the patch
-              //since constant damage + ignite's indefinite duration
-                SharingIgnite = false;
-            }
             int Index = victims.IndexOf(state);
             victims.RemoveAt(Index);
             timers.RemoveAt(Index);
@@ -115,7 +83,6 @@ namespace Hypersycos.GERogueFrame
         {
             base.FixedUpdate();
 
-            Timer -= Time.fixedDeltaTime;
             for (int i = 0; i < victims.Count; i++)
             { //uses individual timers so that the first damage tick happens as soon as an enemy
               //enters the patch

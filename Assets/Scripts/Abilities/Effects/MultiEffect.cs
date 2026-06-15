@@ -95,7 +95,13 @@ namespace Hypersycos.GERogueFrame
 
         AbilityPayload ICastEffect.ServerCastEnd(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
 		{
-            return new MultiPayload(Effects.Select((x) => x.ServerCastEnd(payload, target, position, cameraPosition, direction, myState)).ToList());
+			List<AbilityPayload> payloads = new();
+			MultiPayload payloadIn = payload as MultiPayload;
+			for (int i = 0; i < Effects.Count; i++)
+			{
+				Effects[i].ServerCastEnd(payloadIn.Payloads[i], target, position, cameraPosition, direction, myState);
+            }
+            return new MultiPayload(payloads);
 		}
 
         void ICastEffect.ServerCastFixedUpdate()
@@ -108,8 +114,14 @@ namespace Hypersycos.GERogueFrame
 
         AbilityPayload ICastEffect.ServerCastStart(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
 		{
-            return new MultiPayload(Effects.Select((x) => x.ServerCastStart(payload, target, position, cameraPosition, direction, myState)).ToList());
-		}
+            List<AbilityPayload> payloads = new();
+            MultiPayload payloadIn = payload as MultiPayload;
+            for (int i = 0; i < Effects.Count; i++)
+            {
+                Effects[i].ServerCastStart(payloadIn.Payloads[i], target, position, cameraPosition, direction, myState);
+            }
+            return new MultiPayload(payloads);
+        }
 
         void ICastEffect.ServerCastUpdate()
 		{
@@ -144,7 +156,7 @@ namespace Hypersycos.GERogueFrame
 			writer.WriteValueSafe(Payloads.Count);
 			foreach(AbilityPayload payload in Payloads)
 			{
-				payload.Serialize(writer);
+				writer.WriteValueSafe(payload);
 			}
         }
 

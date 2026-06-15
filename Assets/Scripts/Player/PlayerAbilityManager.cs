@@ -206,7 +206,7 @@ namespace Hypersycos.GERogueFrame
             }
             else
             {
-                ability.targets[(int)effectID].GetEffect().ClientCastStart(null);
+                ability.targets[(int)effectID].Effect.ClientCastStart(null);
             }
         }
 
@@ -222,7 +222,7 @@ namespace Hypersycos.GERogueFrame
             }
             else
             {
-                ability.targets[(int)effectID].GetEffect().ClientCastStart(payload);
+                ability.targets[(int)effectID].Effect.ClientCastStart(payload);
             }
         }
         #endregion
@@ -326,7 +326,7 @@ namespace Hypersycos.GERogueFrame
             }
             else
             {
-                ability.targets[(int)effectID].GetEffect().ClientCastStart(null);
+                ability.targets[(int)effectID].Effect.ClientCastStart(null);
             }
         }
 
@@ -342,7 +342,7 @@ namespace Hypersycos.GERogueFrame
             }
             else
             {
-                ability.targets[(int)effectID].GetEffect().ClientCastStart(payload);
+                ability.targets[(int)effectID].Effect.ClientCastStart(payload);
             }
         }
 

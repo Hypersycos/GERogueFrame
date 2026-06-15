@@ -17,6 +17,9 @@ namespace Hypersycos.GERogueFrame
         protected int _priority;
         public int Priority => Priority;
 
+        public ICastEffect Effect { get => TargetChecker.Effect; set => TargetChecker.Effect = value; }
+        ITargetChecker ICastCostChecker.TargetChecker { get => TargetChecker; set => TargetChecker = value; }
+
         public float Cost;
 
         public EnergyChecker(float energyCost)
@@ -40,7 +43,7 @@ namespace Hypersycos.GERogueFrame
 
         public bool CanCast(CharacterState state, Ability ability)
         {
-            return (ability as BaseAbility).CurrentCooldown <= 0;
+            return (ability as CooldownAbility).CurrentCooldown <= 0;
         }
 
         public ICastCostChecker Clone()
@@ -49,11 +52,6 @@ namespace Hypersycos.GERogueFrame
             clone._priority = _priority;
             clone.TargetChecker = TargetChecker.Clone();
             return clone;
-        }
-
-        public ICastEffect GetEffect()
-        {
-            return TargetChecker.GetEffect();
         }
 
         public void Charge(CharacterState state, Ability ability)

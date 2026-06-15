@@ -111,7 +111,7 @@ namespace Hypersycos.GERogueFrame
                 {
                     Owner.ApplyHealInstance(new DamageInstance(false, change, regenerator.CharacterSource, validTargets), false);
                 }
-                else
+                else if (change < 0)
                 {
                     Owner.ApplyDamageInstance(new DamageInstance(true, -change, regenerator.CharacterSource, validTargets), false);
                 }

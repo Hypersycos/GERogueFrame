@@ -12,7 +12,8 @@ namespace Hypersycos.GERogueFrame
         void Charge(CharacterState state, Ability ability);
         ICastCostChecker Clone();
 
-        ICastEffect GetEffect();
+        ICastEffect Effect { get; set; }
+        ITargetChecker TargetChecker { get; set; }
 
         int IComparable<ICastCostChecker>.CompareTo(ICastCostChecker other)
         {

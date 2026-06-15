@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -94,15 +95,15 @@ namespace Hypersycos.GERogueFrame
             return statusInstances.ContainsKey(statusEffect) ? statusInstances[statusEffect].Count : 0;
         }
 
-        public List<StatusInstance> GetStatusInstances(StatusEffect statusEffect)
+        public IList<StatusInstance> GetStatusInstances(StatusEffect statusEffect)
         {
             if (statusInstances.ContainsKey(statusEffect))
             {
-                return new List<StatusInstance>(statusInstances[statusEffect]);
+                return statusInstances[statusEffect].AsReadOnlyList();
             }
             else
             {
-                return null;
+                return new List<StatusInstance>();
             }
         }
         public void AddStatus(StatusInstance instance)

@@ -16,6 +16,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
+    - {fileID: 11400000, guid: d82f0da314caebf408f4915d464c0e7e, type: 2}
     - {fileID: 11400000, guid: 408a6fd48e8a0784da3cecc525b4ff3b, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
@@ -24,26 +25,60 @@ MonoBehaviour:
     SerializationNodes:
     - Name: AbilityData
       Entry: 7
-      Data: 0|Hypersycos.GERogueFrame.BaseAbilityData, Assembly-CSharp
+      Data: 0|Hypersycos.GERogueFrame.StandardAbilityData, Assembly-CSharp
     - Name: AbilityName
       Entry: 1
-      Data: Accelerant
+      Data: Ignite
     - Name: AbilityDescription
-      Entry: 6
-      Data: 
+      Entry: 1
+      Data: Applies {{S|Accelerant}} to the enemy
     - Name: AbilityIcon
       Entry: 6
       Data: 
+    - Name: TargetOnStart
+      Entry: 5
+      Data: false
     - Name: Cooldown
       Entry: 4
       Data: 3
     - Name: EnergyCost
       Entry: 4
       Data: 15
+    - Name: priority
+      Entry: 3
+      Data: 0
     - Name: ExtraCheckers
+      Entry: 6
+      Data: 
+    - Name: TargetChecker
       Entry: 7
-      Data: 1|System.Collections.Generic.List`1[[Hypersycos.GERogueFrame.ICastCostChecker,
+      Data: 1|Hypersycos.GERogueFrame.HitscanChecker, Assembly-CSharp
+    - Name: CastEffect
+      Entry: 7
+      Data: 2|Hypersycos.GERogueFrame.MultiEffect, Assembly-CSharp
+    - Name: Effects
+      Entry: 7
+      Data: 3|System.Collections.Generic.List`1[[Hypersycos.GERogueFrame.ICastEffect,
         Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 2
+    - Name: 
+      Entry: 7
+      Data: 4|Hypersycos.GERogueFrame.ApplyStatus, Assembly-CSharp
+    - Name: statusEffect
+      Entry: 7
+      Data: 5|Hypersycos.GERogueFrame.Assets.Scripts.StatusEffects.Instances.AccelerantStatusInstance,
+        Assembly-CSharp
+    - Name: <StatusEffect>k__BackingField
+      Entry: 10
+      Data: 0
+    - Name: Amount
+      Entry: 4
+      Data: 1
+    - Name: OneTimeEffects
+      Entry: 7
+      Data: 6|System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core
     - Name: 
       Entry: 12
       Data: 0
@@ -53,24 +88,30 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: TargetChecker
+    - Name: duration
+      Entry: 4
+      Data: 6
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
       Entry: 7
-      Data: 2|Hypersycos.GERogueFrame.HitscanChecker, Assembly-CSharp
-    - Name: CastEffect
-      Entry: 7
-      Data: 3|Hypersycos.GERogueFrame.ApplyStatus, Assembly-CSharp
+      Data: 7|Hypersycos.GERogueFrame.ApplyStatus, Assembly-CSharp
     - Name: statusEffect
       Entry: 7
-      Data: 4|Hypersycos.GERogueFrame.HeatStatusInstance, Assembly-CSharp
+      Data: 8|Hypersycos.GERogueFrame.HeatStatusInstance, Assembly-CSharp
     - Name: <StatusEffect>k__BackingField
       Entry: 10
-      Data: 0
+      Data: 1
     - Name: Amount
       Entry: 4
       Data: 5
     - Name: OneTimeEffects
       Entry: 7
-      Data: 5|System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core
+      Data: 9|System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core
     - Name: 
       Entry: 12
       Data: 0
@@ -88,7 +129,7 @@ MonoBehaviour:
       Data: 1
     - Name: ValidStatTypes
       Entry: 7
-      Data: 6|Hypersycos.GERogueFrame.StatTypeTarget, Assembly-CSharp
+      Data: 10|Hypersycos.GERogueFrame.StatTypeTarget, Assembly-CSharp
     - Name: IsExclusive
       Entry: 5
       Data: false
@@ -104,9 +145,18 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: MaxRange
       Entry: 4
-      Data: 100
+      Data: 50
     - Name: HitLayerMask
       Entry: 7
       Data: UnityEngine.LayerMask, UnityEngine.CoreModule
@@ -127,13 +177,10 @@ MonoBehaviour:
       Data: 
     - Name: TriggerInteraction
       Entry: 3
-      Data: 0
+      Data: 1
     - Name: 
       Entry: 8
       Data: 
-    - Name: TargetOnStart
-      Entry: 5
-      Data: false
     - Name: 
       Entry: 8
       Data: 

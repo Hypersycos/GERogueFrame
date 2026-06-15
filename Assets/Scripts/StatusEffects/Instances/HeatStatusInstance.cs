@@ -8,7 +8,7 @@ namespace Hypersycos.GERogueFrame
     public class HeatStatusInstance : DotStatusInstance
     {
         static StatusEffect _heat = null;
-        static StatusEffect Heat => _heat ?? (_heat = StatusEffect.StatusDict["Heat"]);
+        public static StatusEffect Heat => _heat ?? (_heat = StatusEffect.StatusDict["Heat"]);
         public HeatStatusInstance(float amount, CharacterState owner, float duration = 1)
             : base(amount, owner, Heat, duration * Heat.DefaultDuration, 1, StatTypeTarget.AllValid)
         {

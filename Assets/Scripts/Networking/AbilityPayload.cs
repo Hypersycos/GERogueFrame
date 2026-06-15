@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using Unity.Netcode;
+using Unity.VisualScripting;
+using UnityEngine;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -34,7 +36,7 @@ namespace Hypersycos.GERogueFrame
     {
         public abstract string id { get; }
 
-        public static Dictionary<string, Func<FastBufferReader, AbilityPayload>> RegisteredPayloads = new() { { "Victim", VictimPayload.Deserialize } };
+        public static Dictionary<string, Func<FastBufferReader, AbilityPayload>> RegisteredPayloads = new() { { "Victim", VictimPayload.Deserialize }, { "Null", AbilityPayload.DeserializeNull } };
 
         public static AbilityPayload Deserialize(FastBufferReader reader)
         {
@@ -51,9 +53,25 @@ namespace Hypersycos.GERogueFrame
             writer.WriteValueSafe(id);
         }
 
+        public static AbilityPayload DeserializeNull(FastBufferReader reader)
+        {
+            return null;
+        }
+
         public static implicit operator AbilityNetworkPayload(AbilityPayload payload)
         {
             return new AbilityNetworkPayload(payload);
+        }
+    }
+
+    public static class AbilityPayloadExtensions
+    {
+        public static void WriteValueSafe(this FastBufferWriter writer, AbilityPayload payload)
+        {
+            if (payload == null)
+                writer.WriteValueSafe("Null");
+            else
+                payload.Serialize(writer);
         }
     }
 }

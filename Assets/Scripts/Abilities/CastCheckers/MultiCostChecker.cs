@@ -28,6 +28,9 @@ namespace Hypersycos.GERogueFrame
 
         public int Priority => _priority;
 
+        public ICastEffect Effect { get => targetChecker.Effect; set => targetChecker.Effect = value; }
+        public ITargetChecker TargetChecker { get => targetChecker; set => targetChecker = value; }
+
         public bool CanCast(CharacterState state, Ability ability, out ITargetChecker checker)
         {
             foreach (ICastCostChecker c in costCheckerList)
@@ -63,11 +66,6 @@ namespace Hypersycos.GERogueFrame
         public ICastCostChecker Clone()
         {
             return new MultiCostChecker(costCheckerList.Select(c => c.Clone()).ToList(), targetChecker.Clone(), _priority);
-        }
-
-        public ICastEffect GetEffect()
-        {
-            return targetChecker.GetEffect();
         }
     }
 }

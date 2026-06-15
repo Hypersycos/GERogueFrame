@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Sirenix.OdinInspector;
+using Sirenix.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,8 +11,11 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace Hypersycos.GERogueFrame
 {
-    public abstract class Ability
+    public class Ability
     {
+        [ShowInInspector]
+        [ListDrawerSettings(ShowFoldout = true)]
+        [OdinSerialize]
         public List<ICastCostChecker> targets;
 
         public Ability(IEnumerable<ICastCostChecker> targets, bool targetOnStart)
@@ -144,22 +149,6 @@ namespace Hypersycos.GERogueFrame
                 payload = null;
                 return false;
             }
-        }
-    }
-
-    public class BaseAbility : Ability
-    {
-        public float MaxCooldown;
-        public float CurrentCooldown;
-        public BaseAbility(IEnumerable<ICastCostChecker> targets, float cooldown, bool targetOnStart) : base(targets, targetOnStart)
-        {
-            MaxCooldown = cooldown;
-        }
-
-        public override void FixedUpdate(CharacterState myState)
-        {
-            if (myState.IsServer)
-                CurrentCooldown = Mathf.Max(0, CurrentCooldown - Time.fixedDeltaTime);
         }
     }
 }
