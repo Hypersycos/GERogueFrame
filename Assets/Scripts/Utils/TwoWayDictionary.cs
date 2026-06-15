@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Hypersycos.GERogueFrame
+namespace Hypersycos.Utils
 {
     public class TwoWayDictionary<K,V> : IEnumerable<KeyValuePair<K,V>>, IEnumerable, IDictionary<K, V>
     {
-        Dictionary<K, V> oneWay;
-        Dictionary<V, K> twoWay;
+        Dictionary<K, V> oneWay = new();
+        Dictionary<V, K> twoWay = new();
 
         public V this[K key] { get => oneWay[key]; set { oneWay[key] = value; twoWay[value] = key; } }
         public K this[V key] { get => twoWay[key]; set { twoWay[key] = value; oneWay[value] = key; } }

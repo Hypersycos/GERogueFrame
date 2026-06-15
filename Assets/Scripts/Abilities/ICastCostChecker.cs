@@ -9,6 +9,7 @@ namespace Hypersycos.GERogueFrame
         int Priority { get; }
         bool CanCast(CharacterState state, Ability ability);
         bool CanCast(CharacterState state, Ability ability, out ITargetChecker checker);
+        void Charge(CharacterState state, Ability ability);
         ICastCostChecker Clone();
 
         ICastEffect GetEffect();

@@ -163,16 +163,15 @@ namespace Hypersycos.GERogueFrame
 
             PlayerAbilityManager aManager = state.GetComponent<PlayerAbilityManager>();
 
-/*            aManager.weapon = (Weapon).CreateAbility();
-            aManager.weaponAlt = (WeaponAlt).CreateAbility();*/
+            aManager.weapon = Weapon?.CreateAbility();
+            aManager.weaponAlt = WeaponAlt?.CreateAbility();
 
-            aManager.ability1 = (Ability1).CreateAbility();/*
-            aManager.ability2 = (Ability2).CreateAbility();
-            aManager.ability3 = (Ability3).CreateAbility();
-            aManager.ability4 = (Ability4).CreateAbility();
+            aManager.ability1 = Ability1?.CreateAbility();
+            aManager.ability2 = Ability2?.CreateAbility();
+            aManager.ability3 = Ability3?.CreateAbility();
+            aManager.ability4 = Ability4?.CreateAbility();
 
-            aManager.ultimate = (Ultimate).CreateAbility();*/
-            aManager.BuildMap();
+            aManager.ultimate = Ultimate?.CreateAbility();
         }
 
 #if UNITY_EDITOR

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
@@ -18,10 +19,14 @@ namespace Hypersycos.GERogueFrame
             TargetOnStart = targetOnStart;
         }
 
-        public bool TargetOnStart { get; private set; }
+        public bool TargetOnStart { get; protected set; }
 
-        public ICastEffect currentEffect { get; private set; }
-        public uint currentID { get; private set; }
+        public ICastEffect currentEffect { get; protected set; }
+        public uint currentID { get; protected set; }
+
+        public virtual void Update(CharacterState myState) { }
+
+        public virtual void FixedUpdate(CharacterState myState) { }
 
         public bool OwnerCast(Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState, out AbilityPayload payload)
         {
@@ -32,24 +37,23 @@ namespace Hypersycos.GERogueFrame
             }
 
             currentEffect = null;
-            object target = null;
             currentID = 0;
             foreach (ICastCostChecker checker in targets)
             {
                 if (checker.CanCast(myState, this, out ITargetChecker targetChecker))
                 {
-                    targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out target, out ICastEffect effect);
+                    targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out object target, out ICastEffect effect);
                     currentEffect = effect;
+                    if (currentEffect != null)
+                    {
+                        payload = currentEffect.OwnerCastStart(target, position, cameraPosition, direction, myState);
+                        return true;
+                    }
                 }
-                if (currentEffect != null)
-                    break;
                 currentID++;
             }
-            if (currentEffect != null)
-                payload = currentEffect.OwnerCastStart(target, position, cameraPosition, direction, myState);
-            else
-                payload = null;
-            return currentEffect != null;
+            payload = null;
+            return false;
         }
 
         public bool ServerCast(AbilityPayload payloadIn, Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState, out AbilityPayload payload)
@@ -61,24 +65,24 @@ namespace Hypersycos.GERogueFrame
             }
 
             currentEffect = null;
-            object target = null;
             currentID = 0;
             foreach (ICastCostChecker checker in targets)
             {
                 if (checker.CanCast(myState, this, out ITargetChecker targetChecker))
                 {
-                    targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out target, out ICastEffect effect);
+                    targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out object target, out ICastEffect effect);
                     currentEffect = effect;
+                    if (currentEffect != null)
+                    {
+                        checker.Charge(myState, this);
+                        payload = currentEffect.ServerCastStart(payloadIn, target, position, cameraPosition, direction, myState);
+                        return true;
+                    }
                 }
-                if (currentEffect != null)
-                    break;
                 currentID++;
             }
-            if (currentEffect != null)
-                payload = currentEffect.ServerCastStart(payloadIn, target, position, cameraPosition, direction, myState);
-            else
-                payload = null;
-            return currentEffect != null;
+            payload = null;
+            return false;
         }
 
         public bool OwnerCastEnd(Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState, out AbilityPayload payload)
@@ -98,13 +102,13 @@ namespace Hypersycos.GERogueFrame
                     {
                         targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out object target, out ICastEffect effect);
                         currentEffect = effect;
-                        if (effect != null)
+                        if (currentEffect != null)
                         {
-                            payload = effect.OwnerCastEnd(target, position, cameraPosition, direction, myState);
+                            payload = currentEffect.OwnerCastStart(target, position, cameraPosition, direction, myState);
                             return true;
                         }
-                        currentID++;
                     }
+                    currentID++;
                 }
                 payload = null;
                 return false;
@@ -130,6 +134,7 @@ namespace Hypersycos.GERogueFrame
                         currentEffect = effect;
                         if (effect != null)
                         {
+                            checker.Charge(myState, this);
                             payload = effect.ServerCastEnd(payloadIn, target, position, cameraPosition, direction, myState);
                             return true;
                         }
@@ -149,6 +154,12 @@ namespace Hypersycos.GERogueFrame
         public BaseAbility(IEnumerable<ICastCostChecker> targets, float cooldown, bool targetOnStart) : base(targets, targetOnStart)
         {
             MaxCooldown = cooldown;
+        }
+
+        public override void FixedUpdate(CharacterState myState)
+        {
+            if (myState.IsServer)
+                CurrentCooldown = Mathf.Max(0, CurrentCooldown - Time.fixedDeltaTime);
         }
     }
 }

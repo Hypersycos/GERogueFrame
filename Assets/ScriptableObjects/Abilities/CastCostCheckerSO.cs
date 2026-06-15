@@ -25,6 +25,11 @@ namespace Hypersycos.GERogueFrame
             return CastCostCheckers.CanCast(state, ability, out checker);
         }
 
+        public void Charge(CharacterState state, Ability ability)
+        {
+            CastCostCheckers.Charge(state, ability);
+        }
+
         public ICastCostChecker Clone()
         {
             return CastCostCheckers.Clone();

@@ -351,7 +351,6 @@ namespace Hypersycos.GERogueFrame
             if (lastJump > 0f)
             {
                 lastJump -= Time.fixedDeltaTime;
-                Debug.Log($"{lastJump}: {velocity.y} / {characterController.velocity}");
             }
         }
     }

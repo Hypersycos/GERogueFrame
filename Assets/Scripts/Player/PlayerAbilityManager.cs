@@ -3,20 +3,29 @@ using System.Collections.Generic;
 using System.Text;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using Hypersycos.Utils;
 
 namespace Hypersycos.GERogueFrame
 {
     class PlayerAbilityManager : NetworkBehaviour
     {
-        public Ability weapon;
-        public Ability weaponAlt;
+        protected Ability _weapon;
+        public Ability weapon { get => _weapon; set { _weapon = value; AssignAbility(value, controls.Player.Fire, 0); } }
+        protected Ability _weaponAlt;
+        public Ability weaponAlt { get => _weapon; set { _weaponAlt = value; AssignAbility(value, controls.Player.Altfire, 1); } }
 
-        public Ability ability1;
-        public Ability ability2;
-        public Ability ability3;
-        public Ability ability4;
+        public Ability ability1 { get => _weapon; set { _ability1 = value; AssignAbility(value, controls.Player.Ability1, 2); } }
+        protected Ability _ability1;
+        public Ability ability2 { get => _weapon; set { _ability2 = value; AssignAbility(value, controls.Player.Ability2, 3); } }
+        protected Ability _ability2;
+        public Ability ability3 { get => _weapon; set { _ability3 = value; AssignAbility(value, controls.Player.Ability3, 4); } }
+        protected Ability _ability3;
+        public Ability ability4 { get => _weapon; set { _ability4 = value; AssignAbility(value, controls.Player.Ability4, 5); } }
+        protected Ability _ability4;
 
-        public Ability ultimate;
+        protected Ability _ultimate;
+        public Ability ultimate { get => _weapon; set { _ultimate = value; AssignAbility(value, controls.Player.Ultimate, 6); } }
 
         PlayerState myState;
         Controls controls;
@@ -24,8 +33,9 @@ namespace Hypersycos.GERogueFrame
 
         Ability currentlyCasting = null;
 
-        Dictionary<Ability, uint> abilityMap = new();
-        Dictionary<uint, Ability> idMap = new();
+        TwoWayDictionary<Ability, uint> abilityMap = new();
+
+        Dictionary<InputAction, Tuple<Action<InputAction.CallbackContext>, Action<InputAction.CallbackContext>>> actionMap = new();
 
         private void Awake()
         {
@@ -33,24 +43,59 @@ namespace Hypersycos.GERogueFrame
             playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
             
             controls = new();
-
             controls.Player.Enable();
-            controls.Player.Ability1.started += CastAbility1;
-            controls.Player.Ability1.canceled += EndCastAbility1;
         }
-        
-        public void BuildMap()
-        {
-            List<Ability> abilities = new List<Ability>() { weapon, weaponAlt, ability1, ability2, ability3, ability4, ultimate };
 
-            uint i = 0;
-            foreach (Ability ability in abilities)
+        private void AssignAbility(Ability ability, InputAction action, uint id)
+        {
+            if (actionMap.TryGetValue(action, out var actionPair))
             {
-                if (ability == null)
-                    continue;
-                abilityMap.Add(ability, i);
-                idMap.Add(i, ability);
-                i++;
+                action.started -= actionPair.Item1;
+                action.canceled -= actionPair.Item2;
+                abilityMap.Remove(id);
+            }
+            if (ability != null)
+            {
+                actionMap[action] = new((_) => CastAbility(ability), (_) => EndCast(ability));
+                action.started += actionMap[action].Item1;
+                action.canceled += actionMap[action].Item2;
+                abilityMap.Add(ability, id);
+            }
+        }
+
+        private void Update()
+        {
+            if (currentlyCasting != null)
+            {
+                if (IsOwner)
+                    currentlyCasting.currentEffect.OwnerCastUpdate();
+                if (IsServer)
+                    currentlyCasting.currentEffect.ServerCastUpdate();
+                if (IsClient)
+                    currentlyCasting.currentEffect.ClientCastUpdate();
+            }
+
+            foreach (Ability ability in abilityMap.Keys)
+            {
+                ability.Update(myState);
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            if (currentlyCasting != null)
+            {
+                if (IsOwner)
+                    currentlyCasting.currentEffect.OwnerCastFixedUpdate();
+                if (IsServer)
+                    currentlyCasting.currentEffect.ServerCastFixedUpdate();
+                if (IsClient)
+                    currentlyCasting.currentEffect.ClientCastFixedUpdate();
+            }
+
+            foreach (Ability ability in abilityMap.Keys)
+            {
+                ability.FixedUpdate(myState);
             }
         }
 
@@ -71,17 +116,17 @@ namespace Hypersycos.GERogueFrame
                     if (success)
                     {
                         if (payload != null)
-                            AbilityCastPayloadRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime, payload);
+                            AbilityCastPayloadRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial, payload);
                         else
-                            AbilityCastRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime);
+                            AbilityCastRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial);
                     }
                 }
                 else
                 {
                     if (payload != null)
-                        CastAbilityPayloadRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime, payload);
+                        CastAbilityPayloadRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime.TickWithPartial, payload);
                     else
-                        CastAbilityRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime);
+                        CastAbilityRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime.TickWithPartial);
                 }
             }
             else
@@ -89,9 +134,9 @@ namespace Hypersycos.GERogueFrame
         }
 
         [Rpc(SendTo.Server)]
-        private void CastAbilityRpc(uint id, uint effectID, Vector3 cameraPos, Vector3 cameraForward, NetworkTime time)
+        private void CastAbilityRpc(uint id, uint effectID, Vector3 cameraPos, Vector3 cameraForward, double time)
         {
-            Ability ability = idMap[id];
+            Ability ability = abilityMap[id];
             if (currentlyCasting == null)
                 currentlyCasting = ability;
             else
@@ -116,9 +161,9 @@ namespace Hypersycos.GERogueFrame
         }
 
         [Rpc(SendTo.Server)]
-        private void CastAbilityPayloadRpc(uint id, uint effectID, Vector3 cameraPos, Vector3 cameraForward, NetworkTime time, AbilityNetworkPayload payloadIn)
+        private void CastAbilityPayloadRpc(uint id, uint effectID, Vector3 cameraPos, Vector3 cameraForward, double time, AbilityNetworkPayload payloadIn)
         {
-            Ability ability = idMap[id];
+            Ability ability = abilityMap[id];
             if (currentlyCasting == null)
                 currentlyCasting = ability;
             else
@@ -149,9 +194,9 @@ namespace Hypersycos.GERogueFrame
         }
 
         [Rpc(SendTo.ClientsAndHost)]
-        private void AbilityCastRpc(uint id, uint effectID, NetworkTime time)
+        private void AbilityCastRpc(uint id, uint effectID, double time)
         {
-            Ability ability = idMap[id];
+            Ability ability = abilityMap[id];
             if (IsOwner)
             {
                 //TODO: actually handle this case
@@ -165,9 +210,9 @@ namespace Hypersycos.GERogueFrame
         }
 
         [Rpc(SendTo.ClientsAndHost)]
-        private void AbilityCastPayloadRpc(uint id, uint effectID, NetworkTime time, AbilityNetworkPayload payload)
+        private void AbilityCastPayloadRpc(uint id, uint effectID, double time, AbilityNetworkPayload payload)
         {
-            Ability ability = idMap[id];
+            Ability ability = abilityMap[id];
             if (IsOwner)
             {
                 //TODO: actually handle this case
@@ -193,26 +238,26 @@ namespace Hypersycos.GERogueFrame
             {
                 if (IsHost)
                 {
-                    success = ability.ServerCast(payload, cameraForward, transform.position, cameraPos, myState, out payload);
+                    success = ability.ServerCastEnd(payload, cameraForward, transform.position, cameraPos, myState, out payload);
                     if (success)
                     {
                         if (payload != null)
-                            EndAbilityCastPayloadRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime, payload);
+                            EndAbilityCastPayloadRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial, payload);
                         else
-                            EndAbilityCastRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime);
+                            EndAbilityCastRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial);
                     }
                 }
                 if (payload != null)
-                    EndCastAbilityPayloadRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime, payload);
+                    EndCastAbilityPayloadRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime.TickWithPartial, payload);
                 else
-                    EndCastAbilityRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime);
+                    EndCastAbilityRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime.TickWithPartial);
             }
             currentlyCasting = null;
         }
         [Rpc(SendTo.Server)]
-        private void EndCastAbilityRpc(uint id, uint effectID, Vector3 cameraPos, Vector3 cameraForward, NetworkTime time)
+        private void EndCastAbilityRpc(uint id, uint effectID, Vector3 cameraPos, Vector3 cameraForward, double time)
         {
-            Ability ability = idMap[id];
+            Ability ability = abilityMap[id];
             if (currentlyCasting != ability)
             { 
                 EndCastFailedRpc(id);
@@ -233,9 +278,9 @@ namespace Hypersycos.GERogueFrame
         }
 
         [Rpc(SendTo.Server)]
-        private void EndCastAbilityPayloadRpc(uint id, uint effectID, Vector3 cameraPos, Vector3 cameraForward, NetworkTime time, AbilityNetworkPayload payloadIn)
+        private void EndCastAbilityPayloadRpc(uint id, uint effectID, Vector3 cameraPos, Vector3 cameraForward, double time, AbilityNetworkPayload payloadIn)
         {
-            Ability ability = idMap[id];
+            Ability ability = abilityMap[id];
             if (currentlyCasting != ability)
             {
                 EndCastFailedRpc(id);
@@ -262,9 +307,9 @@ namespace Hypersycos.GERogueFrame
         }
 
         [Rpc(SendTo.ClientsAndHost)]
-        private void EndAbilityCastRpc(uint id, uint effectID, NetworkTime time)
+        private void EndAbilityCastRpc(uint id, uint effectID, double time)
         {
-            Ability ability = idMap[id];
+            Ability ability = abilityMap[id];
             if (IsOwner)
             {
                 //TODO: actually handle this case
@@ -278,9 +323,9 @@ namespace Hypersycos.GERogueFrame
         }
 
         [Rpc(SendTo.ClientsAndHost)]
-        private void EndAbilityCastPayloadRpc(uint id, uint effectID, NetworkTime time, AbilityNetworkPayload payload)
+        private void EndAbilityCastPayloadRpc(uint id, uint effectID, double time, AbilityNetworkPayload payload)
         {
-            Ability ability = idMap[id];
+            Ability ability = abilityMap[id];
             if (IsOwner)
             {
                 //TODO: actually handle this case
@@ -294,15 +339,5 @@ namespace Hypersycos.GERogueFrame
         }
 
         #endregion
-
-        private void CastAbility1(UnityEngine.InputSystem.InputAction.CallbackContext obj)
-        {
-            CastAbility(ability1);
-        }
-
-        private void EndCastAbility1(UnityEngine.InputSystem.InputAction.CallbackContext obj)
-        {
-            EndCast(ability1);
-        }
     }
 }

@@ -14,6 +14,8 @@ namespace Hypersycos.GERogueFrame
         [ShowInInspector]
         [OdinSerialize] protected ITargetChecker TargetChecker;
 
+        public float cooldownRefund = 0;
+
         protected int _priority;
         public int Priority => Priority;
 
@@ -34,6 +36,12 @@ namespace Hypersycos.GERogueFrame
         public bool CanCast(CharacterState state, Ability ability)
         {
             return (ability as BaseAbility).CurrentCooldown <= 0;
+        }
+
+        public void Charge(CharacterState state, Ability ability)
+        {
+            BaseAbility bAbility = (ability as BaseAbility);
+            bAbility.CurrentCooldown = bAbility.MaxCooldown * (1 - cooldownRefund);
         }
 
         public ICastCostChecker Clone()

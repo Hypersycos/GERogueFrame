@@ -55,5 +55,10 @@ namespace Hypersycos.GERogueFrame
         {
             return TargetChecker.GetEffect();
         }
+
+        public void Charge(CharacterState state, Ability ability)
+        {
+            (state as PlayerState).UseEnergy(Cost);
+        }
     }
 }

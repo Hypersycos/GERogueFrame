@@ -52,6 +52,14 @@ namespace Hypersycos.GERogueFrame
             return true;
         }
 
+        public void Charge(CharacterState state, Ability ability)
+        {
+            foreach (ICastCostChecker c in costCheckerList)
+            {
+                c.Charge(state, ability);
+            }
+        }
+
         public ICastCostChecker Clone()
         {
             return new MultiCostChecker(costCheckerList.Select(c => c.Clone()).ToList(), targetChecker.Clone(), _priority);
