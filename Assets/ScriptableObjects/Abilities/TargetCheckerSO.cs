@@ -23,7 +23,7 @@ namespace Hypersycos.GERogueFrame
             return TargetChecker.GetEffect();
         }
 
-        public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out object hit, out ICastEffect castEffect)
+        public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out TargetPayload hit, out ICastEffect castEffect)
         {
             return TargetChecker.HasValidTarget(direction, position, camPosition, myState, out hit, out castEffect);
         }

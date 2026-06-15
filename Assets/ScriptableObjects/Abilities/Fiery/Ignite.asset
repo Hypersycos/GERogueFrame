@@ -27,7 +27,7 @@ MonoBehaviour:
       Data: 0|Hypersycos.GERogueFrame.BaseAbilityData, Assembly-CSharp
     - Name: AbilityName
       Entry: 1
-      Data: Ignite
+      Data: Accelerant
     - Name: AbilityDescription
       Entry: 6
       Data: 
@@ -133,7 +133,7 @@ MonoBehaviour:
       Data: 
     - Name: TargetOnStart
       Entry: 5
-      Data: true
+      Data: false
     - Name: 
       Entry: 8
       Data: 

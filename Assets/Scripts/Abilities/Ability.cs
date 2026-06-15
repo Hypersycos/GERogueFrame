@@ -19,7 +19,7 @@ namespace Hypersycos.GERogueFrame
             TargetOnStart = targetOnStart;
         }
 
-        public bool TargetOnStart { get; protected set; }
+        public bool TargetOnStart { get; protected set; } = false;
 
         public ICastEffect currentEffect { get; protected set; }
         public uint currentID { get; protected set; }
@@ -42,7 +42,7 @@ namespace Hypersycos.GERogueFrame
             {
                 if (checker.CanCast(myState, this, out ITargetChecker targetChecker))
                 {
-                    targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out object target, out ICastEffect effect);
+                    targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out TargetPayload target, out ICastEffect effect);
                     currentEffect = effect;
                     if (currentEffect != null)
                     {
@@ -70,7 +70,7 @@ namespace Hypersycos.GERogueFrame
             {
                 if (checker.CanCast(myState, this, out ITargetChecker targetChecker))
                 {
-                    targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out object target, out ICastEffect effect);
+                    targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out TargetPayload target, out ICastEffect effect);
                     currentEffect = effect;
                     if (currentEffect != null)
                     {
@@ -100,11 +100,11 @@ namespace Hypersycos.GERogueFrame
                 {
                     if (checker.CanCast(myState, this, out ITargetChecker targetChecker))
                     {
-                        targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out object target, out ICastEffect effect);
+                        targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out TargetPayload target, out ICastEffect effect);
                         currentEffect = effect;
                         if (currentEffect != null)
                         {
-                            payload = currentEffect.OwnerCastStart(target, position, cameraPosition, direction, myState);
+                            payload = currentEffect.OwnerCastEnd(target, position, cameraPosition, direction, myState);
                             return true;
                         }
                     }
@@ -130,7 +130,7 @@ namespace Hypersycos.GERogueFrame
                 {
                     if (checker.CanCast(myState, this, out ITargetChecker targetChecker))
                     {
-                        targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out object target, out ICastEffect effect);
+                        targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out TargetPayload target, out ICastEffect effect);
                         currentEffect = effect;
                         if (effect != null)
                         {

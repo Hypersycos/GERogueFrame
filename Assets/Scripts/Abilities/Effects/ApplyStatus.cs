@@ -29,13 +29,9 @@ namespace Hypersycos.GERogueFrame
             return new ApplyStatus(statusEffect.CloneInstance());
         }
 
-        AbilityPayload ICastEffect.OwnerCastEnd(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState) => null;
-
-        void ICastEffect.OwnerCastFixedUpdate() { }
-
-        AbilityPayload ICastEffect.OwnerCastStart(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        AbilityPayload ICastEffect.OwnerCastEnd(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
-            Collider coll = target as Collider;
+            Collider coll = (target as IComponentPayload<Collider>).Component;
             if (coll == null)
                 return null;
 
@@ -49,20 +45,24 @@ namespace Hypersycos.GERogueFrame
             return new VictimPayload(victim);
         }
 
+        void ICastEffect.OwnerCastFixedUpdate() { }
+
+        AbilityPayload ICastEffect.OwnerCastStart(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState) => null;
+
         void ICastEffect.OwnerCastUpdate() { }
 
-        AbilityPayload ICastEffect.ServerCastEnd(AbilityPayload payload, object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState) => null;
-
-        void ICastEffect.ServerCastFixedUpdate() { }
-
-        AbilityPayload ICastEffect.ServerCastStart(AbilityPayload payload, object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        AbilityPayload ICastEffect.ServerCastEnd(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
             //TODO: validate victim
             StatusInstance statusInst = statusEffect.CloneInstance();
             statusInst.SetOwner(myState);
-            (payload as VictimPayload)?.victim.AddStatus(statusInst);
+            (payload as IVictimPayload)?.Victim.AddStatus(statusInst);
             return null;
         }
+
+        void ICastEffect.ServerCastFixedUpdate() { }
+
+        AbilityPayload ICastEffect.ServerCastStart(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState) => null;
 
         void ICastEffect.ServerCastUpdate() { }
 

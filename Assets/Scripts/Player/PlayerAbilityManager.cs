@@ -65,7 +65,7 @@ namespace Hypersycos.GERogueFrame
 
         private void Update()
         {
-            if (currentlyCasting != null)
+            if (currentlyCasting != null && currentlyCasting.currentEffect != null)
             {
                 if (IsOwner)
                     currentlyCasting.currentEffect.OwnerCastUpdate();
@@ -83,7 +83,7 @@ namespace Hypersycos.GERogueFrame
 
         private void FixedUpdate()
         {
-            if (currentlyCasting != null)
+            if (currentlyCasting != null && currentlyCasting.currentEffect != null)
             {
                 if (IsOwner)
                     currentlyCasting.currentEffect.OwnerCastFixedUpdate();
@@ -190,6 +190,7 @@ namespace Hypersycos.GERogueFrame
         [Rpc(SendTo.Owner)]
         private void CastFailedRpc(uint id)
         {
+            currentlyCasting = null;
             throw new NotImplementedException();
         }
 
@@ -231,6 +232,8 @@ namespace Hypersycos.GERogueFrame
         {
             if (currentlyCasting != ability)
                 return;
+            currentlyCasting = null;
+
             Vector3 cameraForward = playerCamera.transform.forward;
             Vector3 cameraPos = playerCamera.transform.position;
             bool success = ability.OwnerCastEnd(cameraForward, transform.position, cameraPos, myState, out AbilityPayload payload);
@@ -247,10 +250,13 @@ namespace Hypersycos.GERogueFrame
                             EndAbilityCastRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial);
                     }
                 }
-                if (payload != null)
-                    EndCastAbilityPayloadRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime.TickWithPartial, payload);
                 else
-                    EndCastAbilityRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime.TickWithPartial);
+                {
+                    if (payload != null)
+                        EndCastAbilityPayloadRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime.TickWithPartial, payload);
+                    else
+                        EndCastAbilityRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime.TickWithPartial);
+                }
             }
             currentlyCasting = null;
         }
@@ -263,6 +269,7 @@ namespace Hypersycos.GERogueFrame
                 EndCastFailedRpc(id);
                 return;
             }
+            currentlyCasting = null;
 
             bool success = ability.ServerCastEnd(null, playerCamera.transform.forward, transform.position, playerCamera.transform.position, myState, out AbilityPayload payload);
             if (success)
@@ -303,6 +310,7 @@ namespace Hypersycos.GERogueFrame
         [Rpc(SendTo.Owner)]
         private void EndCastFailedRpc(uint id)
         {
+            currentlyCasting = null;
             throw new NotImplementedException();
         }
 

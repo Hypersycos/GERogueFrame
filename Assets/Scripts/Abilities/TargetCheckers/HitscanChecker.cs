@@ -35,7 +35,7 @@ namespace Hypersycos.GERogueFrame
             return CastEffect;
         }
 
-        public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out object hit, out ICastEffect castEffect)
+        public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out TargetPayload hit, out ICastEffect castEffect)
         {
             bool didHit = Physics.Raycast(camPosition, direction, out RaycastHit info, MaxRange, HitLayerMask, TriggerInteraction);
             if (didHit)
@@ -44,7 +44,7 @@ namespace Hypersycos.GERogueFrame
                 {
                     Debug.DrawLine(camPosition, info.point, Color.green, 10);
                     castEffect = CastEffect;
-                    hit = info.collider;
+                    hit = new HitscanPayload(info);
                     return true;
                 }
                 else
@@ -63,5 +63,21 @@ namespace Hypersycos.GERogueFrame
                 return false;
             }
         }
+    }
+
+    public record HitscanPayload : TargetPayload, IComponentPayload<Collider>, IVec3Payload, IGameObjectPayload
+    {
+        public RaycastHit hit;
+
+        public HitscanPayload(RaycastHit hit)
+        {
+            this.hit = hit;
+        }
+
+        public Vector3 Target => hit.point;
+
+        GameObject IGameObjectPayload.Target => hit.collider.gameObject;
+
+        Collider IComponentPayload<Collider>.Component => hit.collider;
     }
 }

@@ -67,7 +67,7 @@ namespace Hypersycos.GERogueFrame
 			return new MultiEffect(effects);
 		}
 
-        AbilityPayload ICastEffect.OwnerCastEnd(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        AbilityPayload ICastEffect.OwnerCastEnd(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
 		{
 			return new MultiPayload(Effects.Select((x) => x.OwnerCastEnd(target, position, cameraPosition, direction, myState)).ToList());
 		}
@@ -80,7 +80,7 @@ namespace Hypersycos.GERogueFrame
 			}
 		}
 
-        AbilityPayload ICastEffect.OwnerCastStart(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        AbilityPayload ICastEffect.OwnerCastStart(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
 		{
             return new MultiPayload(Effects.Select((x) => x.OwnerCastStart(target, position, cameraPosition, direction, myState)).ToList());
 		}
@@ -93,7 +93,7 @@ namespace Hypersycos.GERogueFrame
 			}
 		}
 
-        AbilityPayload ICastEffect.ServerCastEnd(AbilityPayload payload, object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        AbilityPayload ICastEffect.ServerCastEnd(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
 		{
             return new MultiPayload(Effects.Select((x) => x.ServerCastEnd(payload, target, position, cameraPosition, direction, myState)).ToList());
 		}
@@ -106,7 +106,7 @@ namespace Hypersycos.GERogueFrame
 			}
 		}
 
-        AbilityPayload ICastEffect.ServerCastStart(AbilityPayload payload, object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        AbilityPayload ICastEffect.ServerCastStart(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
 		{
             return new MultiPayload(Effects.Select((x) => x.ServerCastStart(payload, target, position, cameraPosition, direction, myState)).ToList());
 		}

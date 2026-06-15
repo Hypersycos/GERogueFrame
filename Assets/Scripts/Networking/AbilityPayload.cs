@@ -56,31 +56,4 @@ namespace Hypersycos.GERogueFrame
             return new AbilityNetworkPayload(payload);
         }
     }
-
-    public record VictimPayload : AbilityPayload
-    {
-        public override string id => "Victim";
-
-        public CharacterState victim;
-
-        public VictimPayload(CharacterState victim)
-        {
-            this.victim = victim;
-        }
-
-        public override void Serialize(FastBufferWriter writer)
-        {
-            base.Serialize(writer);
-            writer.WriteValueSafe(new NetworkBehaviourReference(victim));
-        }
-
-        public new static AbilityPayload Deserialize(FastBufferReader reader)
-        {
-            reader.ReadValueSafe(out NetworkBehaviourReference victim);
-            bool success = victim.TryGet(out CharacterState state);
-            if (success)
-                return new VictimPayload(state);
-            return null;
-        }
-    }
 }

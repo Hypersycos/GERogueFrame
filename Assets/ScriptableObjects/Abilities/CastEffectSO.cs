@@ -43,7 +43,7 @@ namespace Hypersycos.GERogueFrame
             return CastEffect.Clone();
         }
 
-        public AbilityPayload OwnerCastEnd(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        public AbilityPayload OwnerCastEnd(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
             return CastEffect.OwnerCastEnd(target, position, cameraPosition, direction, myState);
         }
@@ -53,7 +53,7 @@ namespace Hypersycos.GERogueFrame
             CastEffect.OwnerCastFixedUpdate();
         }
 
-        public AbilityPayload OwnerCastStart(object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        public AbilityPayload OwnerCastStart(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
             return CastEffect.OwnerCastStart(target, position, cameraPosition, direction, myState);
         }
@@ -63,7 +63,7 @@ namespace Hypersycos.GERogueFrame
             CastEffect.OwnerCastUpdate();
         }
 
-        public AbilityPayload ServerCastEnd(AbilityPayload payload, object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        public AbilityPayload ServerCastEnd(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
             return CastEffect.ServerCastEnd(payload, target, position, cameraPosition, direction, myState);
         }
@@ -73,7 +73,7 @@ namespace Hypersycos.GERogueFrame
             CastEffect.ServerCastFixedUpdate();
         }
 
-        public AbilityPayload ServerCastStart(AbilityPayload payload, object target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        public AbilityPayload ServerCastStart(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
             return CastEffect.ServerCastStart(payload, target, position, cameraPosition, direction, myState);
         }

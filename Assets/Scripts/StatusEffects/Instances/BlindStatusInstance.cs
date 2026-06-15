@@ -8,6 +8,8 @@ namespace Hypersycos.GERogueFrame
 {
     public class BlindStatusInstance : DurationStatusInstance
     {
+        static StatusEffect _blind = null;
+        static StatusEffect Blind => _blind ?? (_blind = StatusEffect.StatusDict["Blind"]);
         public override void Apply(CharacterState victim, Func<IEnumerator, Coroutine> Start)
         {
             Debug.Log("Blinded " + victim.name);
