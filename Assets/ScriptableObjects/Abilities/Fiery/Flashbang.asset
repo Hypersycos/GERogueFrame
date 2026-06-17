@@ -12,9 +12,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdd64b538fb4b1c4780c6fb0225a8210, type: 3}
   m_Name: Flashbang
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.AbilitySO
-  AbilityName: 
-  AbilityDescription: 
-  AbilityIcon: {fileID: 0}
-  AbilityResource: 
-  AbilityCost: 0
-  AbilityCooldown: 0
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: AbilityData
+      Entry: 7
+      Data: 0|Hypersycos.GERogueFrame.StandardAbilityData, Assembly-CSharp
+    - Name: AbilityName
+      Entry: 6
+      Data: 
+    - Name: AbilityDescription
+      Entry: 6
+      Data: 
+    - Name: AbilityIcon
+      Entry: 6
+      Data: 
+    - Name: TargetOnStart
+      Entry: 5
+      Data: false
+    - Name: Cooldown
+      Entry: 4
+      Data: 5
+    - Name: EnergyCost
+      Entry: 4
+      Data: 50
+    - Name: priority
+      Entry: 3
+      Data: 0
+    - Name: ExtraCheckers
+      Entry: 6
+      Data: 
+    - Name: TargetChecker
+      Entry: 7
+      Data: 1|Hypersycos.GERogueFrame.NoTarget, Assembly-CSharp
+    - Name: _effect
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 

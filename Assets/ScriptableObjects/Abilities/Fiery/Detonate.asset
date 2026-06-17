@@ -15,7 +15,8 @@ MonoBehaviour:
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
-    ReferencedUnityObjects: []
+    ReferencedUnityObjects:
+    - {fileID: -6786609212178123391, guid: ab4f8a18aa8a3464bb97405471478fcc, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -60,7 +61,7 @@ MonoBehaviour:
       Data: 3|Hypersycos.GERogueFrame.Detonate, Assembly-CSharp
     - Name: ExplosionRange
       Entry: 4
-      Data: 3
+      Data: 6
     - Name: EnemyLayerMask
       Entry: 7
       Data: UnityEngine.LayerMask, UnityEngine.CoreModule
@@ -70,6 +71,9 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: detonateVisual
+      Entry: 10
+      Data: 0
     - Name: 
       Entry: 8
       Data: 

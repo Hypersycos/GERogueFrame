@@ -323,10 +323,11 @@ namespace Hypersycos.GERogueFrame
                 //TODO: actually handle this case
                 if (ability.currentID != effectID)
                     throw new Exception("ohno");
+                ability.targets[(int)effectID].Effect.ClientCastEnd(null);
             }
             else
             {
-                ability.targets[(int)effectID].Effect.ClientCastStart(null);
+                ability.targets[(int)effectID].Effect.ClientCastEnd(null);
             }
         }
 
@@ -339,10 +340,11 @@ namespace Hypersycos.GERogueFrame
                 //TODO: actually handle this case
                 if (ability.currentID != effectID)
                     throw new Exception("ohno");
+                ability.targets[(int)effectID].Effect.ClientCastEnd(payload);
             }
             else
             {
-                ability.targets[(int)effectID].Effect.ClientCastStart(payload);
+                ability.targets[(int)effectID].Effect.ClientCastEnd(payload);
             }
         }
 

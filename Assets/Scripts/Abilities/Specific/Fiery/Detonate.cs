@@ -51,6 +51,7 @@ namespace Hypersycos.GERogueFrame
 
         public float ExplosionRange;
         public LayerMask EnemyLayerMask;
+        [SerializeField] AreaOfEffectVisual detonateVisual;
 
         public ICastEffect Clone()
         {
@@ -106,7 +107,14 @@ namespace Hypersycos.GERogueFrame
 
         void ICastEffect.ClientCastEnd(AbilityPayload payload)
         {
-            //TODO: Apply detonate visuals
+            var det = payload as DetonatePayload;
+            foreach(CharacterState state in det.victims)
+            {
+                if (state != null)
+                {
+                    AreaOfEffectVisual visual = GameObject.Instantiate(detonateVisual, state.transform.position, Quaternion.identity);
+                }
+            }
         }
     }
 
