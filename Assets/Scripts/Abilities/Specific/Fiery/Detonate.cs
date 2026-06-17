@@ -80,7 +80,7 @@ namespace Hypersycos.GERogueFrame
                     { //Prevents infinite loops if this damage instance is used to create a heat status effect
                         continue;
                     }
-                    int ticks = (int)inst.duration + 1;
+                    int ticks = (int)Math.Ceiling(inst.duration);
                     total += ticks * inst.Amount;
                     state.RemoveStatus(inst);
                 }

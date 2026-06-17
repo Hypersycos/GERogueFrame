@@ -68,10 +68,7 @@ namespace Hypersycos.GERogueFrame
 
         public abstract void Serialize(FastBufferWriter writer);
 
-        public static AbilityPayload DeserializeNull(FastBufferReader reader)
-        {
-            return null;
-        }
+        public static AbilityPayload DeserializeNull(FastBufferReader reader) => null;
 
         public static implicit operator AbilityNetworkPayload(AbilityPayload payload)
         {
@@ -85,6 +82,8 @@ namespace Hypersycos.GERogueFrame
             RegisteredPayloads.Clear();
             PayloadIDs.Clear();
 #endif
+            RegisteredPayloads.Add("Null", DeserializeNull);
+
             List<AbilityPayload> objects = new List<AbilityPayload>();
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
             IEnumerable<Type> types = assemblies.SelectMany(x => x.GetTypes().Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(AbilityPayload))));
@@ -138,7 +137,10 @@ namespace Hypersycos.GERogueFrame
             if (payload == null)
                 writer.WriteValueSafe("Null");
             else
+            {
+                writer.WriteValueSafe(AbilityPayload.PayloadIDs[payload.GetType()]);
                 payload.Serialize(writer);
+            }
         }
     }
 }

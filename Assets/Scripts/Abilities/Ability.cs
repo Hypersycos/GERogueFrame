@@ -33,6 +33,8 @@ namespace Hypersycos.GERogueFrame
 
         public virtual void FixedUpdate(CharacterState myState) { }
 
+        public virtual AbilityPayload Sync() => null;
+
         public bool OwnerCast(Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState, out AbilityPayload payload)
         {
             if (!TargetOnStart)

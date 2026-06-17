@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Hypersycos.GERogueFrame
@@ -23,11 +24,58 @@ namespace Hypersycos.GERogueFrame
         public void AddHaste(float amount);
         public void RemoveHaste(float amount);
     }
+
+    public interface ICooldownUpdatePayload
+    {
+        public float CurrentCooldown { get; }
+        public float Haste { get; }
+        public float ServerTime { get; }
+    }
+
+    public record CooldownPayload : AbilityPayload, ICooldownUpdatePayload
+    {
+        float _CurrentCooldown;
+        public float CurrentCooldown => _CurrentCooldown;
+
+        float _Haste;
+        public float Haste => _Haste;
+
+        float _ServerTime;
+
+        public CooldownPayload(float currentCooldown, float haste, float serverTime)
+        {
+            _CurrentCooldown = currentCooldown;
+            _Haste = haste;
+            _ServerTime = serverTime;
+        }
+
+        public float ServerTime => _ServerTime;
+
+        public override void Serialize(FastBufferWriter writer)
+        {
+            writer.TryBeginWrite(sizeof(float) * 3);
+            writer.WriteValue(CurrentCooldown);
+            writer.WriteValue(Haste);
+            writer.WriteValue(ServerTime);
+        }
+
+        public new static AbilityPayload Deserialize(FastBufferReader reader)
+        {
+            reader.TryBeginRead(sizeof(float) * 3);
+            reader.ReadValue(out float cd);
+            reader.ReadValue(out float haste);
+            reader.ReadValue(out float time);
+            return new CooldownPayload(cd, haste, time);
+        }
+    }
+
     public class CooldownAbility : Ability, ICooldownAbility
     {
         float _maxCooldown;
         float _currentCooldown;
         float _haste;
+
+        bool isDirty = false;
 
         public float CurrentCooldown => _currentCooldown;
 
@@ -46,6 +94,10 @@ namespace Hypersycos.GERogueFrame
         {
             if (myState.IsServer)
                 _currentCooldown = Mathf.Max(0, _currentCooldown - Time.fixedDeltaTime);
+        }
+
+        public override AbilityPayload Sync()
+        {
         }
 
         public void SetCooldown(float mult = 1)
