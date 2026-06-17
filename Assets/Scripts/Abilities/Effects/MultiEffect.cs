@@ -140,9 +140,9 @@ namespace Hypersycos.GERogueFrame
 		}
     }
 
+    [PayloadId("MultiPayload", nameof(Deserialize))]
     public record MultiPayload : AbilityPayload
     {
-		public override string id => "MultiPayload";
 
 		public List<AbilityPayload> Payloads = new List<AbilityPayload>();
         public MultiPayload(List<AbilityPayload> payloads)
@@ -152,7 +152,6 @@ namespace Hypersycos.GERogueFrame
 
         public override void Serialize(FastBufferWriter writer)
         {
-            base.Serialize(writer);
 			writer.WriteValueSafe(Payloads.Count);
 			foreach(AbilityPayload payload in Payloads)
 			{

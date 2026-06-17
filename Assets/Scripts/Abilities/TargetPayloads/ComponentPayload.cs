@@ -24,6 +24,7 @@ namespace Hypersycos.GERogueFrame
 
         public GameObject Target => _target.gameObject;
         public Component Component => _target;
+        public T ComponentAs<T>() where T : Component => (T)Component;
 
         public ComponentPayload(Component target)
         {

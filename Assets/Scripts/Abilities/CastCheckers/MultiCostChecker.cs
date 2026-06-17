@@ -26,6 +26,12 @@ namespace Hypersycos.GERogueFrame
             _priority = priority;
         }
 
+        public MultiCostChecker()
+        {
+            costCheckerList = new();
+            targetChecker = null;
+        }
+
         public int Priority => _priority;
 
         public ICastEffect Effect { get => targetChecker.Effect; set => targetChecker.Effect = value; }

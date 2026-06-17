@@ -1,0 +1,154 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdd64b538fb4b1c4780c6fb0225a8210, type: 3}
+  m_Name: Detonate
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.AbilitySO
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: AbilityData
+      Entry: 7
+      Data: 0|Hypersycos.GERogueFrame.StandardAbilityData, Assembly-CSharp
+    - Name: AbilityName
+      Entry: 1
+      Data: Detonate
+    - Name: AbilityDescription
+      Entry: 1
+      Data: Detonates all {{S|Heat}} procs on targets in an area, causing smaller
+        explosions dealing the remaining damage
+    - Name: AbilityIcon
+      Entry: 6
+      Data: 
+    - Name: TargetOnStart
+      Entry: 5
+      Data: false
+    - Name: Cooldown
+      Entry: 4
+      Data: 5
+    - Name: EnergyCost
+      Entry: 4
+      Data: 50
+    - Name: priority
+      Entry: 3
+      Data: 0
+    - Name: ExtraCheckers
+      Entry: 6
+      Data: 
+    - Name: TargetChecker
+      Entry: 7
+      Data: 1|Hypersycos.GERogueFrame.TargetCheckerChain, Assembly-CSharp
+    - Name: BaseChecker
+      Entry: 7
+      Data: 2|Hypersycos.GERogueFrame.HitscanChecker, Assembly-CSharp
+    - Name: CastEffect
+      Entry: 7
+      Data: 3|Hypersycos.GERogueFrame.Detonate, Assembly-CSharp
+    - Name: ExplosionRange
+      Entry: 4
+      Data: 3
+    - Name: EnemyLayerMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 192
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: MaxRange
+      Entry: 4
+      Data: 15
+    - Name: HitLayerMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 247
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TargetLayerMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 247
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TriggerInteraction
+      Entry: 3
+      Data: 1
+    - Name: NoHitIsSuccess
+      Entry: 5
+      Data: true
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TargetCheckerList
+      Entry: 7
+      Data: 4|System.Collections.Generic.List`1[[Hypersycos.GERogueFrame.ISecondaryTargetChecker,
+        Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 2
+    - Name: 
+      Entry: 7
+      Data: 5|Hypersycos.GERogueFrame.AreaChecker, Assembly-CSharp
+    - Name: Radius
+      Entry: 4
+      Data: 6
+    - Name: Mask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 192
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TriggerInteraction
+      Entry: 3
+      Data: 1
+    - Name: EmptyIsSuccess
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 6|Hypersycos.GERogueFrame.DetonateFilter, Assembly-CSharp
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 

@@ -9,7 +9,7 @@ namespace Hypersycos.GERogueFrame
     {
         public ICastEffect Clone()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         AbilityPayload ICastEffect.OwnerCastEnd(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)

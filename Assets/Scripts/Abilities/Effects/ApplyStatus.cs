@@ -14,6 +14,10 @@ namespace Hypersycos.GERogueFrame
             this.statusEffect = statusEffect;
         }
 
+        public ApplyStatus()
+        {
+        }
+
         void ICastEffect.ClientCastEnd(AbilityPayload payload) { }
 
         void ICastEffect.ClientCastFixedUpdate() { }

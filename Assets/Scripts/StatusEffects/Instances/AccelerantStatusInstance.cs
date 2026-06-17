@@ -36,9 +36,9 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.StatusEffects.Instances
 
         public void AddHeat(CharacterState victim, DamageInstance damage)
         {
-            if (damage.OneTimeEffects.Contains("Ignite")) return;
+            if (damage.OneTimeEffects.Contains("Accelerant")) return;
             float damageTick;
-            if (damage.OneTimeEffects.Contains("NoScaleIgnite"))
+            if (damage.OneTimeEffects.Contains("NoScaleAccelerant"))
             { //NoScaleIgnite applies the damage exactly again
               //Notably scales inversely with greater duration, and doesn't scale with str
                 int numTicks = (int)(Heat.DefaultDuration * OwnerDuration) + 1;
@@ -51,7 +51,7 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.StatusEffects.Instances
             StatusInstance HeatInstance = new HeatStatusInstance(damageTick, damage.owner, OwnerDuration);
             HeatInstance.OneTimeEffects = new HashSet<string>(damage.OneTimeEffects);
             //Don't allow ignite to chain
-            HeatInstance.OneTimeEffects.Add("Ignite");
+            HeatInstance.OneTimeEffects.Add("Accelerant");
             victim.AddStatus(HeatInstance);
         }
 

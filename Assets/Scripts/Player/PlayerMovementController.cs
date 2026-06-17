@@ -171,7 +171,6 @@ namespace Hypersycos.GERogueFrame
 
             jumpsAvailable--;
             lastJump = 0.5f;
-            Debug.Log($"{lastJump}: {velocity.y}");
             OnJump?.Invoke();
         }
 

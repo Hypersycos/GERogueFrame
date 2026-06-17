@@ -15,6 +15,7 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] LayerMask HitLayerMask;
         [SerializeField] LayerMask TargetLayerMask;
         [SerializeField] QueryTriggerInteraction TriggerInteraction;
+        [SerializeField] bool NoHitIsSuccess;
 
         public HitscanChecker(ICastEffect castEffect, float maxRange, LayerMask hitLayerMask, LayerMask targetLayerMask, QueryTriggerInteraction triggerInteraction)
         {
@@ -39,14 +40,14 @@ namespace Hypersycos.GERogueFrame
             {
                 if ((TargetLayerMask & (1 << info.collider.gameObject.layer)) != 0)
                 {
-                    Debug.DrawLine(camPosition, info.point, Color.green, 10);
+                    Debug.DrawLine(camPosition, info.point, Color.green, 3);
                     castEffect = CastEffect;
                     hit = new HitscanPayload(info);
                     return true;
                 }
                 else
                 {
-                    Debug.DrawLine(camPosition, info.point, Color.yellow, 10);
+                    Debug.DrawLine(camPosition, info.point, Color.yellow, 3);
                     castEffect = null;
                     hit = null;
                     return false;
@@ -54,7 +55,15 @@ namespace Hypersycos.GERogueFrame
             }
             else
             {
-                Debug.DrawLine(camPosition, camPosition + direction * MaxRange, Color.red, 10);
+                if (NoHitIsSuccess)
+                {
+                    Debug.DrawLine(camPosition, camPosition + direction * MaxRange, Color.green, 3);
+                    castEffect = CastEffect;
+                    hit = new Vec3Payload(camPosition + direction * MaxRange);
+                    return true;
+                }
+
+                Debug.DrawLine(camPosition, camPosition + direction * MaxRange, Color.red, 3);
                 castEffect = null;
                 hit = null;
                 return false;

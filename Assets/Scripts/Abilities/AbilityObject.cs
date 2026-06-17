@@ -16,11 +16,11 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] UnityEvent<AbilityObject> OnExpire;
         [SerializeField] public float ExpiryLength;
 
-        protected virtual void FixedUpdate()
+        protected void DoTimer(float scale = 1)
         {
             if (IsServer)
             {
-                Timer -= Time.fixedDeltaTime;
+                Timer -= Time.fixedDeltaTime * scale;
                 if (Timer <= 0)
                 {
                     OnExpire.Invoke(this);
@@ -30,6 +30,11 @@ namespace Hypersycos.GERogueFrame
                     Destroy(gameObject);
                 }
             }
+        }
+
+        protected virtual void FixedUpdate()
+        {
+            DoTimer();
         }
     }
 }

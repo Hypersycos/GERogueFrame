@@ -27,6 +27,11 @@ namespace Hypersycos.GERogueFrame
             Cost = energyCost;
         }
 
+        public EnergyChecker()
+        {
+
+        }
+
         public bool CanCast(CharacterState state, Ability ability, out ITargetChecker checker)
         {
             if ((state as PlayerState).CanUseEnergy(Cost))

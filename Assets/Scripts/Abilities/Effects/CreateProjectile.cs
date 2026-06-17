@@ -7,23 +7,23 @@ using UnityEngine;
 
 namespace Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects
 {
-    class CreateObject : ICastEffect
+    class CreateProjectile : ICastEffect
     {
-        [OdinSerialize] AbilityObject obj;
+        [OdinSerialize] AbilityProjectile obj;
 
-        public CreateObject(AbilityObject obj)
+        public CreateProjectile(AbilityProjectile obj)
         {
             this.obj = obj;
         }
 
-        public CreateObject()
+        public CreateProjectile()
         {
 
         }
 
         public ICastEffect Clone()
         {
-            return new CreateObject(obj);
+            return new CreateProjectile(obj);
         }
 
         AbilityPayload ICastEffect.ServerCastEnd(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)

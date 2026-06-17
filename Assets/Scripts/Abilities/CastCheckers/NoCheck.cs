@@ -23,6 +23,10 @@ namespace Hypersycos.GERogueFrame
             TargetChecker = targetChecker;
         }
 
+        public NoCheck()
+        {
+        }
+
         public bool CanCast(CharacterState state, Ability ability) => true;
 
         public bool CanCast(CharacterState state, Ability ability, out ITargetChecker checker)

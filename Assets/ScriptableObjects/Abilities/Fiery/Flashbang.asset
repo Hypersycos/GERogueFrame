@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdd64b538fb4b1c4780c6fb0225a8210, type: 3}
-  m_Name: FieryAbility3
+  m_Name: Flashbang
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.AbilitySO
   AbilityName: 
   AbilityDescription: 

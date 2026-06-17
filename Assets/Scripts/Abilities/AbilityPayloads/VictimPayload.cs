@@ -10,9 +10,9 @@ namespace Hypersycos.GERogueFrame
         public CharacterState Victim { get; }
     }
 
+    [PayloadId("Victim", nameof(Deserialize))]
     public record VictimPayload : AbilityPayload, IVictimPayload
     {
-        public override string id => "Victim";
 
         protected CharacterState _victim;
 
@@ -25,7 +25,6 @@ namespace Hypersycos.GERogueFrame
 
         public override void Serialize(FastBufferWriter writer)
         {
-            base.Serialize(writer);
             writer.WriteValueSafe(new NetworkBehaviourReference(_victim));
         }
 
