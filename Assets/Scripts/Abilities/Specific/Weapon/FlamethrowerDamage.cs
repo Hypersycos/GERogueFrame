@@ -14,6 +14,8 @@ namespace Hypersycos.GERogueFrame
         public int ticks;
         public Vector3 movePerTick;
         public float scalePerTick;
+        float falloffPerTick;
+        float dotFalloffPerTick;
         public LayerMask terrainHitMask;
         Vector3 origin;
         SphereCollider myCollider;
@@ -28,8 +30,8 @@ namespace Hypersycos.GERogueFrame
 
             Vector3 closestPoint = other.ClosestPoint(transform.position);
 
-            if (Physics.Raycast(origin, closestPoint - origin, 1, terrainHitMask) &&
-                Physics.Raycast(transform.position, (closestPoint - transform.position).normalized, 1, terrainHitMask))
+            if (Physics.Raycast(origin, closestPoint - origin, 1, terrainHitMask, QueryTriggerInteraction.Ignore) ||
+                Physics.Raycast(transform.position, (closestPoint - transform.position).normalized, 1, terrainHitMask, QueryTriggerInteraction.Ignore))
                 return;
 
             if (damageInst != null)
@@ -51,17 +53,22 @@ namespace Hypersycos.GERogueFrame
                 return;
             }
 
-            transform.position += movePerTick;
             myCollider.radius += scalePerTick;
+            transform.position += movePerTick;
+            damageInst.Amount += falloffPerTick;
+            dot.Amount += dotFalloffPerTick;
         }
 
-        public void Setup(float damage, float range, float angle, float speed, DotStatusInstance dot, CharacterState owner)
+        public void Setup(float damage, float range, float angle, float speed, DotStatusInstance dot, CharacterState owner, float falloff)
         {
             ticks = (int)(range / speed / Time.fixedDeltaTime);
+            falloffPerTick = damage * (falloff - 1) / ticks;
             float distPerTick = speed * Time.fixedDeltaTime;
             movePerTick = distPerTick * (transform.rotation * Vector3.forward);
-            scalePerTick = Mathf.Sin(angle) * distPerTick;
+            scalePerTick = Mathf.Sin(angle) * distPerTick / 2;
             this.dot = dot;
+
+            dotFalloffPerTick = this.dot.Amount * (falloff - 1) / ticks;
 
             myCollider = GetComponent<SphereCollider>();
             origin = transform.position;

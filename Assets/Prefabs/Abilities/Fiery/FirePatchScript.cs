@@ -24,16 +24,15 @@ namespace Hypersycos.GERogueFrame
             Damage *= Strength;
             Timer *= Duration;
 
-            if (!IsServer)
+            if (IsServer)
             {
-                GetComponent<Collider>().enabled = false;
-                enabled = false;
+                GetComponent<Collider>().enabled = true;
             }
         }
 
         private void OnTriggerEnter(Collider other)
         {
-             if (!enabled) return;
+             if (Timer <= 0) return;
 
             CharacterState state = other.GetComponent<CharacterState>();
             if (state == null || state.Team == SpawnedBy.Team) return;

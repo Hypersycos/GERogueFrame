@@ -11,10 +11,10 @@ namespace Hypersycos.GERogueFrame
     {
         public virtual CharacterState SpawnedBy { get; set; }
 
-        [SerializeField] public float Timer;
+        public float Timer;
         public CharacterState Owner;
-        [SerializeField] UnityEvent<AbilityObject> OnExpire;
-        [SerializeField] public float ExpiryLength;
+        public UnityEvent<AbilityObject> OnExpire;
+        public float ExpiryLength;
 
         protected void DoTimer(float scale = 1)
         {

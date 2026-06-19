@@ -266,12 +266,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 66650111}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72e5bf721a85fbd42ad4aa50e0fa71f0, type: 3}
+  m_Script: {fileID: 11500000, guid: 3d50514a84a4ff841aadc82a36b793f9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: '::'
-  target: {fileID: 0}
-  cameraDistance: 3
-  cameraOffset: {x: 1, y: 0.5, z: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.CameraManager
+  myCam: {fileID: 0}
+  spectateTarget: {fileID: 0}
 --- !u!1 &366175518
 GameObject:
   m_ObjectHideFlags: 0

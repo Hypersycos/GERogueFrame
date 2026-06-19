@@ -23,7 +23,7 @@ namespace Hypersycos.GERogueFrame
 
         public ITargetChecker Clone()
         {
-            return new NoTarget(_effect);
+            return new NoTarget(_effect.Clone());
         }
 
         public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out TargetPayload hit, out ICastEffect castEffect)

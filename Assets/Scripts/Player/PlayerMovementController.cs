@@ -9,7 +9,7 @@ namespace Hypersycos.GERogueFrame
     public class PlayerMovementController : MonoBehaviour
     {
         CharacterController characterController;
-        GameObject playerCamera;
+        Transform playerCamera;
         InputAction move;
         Controls controls;
 
@@ -38,6 +38,7 @@ namespace Hypersycos.GERogueFrame
         [field: SerializeField] public bool superJumpAvailable { get; private set; } = false;
         [SerializeField] int jumpsAvailable = 0;
         [SerializeField] float lastJump = 0f;
+        public bool lockedToCamera;
 
         Dictionary<string, float> movementModifierTracker = new Dictionary<string, float>();
         Dictionary<string, float> gravityModifierTracker = new Dictionary<string, float>();
@@ -68,7 +69,7 @@ namespace Hypersycos.GERogueFrame
         void Awake()
         {
             characterController = GetComponent<CharacterController>();
-            playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
+            playerCamera = transform.Find("CameraPos");
             controls = new();
 
             controls.Player.Jump.started += DoJump;
@@ -80,16 +81,16 @@ namespace Hypersycos.GERogueFrame
             controls.Player.Enable();
         }
 
-        private Vector3 GetHorizontalCameraForward(GameObject playerCamera)
+        private Vector3 GetHorizontalCameraForward(Transform playerCamera)
         {
-            Vector3 forward = playerCamera.transform.forward;
+            Vector3 forward = playerCamera.forward;
             forward.y = 0;
             return forward.normalized;
         }
 
-        private Vector3 GetHorizontalCameraRight(GameObject playerCamera)
+        private Vector3 GetHorizontalCameraRight(Transform playerCamera)
         {
-            Vector3 right = playerCamera.transform.right;
+            Vector3 right = playerCamera.right;
             right.y = 0;
             return right.normalized;
         }
@@ -227,11 +228,6 @@ namespace Hypersycos.GERogueFrame
 
             inputForce *= grounded ? 1 : airStrafeRate;
 
-            if (horizontalVelocity != Vector3.zero)
-            {
-                transform.rotation = Quaternion.LookRotation(horizontalVelocity, Vector3.up);
-            }
-
             if (horizontalVelocity.magnitude > maxSpeed)
             { //reduce control if over max speed
                 inputForce *= overspeedControl;
@@ -350,6 +346,18 @@ namespace Hypersycos.GERogueFrame
             if (lastJump > 0f)
             {
                 lastJump -= Time.fixedDeltaTime;
+            }
+
+            if (lockedToCamera)
+            {
+                transform.rotation = Quaternion.LookRotation(GetHorizontalCameraForward(playerCamera), Vector3.up);
+            }
+            else
+            {
+                if (horizontalVelocity != Vector3.zero)
+                {
+                    transform.rotation = Quaternion.LookRotation(horizontalVelocity, Vector3.up);
+                }
             }
         }
     }

@@ -244,6 +244,16 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
+        public void AnticipateDamageInstance(DamageInstance inst)
+        {
+
+        }
+
+        public void AnticipateStatusInstance(StatusInstance inst)
+        {
+
+        }
+
         public Color GetDamageColor()
         {
             return HitPoints.GetDamageColor();

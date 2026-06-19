@@ -199,6 +199,14 @@ namespace Hypersycos.GERogueFrame
             copy.AddComponent<PlayerState>().DamageTickPrefab = AssetDatabase.LoadAssetAtPath<TMPro.TMP_Text>("Assets/UI/DamageNumber.prefab");
             copy.AddComponent<PlayerAbilityManager>();
 
+            GameObject camPos = new GameObject("CameraPos");
+            NetworkTransform camTrans = camPos.AddComponent<NetworkTransform>();
+            camTrans.AuthorityMode = NetworkTransform.AuthorityModes.Owner;
+            camTrans.SyncScaleX = false;
+            camTrans.SyncScaleY = false;
+            camTrans.SyncScaleZ = false;
+            camPos.transform.SetParent(copy.transform);
+
             GameObject basePrefab = PrefabUtility.SaveAsPrefabAsset(copy, $"Assets/NetworkPrefabs/{CharacterName}Net.prefab", out bool success);
 
             if (success)

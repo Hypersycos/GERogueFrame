@@ -33,11 +33,15 @@ namespace Hypersycos.GERogueFrame
 
             if (IsOwner)
             {
-                GameObject.FindWithTag("MainCamera").GetComponent<CameraManager>().SetTarget(cameraTarget);
                 controller.enabled = true;
                 gameObject.AddComponent<PlayerMovementController>().movementSpeed = so.Speed;
                 gameObject.AddComponent<PlayerAnimatorScript>();
                 Destroy(bar.gameObject);
+
+                var cam = transform.Find("CameraPos").gameObject.AddComponent<PlayerCameraManager>();
+                cam.SetTarget(transform.Find("CameraTarget").gameObject);
+
+                GameObject.FindWithTag("MainCamera").GetComponent<CameraManager>().SetCam(cam.transform);
             }
             else
             {
