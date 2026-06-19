@@ -48,7 +48,7 @@ namespace Hypersycos.GERogueFrame
             Amount = inst.Amount;
             ActualAmount = Amount;
             ValidStatTypes = inst.ValidStatTypes;
-            owner = null;
+            owner = inst.owner;
             OneTimeEffects = new(inst.OneTimeEffects);
         }
 

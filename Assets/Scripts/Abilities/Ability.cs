@@ -11,6 +11,11 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace Hypersycos.GERogueFrame
 {
+    public interface IServerTickPayload
+    {
+        public int ServerTick { get; }
+    }
+
     public class Ability
     {
         [ShowInInspector]
@@ -32,8 +37,10 @@ namespace Hypersycos.GERogueFrame
         public virtual void Update(CharacterState myState) { }
 
         public virtual void FixedUpdate(CharacterState myState) { }
-
+        public virtual bool IsDirty { get => false; }
         public virtual AbilityPayload Sync() => null;
+        public virtual void SyncClient(AbilityPayload payload) { }
+        public virtual void SyncOwner(AbilityPayload payload) { }
 
         public bool OwnerCast(Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState, out AbilityPayload payload)
         {

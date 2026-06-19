@@ -66,7 +66,7 @@ namespace Hypersycos.GERogueFrame
             LayerMask layerMask = 0xFFFF ^ (1 << 6 | 1 << 7);
 
             Debug.DrawRay(target.transform.position, dir * cameraDistance, Color.hotPink);
-            if (Physics.Raycast(target.transform.position, dir, out RaycastHit hit, cameraDistance, layerMask))
+            if (Physics.Raycast(target.transform.position, dir, out RaycastHit hit, cameraDistance, layerMask, QueryTriggerInteraction.Ignore))
             {
                 gameObject.transform.position = hit.point;
                 Debug.DrawLine(target.transform.position, hit.point, Color.red);

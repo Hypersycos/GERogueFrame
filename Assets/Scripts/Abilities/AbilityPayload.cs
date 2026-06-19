@@ -116,15 +116,15 @@ namespace Hypersycos.GERogueFrame
 
                 if (id == "" || id == null)
                     Debug.LogError($"AbilityPayload {type.FullName} has an invalid id");
-                else if (RegisteredPayloads.ContainsKey(attr.Id))
-                    Debug.LogError($"AbilityPayload {type.FullName} id {type.FullName} conflicts with {conflictDict[attr.Id].FullName}");
+                else if (RegisteredPayloads.ContainsKey(id))
+                    Debug.LogError($"AbilityPayload {type.FullName} id {type.FullName} conflicts with {conflictDict[id].FullName}");
                 else if (deserializer == null)
                     Debug.LogError($"AbilityPayload {type.FullName} has an invalid deserializer {attr.Deserializer}");
                 else
                 {
-                    RegisteredPayloads.Add(attr.Id, deserializer);
-                    conflictDict.Add(attr.Id, type);
-                    PayloadIDs.Add(type, attr.Id);
+                    RegisteredPayloads.Add(id, deserializer);
+                    conflictDict.Add(id, type);
+                    PayloadIDs.Add(type, id);
                 }    
             }
         }

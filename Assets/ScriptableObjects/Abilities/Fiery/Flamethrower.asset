@@ -15,12 +15,116 @@ MonoBehaviour:
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
-    ReferencedUnityObjects: []
+    ReferencedUnityObjects:
+    - {fileID: 11400000, guid: 408a6fd48e8a0784da3cecc525b4ff3b, type: 2}
+    - {fileID: 6324557027431425041, guid: 9fe870ef6b9e210469cb93643f2dad7e, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
     - Name: AbilityData
+      Entry: 7
+      Data: 0|Hypersycos.GERogueFrame.StandardAbilityData, Assembly-CSharp
+    - Name: AbilityName
       Entry: 6
+      Data: 
+    - Name: AbilityDescription
+      Entry: 6
+      Data: 
+    - Name: AbilityIcon
+      Entry: 6
+      Data: 
+    - Name: TargetOnStart
+      Entry: 5
+      Data: true
+    - Name: Cooldown
+      Entry: 4
+      Data: 0
+    - Name: EnergyCost
+      Entry: 4
+      Data: 0
+    - Name: priority
+      Entry: 3
+      Data: 0
+    - Name: ExtraCheckers
+      Entry: 6
+      Data: 
+    - Name: TargetChecker
+      Entry: 7
+      Data: 1|Hypersycos.GERogueFrame.NoTarget, Assembly-CSharp
+    - Name: _effect
+      Entry: 7
+      Data: 2|Hypersycos.GERogueFrame.Flamethrower, Assembly-CSharp
+    - Name: dps
+      Entry: 4
+      Data: 15
+    - Name: range
+      Entry: 4
+      Data: 15
+    - Name: angle
+      Entry: 4
+      Data: 30
+    - Name: speed
+      Entry: 4
+      Data: 15
+    - Name: tickrate
+      Entry: 4
+      Data: 20
+    - Name: timeCount
+      Entry: 4
+      Data: 0
+    - Name: dot
+      Entry: 7
+      Data: 3|Hypersycos.GERogueFrame.HeatStatusInstance, Assembly-CSharp
+    - Name: <StatusEffect>k__BackingField
+      Entry: 10
+      Data: 0
+    - Name: Amount
+      Entry: 4
+      Data: 15
+    - Name: OneTimeEffects
+      Entry: 7
+      Data: 4|System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: duration
+      Entry: 4
+      Data: 3
+    - Name: TickDelay
+      Entry: 4
+      Data: 1
+    - Name: ValidStatTypes
+      Entry: 7
+      Data: 5|Hypersycos.GERogueFrame.StatTypeTarget, Assembly-CSharp
+    - Name: IsExclusive
+      Entry: 5
+      Data: false
+    - Name: Types
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: projectile
+      Entry: 10
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
       Data: 

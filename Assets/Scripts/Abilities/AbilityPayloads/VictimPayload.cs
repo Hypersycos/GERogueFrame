@@ -5,9 +5,10 @@ using Unity.Netcode;
 
 namespace Hypersycos.GERogueFrame
 {
-    public interface IVictimPayload
+    public interface IVictimPayload : IComponentPayload<CharacterState>
     {
         public CharacterState Victim { get; }
+        CharacterState IComponentPayload<CharacterState>.Component => Victim;
     }
 
     [PayloadId("Victim", nameof(Deserialize))]
@@ -15,7 +16,6 @@ namespace Hypersycos.GERogueFrame
     {
 
         protected CharacterState _victim;
-
         public CharacterState Victim => _victim;
 
         public VictimPayload(CharacterState victim)

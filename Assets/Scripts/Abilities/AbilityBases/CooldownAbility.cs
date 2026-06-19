@@ -25,11 +25,10 @@ namespace Hypersycos.GERogueFrame
         public void RemoveHaste(float amount);
     }
 
-    public interface ICooldownUpdatePayload
+    public interface ICooldownUpdatePayload : IServerTickPayload
     {
         public float CurrentCooldown { get; }
         public float Haste { get; }
-        public float ServerTime { get; }
     }
 
     public record CooldownPayload : AbilityPayload, ICooldownUpdatePayload
@@ -40,23 +39,23 @@ namespace Hypersycos.GERogueFrame
         float _Haste;
         public float Haste => _Haste;
 
-        float _ServerTime;
+        int _ServerTime;
+        public int ServerTick => _ServerTime;
 
-        public CooldownPayload(float currentCooldown, float haste, float serverTime)
+        public CooldownPayload(float currentCooldown, float haste, int serverTime)
         {
             _CurrentCooldown = currentCooldown;
             _Haste = haste;
             _ServerTime = serverTime;
         }
 
-        public float ServerTime => _ServerTime;
 
         public override void Serialize(FastBufferWriter writer)
         {
             writer.TryBeginWrite(sizeof(float) * 3);
             writer.WriteValue(CurrentCooldown);
             writer.WriteValue(Haste);
-            writer.WriteValue(ServerTime);
+            writer.WriteValue(ServerTick);
         }
 
         public new static AbilityPayload Deserialize(FastBufferReader reader)
@@ -64,7 +63,7 @@ namespace Hypersycos.GERogueFrame
             reader.TryBeginRead(sizeof(float) * 3);
             reader.ReadValue(out float cd);
             reader.ReadValue(out float haste);
-            reader.ReadValue(out float time);
+            reader.ReadValue(out int time);
             return new CooldownPayload(cd, haste, time);
         }
     }
@@ -75,15 +74,17 @@ namespace Hypersycos.GERogueFrame
         float _currentCooldown;
         float _haste;
 
-        bool isDirty = false;
+        int lastUpdate = 0;
 
-        public float CurrentCooldown => _currentCooldown;
+        public float CurrentCooldown { get => _currentCooldown; private set { _currentCooldown = value; lastUpdate = NetworkManager.Singleton.ServerTime.Tick; } }
 
         public float CurrentCooldownPercent => _currentCooldown / MaxCooldown;
 
         public float MaxCooldown => _maxCooldown * (this as ICooldownAbility).InverseCDR;
 
-        public float Haste => _haste;
+        public float Haste { get => _haste; private set { _haste = value; lastUpdate = NetworkManager.Singleton.ServerTime.Tick; } }
+
+        public override bool IsDirty { get => lastUpdate == NetworkManager.Singleton.ServerTime.Tick; }
 
         public CooldownAbility(IEnumerable<ICastCostChecker> targets, float cooldown, bool targetOnStart) : base(targets, targetOnStart)
         {
@@ -98,46 +99,58 @@ namespace Hypersycos.GERogueFrame
 
         public override AbilityPayload Sync()
         {
+            return new CooldownPayload(_currentCooldown, _haste, lastUpdate);
+        }
+
+        public override void SyncClient(AbilityPayload payload)
+        {
+            var cd = payload as CooldownPayload;
+            if (lastUpdate < cd.ServerTick)
+            {
+                _currentCooldown = cd.CurrentCooldown;
+                _haste = cd.Haste;
+                lastUpdate = cd.ServerTick;
+            }
         }
 
         public void SetCooldown(float mult = 1)
         {
-            _currentCooldown = mult * MaxCooldown;
+            CurrentCooldown = mult * MaxCooldown;
         }
 
         public void SetCooldownTo(float seconds)
         {
-            _currentCooldown = seconds;
+            CurrentCooldown = seconds;
         }
 
         public void ReduceCooldown(float delta)
         {
-            _currentCooldown -= delta;
+            CurrentCooldown -= delta;
         }
 
         public void ReduceCooldownByMult(float mult)
         {
-            _currentCooldown -= MaxCooldown * mult;
+            CurrentCooldown -= MaxCooldown * mult;
         }
 
         public void IncreaseCooldown(float delta)
         {
-            _currentCooldown += delta;
+            CurrentCooldown += delta;
         }
 
         public void IncreaseCooldownByMult(float mult)
         {
-            _currentCooldown += MaxCooldown * mult;
+            CurrentCooldown += MaxCooldown * mult;
         }
 
         public void AddHaste(float amount)
         {
-            _haste += amount;
+            Haste += amount;
         }
 
         public void RemoveHaste(float amount)
         {
-            _haste -= amount;
+            Haste -= amount;
         }
     }
 }

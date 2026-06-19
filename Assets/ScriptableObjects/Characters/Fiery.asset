@@ -16,6 +16,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
+    - {fileID: 11400000, guid: 4d991d110910890468d4e38ec132196e, type: 2}
     - {fileID: 11400000, guid: a84cf56a0c9744c48a3061ae3f6f9c59, type: 2}
     - {fileID: 11400000, guid: eaea8a80e83214c4d9aa529ece89f482, type: 2}
     - {fileID: 11400000, guid: b244c4f342f5fe04cadc23d14980fe3a, type: 2}
@@ -25,20 +26,20 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes:
     - Name: Weapon
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 0
     - Name: WeaponAlt
       Entry: 6
       Data: 
     - Name: Ability1
       Entry: 10
-      Data: 0
+      Data: 1
     - Name: Ability2
       Entry: 10
-      Data: 1
+      Data: 2
     - Name: Ability3
       Entry: 10
-      Data: 2
+      Data: 3
     - Name: Ability4
       Entry: 6
       Data: 

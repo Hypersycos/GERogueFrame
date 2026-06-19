@@ -40,17 +40,17 @@ namespace Hypersycos.GERogueFrame
 
             if (baseChecks.Count > 1)
             {
-                MultiCostChecker multiChecker = new(baseChecks, TargetChecker, priority);
+                MultiCostChecker multiChecker = new(baseChecks, TargetChecker.Clone(), priority);
                 return new List<ICastCostChecker>() { multiChecker };
             }
             else if (baseChecks.Count == 1)
             {
-                baseChecks[0].TargetChecker = TargetChecker;
+                baseChecks[0].TargetChecker = TargetChecker.Clone();
                 return baseChecks;
             }
             else if (TargetChecker != null)
             {
-                baseChecks.Add(new NoCheck(priority, TargetChecker));
+                baseChecks.Add(new NoCheck(priority, TargetChecker.Clone()));
                 return baseChecks;
             }
             return baseChecks;

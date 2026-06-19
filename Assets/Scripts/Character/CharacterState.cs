@@ -182,12 +182,12 @@ namespace Hypersycos.GERogueFrame
             AfterStatusRemoved.Invoke(this, instance);
         }
 
-        public virtual void ApplyStatus(StatusInstance instance)
+        protected virtual void ApplyStatus(StatusInstance instance)
         {
             instance.Apply(this, StartCoroutine);
         }
 
-        public virtual void UnapplyStatus(StatusInstance instance)
+        protected virtual void UnapplyStatus(StatusInstance instance)
         {
             instance.Remove(this);
         }

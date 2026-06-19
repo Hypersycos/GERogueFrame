@@ -53,9 +53,16 @@ namespace Hypersycos.GERogueFrame
         public LayerMask EnemyLayerMask;
         [SerializeField] AreaOfEffectVisual detonateVisual;
 
+        public Detonate(float explosionRange, LayerMask enemyLayerMask, AreaOfEffectVisual detonateVisual)
+        {
+            ExplosionRange = explosionRange;
+            EnemyLayerMask = enemyLayerMask;
+            this.detonateVisual = detonateVisual;
+        }
+
         public ICastEffect Clone()
         {
-            throw new NotImplementedException();
+            return new Detonate(ExplosionRange, EnemyLayerMask, detonateVisual);
         }
 
         AbilityPayload ICastEffect.OwnerCastEnd(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
