@@ -27,7 +27,7 @@ namespace Hypersycos.GERogueFrame
             timer += Time.fixedDeltaTime;
             if (timer > maxTime)
                 Destroy(gameObject);
-            float scale = Mathf.Lerp(startR, endR, timer / rTime);
+            float scale = Mathf.Lerp(startR * 2, endR * 2, timer / rTime);
             transform.localScale = new Vector3(scale, scale, scale);
             float alpha = Mathf.Lerp(startAlpha, endAlpha, timer / aTime);
 

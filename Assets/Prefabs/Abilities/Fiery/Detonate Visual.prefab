@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6252253504845537472}
   - component: {fileID: -2474926749657894618}
   - component: {fileID: -6786609212178123391}
-  m_Layer: 6
+  m_Layer: 8
   m_Name: Detonate Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}

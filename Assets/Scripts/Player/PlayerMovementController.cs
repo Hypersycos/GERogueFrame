@@ -11,7 +11,8 @@ namespace Hypersycos.GERogueFrame
         CharacterController characterController;
         Transform playerCamera;
         InputAction move;
-        Controls controls;
+        ControlsWrapper controlWrapper;
+        Controls controls => controlWrapper.controls;
 
         [Header("Stats")]
         [SerializeField] public float movementSpeed = 4f;
@@ -70,15 +71,16 @@ namespace Hypersycos.GERogueFrame
         {
             characterController = GetComponent<CharacterController>();
             playerCamera = transform.Find("CameraPos");
-            controls = new();
+            controlWrapper = ControlsWrapper.Singleton;
 
             controls.Player.Jump.started += DoJump;
             controls.Player.Crouch.started += DoCrouch;
             controls.Player.Crouch.canceled += DoCrouch;
             controls.Player.ToggleCrouch.started += DoCrouch;
 
+            controlWrapper.MenuOpened += () => enabled = false;
+            controlWrapper.MenuClosed += () => enabled = true;
             move = controls.Player.Move;
-            controls.Player.Enable();
         }
 
         private Vector3 GetHorizontalCameraForward(Transform playerCamera)
@@ -212,11 +214,6 @@ namespace Hypersycos.GERogueFrame
 
         private void FixedUpdate()
         {
-            if (move == null)
-            {
-                return;
-            }
-
             Vector3 inputForce = Vector3.zero;
             Vector2 moveInput = move.ReadValue<Vector2>();
             if (moveInput.magnitude > 1)

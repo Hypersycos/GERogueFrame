@@ -155,6 +155,7 @@ namespace Hypersycos.GERogueFrame
         {
             NetworkManager.SceneManager.OnLoadEventCompleted -= OnGameSceneLoaded;
             _gameState.Value = GameState.Playing;
+            ControlsWrapper.Singleton.CloseMenu(default);
 
             float rotation = 360 / playerCharacterMap.Count;
             float distance = playerCharacterMap.Count * 15 / (2 * Mathf.PI);

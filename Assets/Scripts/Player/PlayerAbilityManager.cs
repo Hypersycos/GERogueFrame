@@ -28,7 +28,8 @@ namespace Hypersycos.GERogueFrame
         public Ability ultimate { get => _weapon; set { _ultimate = value; AssignAbility(value, controls.Player.Ultimate, 6); } }
 
         PlayerState myState;
-        Controls controls;
+        ControlsWrapper controlWrapper;
+        Controls controls => controlWrapper.controls;
         GameObject playerCamera;
 
         Ability currentlyCasting = null;
@@ -41,9 +42,8 @@ namespace Hypersycos.GERogueFrame
         {
             myState = GetComponent<PlayerState>();
             playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
-            
-            controls = new();
-            controls.Player.Enable();
+
+            controlWrapper = ControlsWrapper.Singleton;
         }
 
         private void AssignAbility(Ability ability, InputAction action, uint id)

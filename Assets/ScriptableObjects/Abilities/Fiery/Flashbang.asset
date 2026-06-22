@@ -15,7 +15,8 @@ MonoBehaviour:
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
-    ReferencedUnityObjects: []
+    ReferencedUnityObjects:
+    - {fileID: 4314035031300602450, guid: f551747c1f93bc043a0b06f13db3b9a5, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -52,7 +53,44 @@ MonoBehaviour:
       Entry: 7
       Data: 1|Hypersycos.GERogueFrame.NoTarget, Assembly-CSharp
     - Name: _effect
-      Entry: 6
+      Entry: 7
+      Data: 2|Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects.CreateDumbProjectile,
+        Assembly-CSharp
+    - Name: obj
+      Entry: 10
+      Data: 0
+    - Name: spawnOffset
+      Entry: 7
+      Data: UnityEngine.Vector3, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: mask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 129
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: velocity
+      Entry: 4
+      Data: 15
+    - Name: maxRange
+      Entry: 4
+      Data: 15
+    - Name: 
+      Entry: 8
       Data: 
     - Name: 
       Entry: 8

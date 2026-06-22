@@ -20,6 +20,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: a84cf56a0c9744c48a3061ae3f6f9c59, type: 2}
     - {fileID: 11400000, guid: eaea8a80e83214c4d9aa529ece89f482, type: 2}
     - {fileID: 11400000, guid: b244c4f342f5fe04cadc23d14980fe3a, type: 2}
+    - {fileID: 11400000, guid: 3f90f08cd458dd14ab8b85854ccd8da8, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -41,8 +42,8 @@ MonoBehaviour:
       Entry: 10
       Data: 3
     - Name: Ability4
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 4
     - Name: Ultimate
       Entry: 6
       Data: 

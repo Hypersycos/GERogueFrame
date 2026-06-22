@@ -38,10 +38,7 @@ namespace Hypersycos.GERogueFrame
                 gameObject.AddComponent<PlayerAnimatorScript>();
                 Destroy(bar.gameObject);
 
-                var cam = transform.Find("CameraPos").gameObject.AddComponent<PlayerCameraManager>();
-                cam.SetTarget(transform.Find("CameraTarget").gameObject);
-
-                GameObject.FindWithTag("MainCamera").GetComponent<CameraManager>().SetCam(cam.transform);
+                GameObject.FindWithTag("MainCamera").GetComponent<CameraManager>().SetMyCamera(GetComponent<PlayerState>());
             }
             else
             {
