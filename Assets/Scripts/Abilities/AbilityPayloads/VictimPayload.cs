@@ -11,6 +11,8 @@ namespace Hypersycos.GERogueFrame
         CharacterState IComponentPayload<CharacterState>.Component => Victim;
     }
 
+    class TargetGetState : TargetGetComponent<CharacterState> { }
+
     [PayloadId("Victim", nameof(Deserialize))]
     public record VictimPayload : AbilityPayload, IVictimPayload
     {

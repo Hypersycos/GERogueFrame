@@ -5,12 +5,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Hypersycos.GERogueFrame
 {
     public interface ISecondaryTargetChecker
     {
-        bool HasValidTarget(TargetPayload target, CharacterState myState, out TargetPayload hit);
+        bool HasValidTarget(ITargetPayload target, CharacterState myState, out ITargetPayload hit);
         ISecondaryTargetChecker Clone();
     }
 
@@ -29,23 +30,38 @@ namespace Hypersycos.GERogueFrame
             TargetCheckerList = targetCheckerList;
         }
 
-        public ICastEffect Effect { get => BaseChecker.Effect; set => BaseChecker.Effect = value; }
-
         public ITargetChecker Clone()
         {
             return new TargetCheckerChain(BaseChecker.Clone(), TargetCheckerList.Select((x) => x.Clone()).ToList());
         }
 
-        public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out TargetPayload hit, out ICastEffect castEffect)
+        public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out ITargetPayload hit, out AbilityPayload verifyData)
         {
-            bool success = BaseChecker.HasValidTarget(direction, position, camPosition, myState, out hit, out castEffect);
+            bool success = BaseChecker.HasValidTarget(direction, position, camPosition, myState, out hit, out verifyData);
             if (success)
             {
                 foreach (var target in TargetCheckerList)
                 {
                     if (!target.HasValidTarget(hit, myState, out hit))
                     {
-                        castEffect = null;
+                        verifyData = null;
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        bool ITargetChecker.VerifyTarget(AbilityPayload target, CharacterState myState, out ITargetPayload hit)
+        {
+            bool success = BaseChecker.VerifyTarget(target, myState, out hit);
+            if (success)
+            {
+                foreach (var secondary in TargetCheckerList)
+                {
+                    if (!secondary.HasValidTarget(hit, myState, out hit))
+                    {
                         return false;
                     }
                 }

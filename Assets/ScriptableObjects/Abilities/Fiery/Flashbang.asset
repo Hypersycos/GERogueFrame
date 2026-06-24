@@ -34,9 +34,6 @@ MonoBehaviour:
     - Name: AbilityIcon
       Entry: 6
       Data: 
-    - Name: TargetOnStart
-      Entry: 5
-      Data: false
     - Name: Cooldown
       Entry: 4
       Data: 5
@@ -51,15 +48,11 @@ MonoBehaviour:
       Data: 
     - Name: TargetChecker
       Entry: 7
-      Data: 1|Hypersycos.GERogueFrame.NoTarget, Assembly-CSharp
-    - Name: _effect
-      Entry: 7
-      Data: 2|Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects.CreateDumbProjectile,
-        Assembly-CSharp
-    - Name: obj
-      Entry: 10
-      Data: 0
-    - Name: spawnOffset
+      Data: 1|Hypersycos.GERogueFrame.DumbProjectileChecker, Assembly-CSharp
+    - Name: spawnObjectPath
+      Entry: 1
+      Data: CameraTarget
+    - Name: offset
       Entry: 7
       Data: UnityEngine.Vector3, UnityEngine.CoreModule
     - Name: 
@@ -67,13 +60,23 @@ MonoBehaviour:
       Data: 0
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0
     - Name: 
       Entry: 4
       Data: 1
     - Name: 
       Entry: 8
       Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: CastEffect
+      Entry: 7
+      Data: 2|Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects.CreateDumbProjectile,
+        Assembly-CSharp
+    - Name: obj
+      Entry: 10
+      Data: 0
     - Name: mask
       Entry: 7
       Data: UnityEngine.LayerMask, UnityEngine.CoreModule
@@ -85,13 +88,10 @@ MonoBehaviour:
       Data: 
     - Name: velocity
       Entry: 4
-      Data: 15
+      Data: 30
     - Name: maxRange
       Entry: 4
       Data: 15
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: 
       Entry: 8
       Data: 

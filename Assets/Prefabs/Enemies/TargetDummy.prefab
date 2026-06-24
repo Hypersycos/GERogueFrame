@@ -2161,7 +2161,6 @@ GameObject:
   - component: {fileID: 39828721480881588}
   - component: {fileID: 1307592876211563076}
   - component: {fileID: 9174404814534057885}
-  - component: {fileID: 3151215369784887519}
   m_Layer: 8
   m_Name: TargetDummy
   m_TagString: Untagged
@@ -2344,18 +2343,6 @@ MonoBehaviour:
       <BaseValue>k__BackingField: 50
       <Bound>k__BackingField: 0
     <IsOverhealth>k__BackingField: 0
---- !u!114 &3151215369784887519
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7788894545764550758}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4180308b14f56144fbef9c0c00190f24, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.TestDamageScript
 --- !u!1 &7862025110262846133
 GameObject:
   m_ObjectHideFlags: 0

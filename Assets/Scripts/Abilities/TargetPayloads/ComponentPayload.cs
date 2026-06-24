@@ -18,7 +18,7 @@ namespace Hypersycos.GERogueFrame
         Component IComponentPayload.Component => Component;
     }
 
-    public record ComponentPayload : TargetPayload, IGameObjectPayload, IComponentPayload
+    public record ComponentPayload : ITargetPayload, IGameObjectPayload, IComponentPayload
     {
         protected Component _target;
 
@@ -32,7 +32,7 @@ namespace Hypersycos.GERogueFrame
         }
     }
 
-    public record ComponentPayload<T> : TargetPayload, IGameObjectPayload, IComponentPayload<T> where T : Component
+    public record ComponentPayload<T> : ITargetPayload, IGameObjectPayload, IComponentPayload<T> where T : Component
     {
 
         protected T _target;

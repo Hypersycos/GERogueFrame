@@ -13,7 +13,7 @@ namespace Hypersycos.GERogueFrame
             return this;
         }
 
-        public bool HasValidTarget(TargetPayload target, CharacterState myState, out TargetPayload hit)
+        public bool HasValidTarget(ITargetPayload target, CharacterState myState, out ITargetPayload hit)
         {
             var objPayload = target as IGameObjectPayload;
             if (objPayload != null)
@@ -38,10 +38,9 @@ namespace Hypersycos.GERogueFrame
             return this;
         }
 
-        public bool HasValidTarget(TargetPayload target, CharacterState myState, out TargetPayload hit)
+        public bool HasValidTarget(ITargetPayload target, CharacterState myState, out ITargetPayload hit)
         {
-            var objPayload = target as IGameObjectPayload;
-            if (objPayload != null)
+            if (target is IGameObjectPayload objPayload)
             {
                 Component test = objPayload.Target.GetComponent(type);
                 if (test != null)

@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Hypersycos.GERogueFrame
 {
-	public abstract record TargetPayload
+	public interface ITargetPayload
 	{
 	}
 }

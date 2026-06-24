@@ -10,9 +10,9 @@ namespace Hypersycos.GERogueFrame
     [RequireComponent(typeof(Rigidbody))]
     class ProjectileScript : MonoBehaviour
     {
-        ProjectileID myID;
-        int ownerTeam;
-        CharacterState owner;
+        public ProjectileID myID { get; private set; }
+        public int ownerTeam { get; protected set; }
+        public CharacterState owner { get; protected set; }
         [SerializeField] float lifetime;
 
         public UnityEvent<ProjectileScript, CharacterState, CharacterState> hitAlly;
@@ -77,7 +77,7 @@ namespace Hypersycos.GERogueFrame
         public void DespawnThis()
         {
             GetComponent<Collider>().enabled = false;
-            ProjectileManager.Singleton.DespawnClientProjectileRpc(myID, transform.position);
+            ProjectileManager.Singleton.DespawnMe(myID, transform.position);
             DespawnServer();
         }
 

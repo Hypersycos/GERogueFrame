@@ -11,7 +11,7 @@ namespace Hypersycos.GERogueFrame
         public GameObject Target { get; }
     }
 
-    public record ObjectPayload : TargetPayload, IGameObjectPayload
+    public record ObjectPayload : ITargetPayload, IGameObjectPayload
     {
 
         protected GameObject _target;

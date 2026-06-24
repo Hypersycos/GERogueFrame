@@ -1,4 +1,4 @@
-﻿using System;
+﻿/*using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -73,7 +73,7 @@ namespace Hypersycos.GERogueFrame
             DoParticles();
         }
 
-        AbilityPayload ICastEffect.OwnerCastStart(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        AbilityPayload ICastEffect.OwnerCastStart(ITargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
             this.myState = myState;
             myCamera = myState.transform.Find("CameraPos");
@@ -83,7 +83,7 @@ namespace Hypersycos.GERogueFrame
             return null;
         }
 
-        AbilityPayload ICastEffect.OwnerCastEnd(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        AbilityPayload ICastEffect.OwnerCastEnd(ITargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
             vfxInstance.GetComponent<ParticleSystem>().Stop();
             myState.GetComponent<PlayerMovementController>().lockedToCamera = false;
@@ -91,7 +91,7 @@ namespace Hypersycos.GERogueFrame
         }
 
 
-        AbilityPayload ICastEffect.ServerCastStart(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        AbilityPayload ICastEffect.ServerCastStart(AbilityPayload payload, ITargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
         {
             timeCount = 0;
             this.myState = myState;
@@ -129,3 +129,4 @@ namespace Hypersycos.GERogueFrame
         }
     }
 }
+*/

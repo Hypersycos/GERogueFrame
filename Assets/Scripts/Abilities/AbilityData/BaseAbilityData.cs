@@ -13,10 +13,6 @@ namespace Hypersycos.GERogueFrame
         public string AbilityName;
         public string AbilityDescription;
         public Texture2D AbilityIcon;
-
-        public bool TargetOnStart = false;
-
         public abstract Ability CreateAbility();
-        public abstract IEnumerable<ICastCostChecker> GetCheckers();
     }
 }

@@ -13,29 +13,13 @@ namespace Hypersycos.GERogueFrame
         [ShowInInspector]
         [OdinSerialize] ICastEffect CastEffect;
 
-        public void ClientCastEnd(AbilityPayload payload)
-        {
-            CastEffect.ClientCastEnd(payload);
-        }
+        public bool HasClientCast => CastEffect.HasClientCast;
 
-        public void ClientCastFixedUpdate()
-        {
-            CastEffect.ClientCastFixedUpdate();
-        }
+        public bool HasOwnerClientCast => CastEffect.HasOwnerClientCast;
 
-        public void ClientCastStart(AbilityPayload payload)
+        public void ClientCast(AbilityPayload networkPayload)
         {
-            CastEffect.ClientCastStart(payload);
-        }
-
-        public void ClientCastUpdate()
-        {
-            CastEffect.ClientCastUpdate();
-        }
-
-        public void ClientNetworkUpdate(AbilityPayload payload)
-        {
-            CastEffect.ClientNetworkUpdate(payload);
+            CastEffect.ClientCast(networkPayload);
         }
 
         public ICastEffect Clone()
@@ -43,49 +27,19 @@ namespace Hypersycos.GERogueFrame
             return CastEffect.Clone();
         }
 
-        public AbilityPayload OwnerCastEnd(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        public AbilityPayload OwnerCast(ITargetPayload targetPayload, CharacterState myState)
         {
-            return CastEffect.OwnerCastEnd(target, position, cameraPosition, direction, myState);
+            return CastEffect.OwnerCast(targetPayload, myState);
         }
 
-        public void OwnerCastFixedUpdate()
+        public void OwnerClientCast(AbilityPayload networkPayload)
         {
-            CastEffect.OwnerCastFixedUpdate();
+            CastEffect.OwnerClientCast(networkPayload);
         }
 
-        public AbilityPayload OwnerCastStart(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        public AbilityPayload ServerCast(ITargetPayload targetPayload, AbilityPayload networkPayload, CharacterState myState)
         {
-            return CastEffect.OwnerCastStart(target, position, cameraPosition, direction, myState);
-        }
-
-        public void OwnerCastUpdate()
-        {
-            CastEffect.OwnerCastUpdate();
-        }
-
-        public AbilityPayload ServerCastEnd(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
-        {
-            return CastEffect.ServerCastEnd(payload, target, position, cameraPosition, direction, myState);
-        }
-
-        public void ServerCastFixedUpdate()
-        {
-            CastEffect.ServerCastFixedUpdate();
-        }
-
-        public AbilityPayload ServerCastStart(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
-        {
-            return CastEffect.ServerCastStart(payload, target, position, cameraPosition, direction, myState);
-        }
-
-        public void ServerCastUpdate()
-        {
-            CastEffect.ServerCastUpdate();
-        }
-
-        public void ServerNetworkUpdate(AbilityPayload payload)
-        {
-            CastEffect.ServerNetworkUpdate(payload);
+            return CastEffect.ServerCast(targetPayload, networkPayload, myState);
         }
     }
 }

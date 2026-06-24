@@ -13,6 +13,8 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] float Strength;
         [SerializeField] float Duration;
 
+        [SerializeField] Collider serverCollider;
+
         StatusEffect Heat => HeatStatusInstance.Heat;
 
         List<CharacterState> victims = new();
@@ -26,7 +28,7 @@ namespace Hypersycos.GERogueFrame
 
             if (IsServer)
             {
-                GetComponent<Collider>().enabled = true;
+                serverCollider.enabled = true;
             }
         }
 

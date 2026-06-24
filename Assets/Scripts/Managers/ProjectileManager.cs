@@ -121,10 +121,11 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
-        public void SpawnDumbProjectile(ProjectileID id, int prefabID, ProjectileSpawnParams spawnParams)
+        public void SpawnDumbProjectile(ProjectileID id, GameObject obj, ProjectileSpawnParams spawnParams)
         {
+            if (!projectiles.dumbIDs.TryGetValue(obj, out int prefabID))
+                return;
             SpawnClientProjectileRpc(id, prefabID, spawnParams);
-            GameObject obj = projectiles.dumbProjectileList[prefabID];
             GameObject spawned = Instantiate(obj, spawnParams.position, spawnParams.rotation);
             ProjectileScript ps = spawned.GetComponent<ProjectileScript>();
             ps.Server(id, spawnParams);
@@ -146,7 +147,7 @@ namespace Hypersycos.GERogueFrame
         }
 
         [Rpc(SendTo.ClientsAndHost, InvokePermission = RpcInvokePermission.Everyone)]
-        public void DespawnClientProjectileRpc(ProjectileID id, Vector3 position)
+        private void DespawnClientProjectileRpc(ProjectileID id, Vector3 position)
         {
             if (clientProjectiles.Remove(id, out GameObject toDestroy))
             {
@@ -156,6 +157,12 @@ namespace Hypersycos.GERogueFrame
             {
                 ant.GetComponent<ProjectileScript>().DespawnVisual(position);
             }
+        }
+
+        public void DespawnMe(ProjectileID myID, Vector3 position)
+        {
+            serverProjectiles.Remove(myID);
+            DespawnClientProjectileRpc(myID, position);
         }
     }
 }

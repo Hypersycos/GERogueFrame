@@ -17,10 +17,5 @@ namespace Hypersycos.GERogueFrame
         {
             return AbilityData.CreateAbility();
         }
-
-        public IEnumerable<ICastCostChecker> GetCheckers()
-        {
-            return AbilityData.GetCheckers();
-        }
     }
 }

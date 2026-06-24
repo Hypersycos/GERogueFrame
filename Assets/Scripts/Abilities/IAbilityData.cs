@@ -7,7 +7,6 @@ namespace Hypersycos.GERogueFrame
 {
     public interface IAbilityData
     {
-        IEnumerable<ICastCostChecker> GetCheckers();
         Ability CreateAbility();
     }
 }

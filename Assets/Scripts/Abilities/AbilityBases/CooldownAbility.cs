@@ -86,7 +86,10 @@ namespace Hypersycos.GERogueFrame
 
         public override bool IsDirty { get => lastUpdate == NetworkManager.Singleton.ServerTime.Tick; }
 
-        public CooldownAbility(IEnumerable<ICastCostChecker> targets, float cooldown, bool targetOnStart) : base(targets, targetOnStart)
+        public CooldownAbility(float cooldown, int priority, bool chargeAtStart,
+                               Dictionary<int, ICastCostChecker> costCheckers, Dictionary<int, ITargetChecker> targetCheckers, Dictionary<int, ICastEffect> effects,
+                               Dictionary<int, int> costToTarget, Dictionary<int, int> targetToEffect,
+                               List<int> startCheckers, Dictionary<int, int> endCheckers, Dictionary<int, int> updateCheckers, Dictionary<int, int> fixedUpdateCheckers) : base(priority, chargeAtStart, costCheckers, targetCheckers, effects, costToTarget, targetToEffect, startCheckers, endCheckers, updateCheckers, fixedUpdateCheckers)
         {
             _maxCooldown = cooldown;
         }
