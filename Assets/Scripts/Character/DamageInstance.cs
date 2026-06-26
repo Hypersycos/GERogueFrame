@@ -10,7 +10,7 @@ namespace Hypersycos.GERogueFrame
     {
         public bool IsDamage;
         public float Amount;
-        public StatTypeTarget ValidStatTypes;
+        public IStatTypeTarget ValidStatTypes;
         public CharacterState owner { get; private set; } = null;
         [SerializeField, ReadOnly] private float? _ActualAmount = null;
         public HashSet<string> OneTimeEffects = new();
@@ -29,12 +29,12 @@ namespace Hypersycos.GERogueFrame
         public readonly CharacterState.CharacterStateHealthEvent OnApply = new();
         public readonly CharacterState.CharacterStateHealthEvent OnFullApply = new();
 
-        public DamageInstance(bool isDamage, float amount, CharacterState owner, StatTypeTarget validStatTypes) : this(isDamage, amount, validStatTypes)
+        public DamageInstance(bool isDamage, float amount, CharacterState owner, IStatTypeTarget validStatTypes) : this(isDamage, amount, validStatTypes)
         {
             this.owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
 
-        public DamageInstance(bool isDamage, float amount, StatTypeTarget validStatTypes)
+        public DamageInstance(bool isDamage, float amount, IStatTypeTarget validStatTypes)
         {
             IsDamage = isDamage;
             Amount = amount;
@@ -57,7 +57,7 @@ namespace Hypersycos.GERogueFrame
             IsDamage = true;
             Amount = 0;
             owner = null;
-            ValidStatTypes = StatTypeTarget.AllValid;
+            ValidStatTypes = AllValidStatTarget.AllValid;
         }
 
         public void SetOwner(CharacterState Owner)
@@ -68,8 +68,20 @@ namespace Hypersycos.GERogueFrame
         }
     }
 
+    public interface IStatTypeTarget
+    {
+        bool IsExclusive { get; }
+        List<StatType> Types { get; }
+
+        bool IsValid(StatType type)
+        { //No need for inclusive null/empty list, so assume null => AllValid
+            if (Types == null) return true;
+            return Types.Contains(type) ^ IsExclusive;
+        }
+    }
+
     [Serializable]
-    public class StatTypeTarget
+    public class StatTypeTarget : IStatTypeTarget
     {
         public bool IsExclusive = true;
         public List<StatType> Types = new();
@@ -80,17 +92,30 @@ namespace Hypersycos.GERogueFrame
             Types = types;
         }
 
-        public StatTypeTarget()
+        public StatTypeTarget() : this(true, null)
+        {
+        }
+
+        bool IStatTypeTarget.IsExclusive => IsExclusive;
+
+        List<StatType> IStatTypeTarget.Types => Types;
+
+        public static IStatTypeTarget AllValid => AllValidStatTarget.AllValid;
+    }
+
+    [Serializable]
+    public class AllValidStatTarget : IStatTypeTarget
+    {
+        private static AllValidStatTarget _AllValid = new();
+        public static IStatTypeTarget AllValid => _AllValid;
+
+        public bool IsExclusive => true;
+
+        public List<StatType> Types => null;
+
+        public AllValidStatTarget()
         {
 
         }
-
-        public bool IsValid(StatType type)
-        { //No need for inclusive null/empty list, so assume null => AllValid
-            if (Types == null) return true;
-            return Types.Contains(type) ^ IsExclusive;
-        }
-
-        public static StatTypeTarget AllValid => new StatTypeTarget(false, null);
     }
 }

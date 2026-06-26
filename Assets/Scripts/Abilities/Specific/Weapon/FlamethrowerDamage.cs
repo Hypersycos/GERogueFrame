@@ -34,6 +34,11 @@ namespace Hypersycos.GERogueFrame
                 Physics.Raycast(transform.position, (closestPoint - transform.position).normalized, 1, terrainHitMask, QueryTriggerInteraction.Ignore))
                 return;
 
+            ApplyDamage(state);
+        }
+
+        private void ApplyDamage(CharacterState state)
+        {
             if (damageInst != null)
                 state.ApplyDamageInstance(new(damageInst));
             if (dot != null)
@@ -59,7 +64,7 @@ namespace Hypersycos.GERogueFrame
             dot.Amount += dotFalloffPerTick;
         }
 
-        public void Setup(float damage, float range, float angle, float speed, DotStatusInstance dot, CharacterState owner, float falloff)
+        public void Setup(float damage, float range, float angle, float speed, DotStatusInstance dot, CharacterState owner, float falloff, HashSet<CharacterState> preDebounce)
         {
             ticks = (int)(range / speed / Time.fixedDeltaTime);
             falloffPerTick = damage * (falloff - 1) / ticks;
@@ -75,6 +80,11 @@ namespace Hypersycos.GERogueFrame
 
             damageInst = new DamageInstance(true, damage, owner, StatTypeTarget.AllValid);
 
+            debounce = preDebounce ?? new();
+            foreach(CharacterState state in debounce)
+            {
+                ApplyDamage(state);
+            }
             myCollider.enabled = true;
             transform.position += movePerTick;
             myCollider.radius = scalePerTick;

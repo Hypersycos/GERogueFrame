@@ -1,4 +1,5 @@
-﻿using Sirenix.Serialization;
+﻿using Hypersycos.Utils;
+using Sirenix.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,20 +15,20 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects
         [SerializeField] LayerMask mask;
         [SerializeField] float velocity;
         [SerializeField] float maxRange = 10000;
-
-        Transform spawnObj;
+        [SerializeField] float lifetime = 10;
 
         public CreateDumbProjectile()
         {
 
         }
 
-        public CreateDumbProjectile(ProjectileScript obj, LayerMask mask, float velocity, float maxRange)
+        public CreateDumbProjectile(ProjectileScript obj, LayerMask mask, float velocity, float maxRange, float lifetime)
         {
             this.obj = obj;
             this.mask = mask;
             this.velocity = velocity;
             this.maxRange = maxRange;
+            this.lifetime = lifetime;
         }
 
         public bool HasClientCast => false;
@@ -41,7 +42,7 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects
 
         public ICastEffect Clone()
         {
-            return new CreateDumbProjectile(obj, mask, velocity, maxRange);
+            return new CreateDumbProjectile(obj, mask, velocity, maxRange, lifetime);
         }
 
         public AbilityPayload OwnerCast(ITargetPayload targetPayload, CharacterState myState)
@@ -49,8 +50,9 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects
             var target = targetPayload as IDumbProjectileTarget;
             Vector3 fakePos = target.fakePos;
             Vector3 convergePos;
+            Vector3 offsetCameraStart = target.camPosition + target.camForward * Vector3.Dot(fakePos - target.camPosition, target.camForward);
 
-            if (Physics.Raycast(target.camPosition, target.camForward, out RaycastHit hitInfo, maxRange, mask, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(offsetCameraStart, target.camForward, out RaycastHit hitInfo, maxRange, mask, QueryTriggerInteraction.Ignore))
             {
                 convergePos = hitInfo.point;
             }
@@ -60,7 +62,7 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects
             }
             Quaternion fakeRotation = Quaternion.FromToRotation(Vector3.forward, convergePos - fakePos);
             Quaternion camRotation = Quaternion.FromToRotation(Vector3.forward, target.camForward);
-            ProjectileSpawnParams spawnParams = new(fakePos, target.camPosition, camRotation, fakeRotation, convergePos, velocity);
+            ProjectileSpawnParams spawnParams = new(fakePos, offsetCameraStart, camRotation, fakeRotation, convergePos, velocity, lifetime);
             if (ProjectileManager.Singleton.AnticipateDumbProjectile(spawnParams, obj.gameObject, out uint spawnID, out int projectileID, out GameObject spawned))
             {
                 return new ProjectilePayload(spawnParams, projectileID, new(NetworkManager.Singleton.LocalClientId, spawnID));
@@ -81,6 +83,7 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects
                 return null;
             var spawnParams = projPayload.SpawnParams;
             spawnParams.velocity = velocity;
+            spawnParams.lifetime = lifetime;
             spawnParams.fakePosition = target.fakePos;
             spawnParams.fakeRotation = Quaternion.FromToRotation(Vector3.forward, spawnParams.focusPoint - spawnParams.fakePosition);
             ProjectileManager.Singleton.SpawnDumbProjectile(projPayload.SpawnID, obj.gameObject, spawnParams);

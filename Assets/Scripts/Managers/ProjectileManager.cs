@@ -32,9 +32,10 @@ namespace Hypersycos.GERogueFrame
         public Quaternion rotation;
         public Quaternion fakeRotation;
         public Vector3 focusPoint;
+        public float lifetime;
         public float velocity;
 
-        public ProjectileSpawnParams(Vector3 fakePosition, Vector3 position, Quaternion rotation, Quaternion fakeRotation, Vector3 focusPoint, float velocity)
+        public ProjectileSpawnParams(Vector3 fakePosition, Vector3 position, Quaternion rotation, Quaternion fakeRotation, Vector3 focusPoint, float velocity, float lifetime)
         {
             this.fakePosition = fakePosition;
             this.position = position;
@@ -42,6 +43,7 @@ namespace Hypersycos.GERogueFrame
             this.fakeRotation = fakeRotation;
             this.focusPoint = focusPoint;
             this.velocity = velocity;
+            this.lifetime = lifetime;
         }
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -52,6 +54,7 @@ namespace Hypersycos.GERogueFrame
             serializer.SerializeValue(ref fakeRotation);
             serializer.SerializeValue(ref focusPoint);
             serializer.SerializeValue(ref velocity);
+            serializer.SerializeValue(ref lifetime);
         }
     }
 

@@ -34,6 +34,12 @@ MonoBehaviour:
     - Name: AbilityIcon
       Entry: 6
       Data: 
+    - Name: endlag
+      Entry: 4
+      Data: 0
+    - Name: queueFor
+      Entry: 4
+      Data: 0
     - Name: Cooldown
       Entry: 4
       Data: 5
@@ -92,6 +98,9 @@ MonoBehaviour:
     - Name: maxRange
       Entry: 4
       Data: 15
+    - Name: lifetime
+      Entry: 4
+      Data: 0.5
     - Name: 
       Entry: 8
       Data: 

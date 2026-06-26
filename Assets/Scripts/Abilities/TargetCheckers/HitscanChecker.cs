@@ -12,28 +12,32 @@ namespace Hypersycos.GERogueFrame
     class HitscanChecker : ITargetChecker
     {
         [SerializeField] float MaxRange;
+        [SerializeField] float StartEpsilon = 0.01f;
+        [SerializeField] float EndEpsilon = 0;
         [SerializeField] LayerMask HitLayerMask;
         [SerializeField] LayerMask VerifyLayerMask;
         [SerializeField] LayerMask TargetLayerMask;
         [SerializeField] QueryTriggerInteraction TriggerInteraction;
         [SerializeField] bool NoHitIsSuccess;
 
-        public HitscanChecker(float maxRange, LayerMask hitLayerMask, LayerMask targetLayerMask, QueryTriggerInteraction triggerInteraction)
+        public HitscanChecker(float maxRange, LayerMask hitLayerMask, LayerMask targetLayerMask, QueryTriggerInteraction triggerInteraction, float startEpsilon, float endEpsilon)
         {
             MaxRange = maxRange;
             HitLayerMask = hitLayerMask;
             TargetLayerMask = targetLayerMask;
             TriggerInteraction = triggerInteraction;
+            StartEpsilon = startEpsilon;
+            EndEpsilon = endEpsilon;
         }
 
         public ITargetChecker Clone()
         {
-            return new HitscanChecker(MaxRange, HitLayerMask, TargetLayerMask, TriggerInteraction);
+            return new HitscanChecker(MaxRange, HitLayerMask, TargetLayerMask, TriggerInteraction, StartEpsilon, EndEpsilon);
         }
 
         public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out ITargetPayload hit, out AbilityPayload verifyData)
         {
-            bool didHit = Physics.Raycast(camPosition, direction, out RaycastHit info, MaxRange, HitLayerMask, TriggerInteraction);
+            bool didHit = Physics.Raycast(camPosition + direction * StartEpsilon, direction, out RaycastHit info, MaxRange - EndEpsilon, HitLayerMask, TriggerInteraction);
             if (didHit)
             {
                 if ((TargetLayerMask & (1 << info.collider.gameObject.layer)) != 0)

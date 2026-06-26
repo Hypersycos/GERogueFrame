@@ -31,33 +31,33 @@ namespace Hypersycos.GERogueFrame
         Vector3 IDumbProjectileTarget.fakePos => fakePos;
     }
 
-    class DumbProjectileChecker : ITargetChecker
+    public record DumbProjectileCheckerNetwork : AbilityPayload, ITargetPayload
     {
-        private record DumbProjectileCheckerNetwork : AbilityPayload
+        public Vector3 camForward;
+        public Vector3 camPosition;
+
+        public DumbProjectileCheckerNetwork(Vector3 camForward, Vector3 camPosition)
         {
-            public Vector3 camForward;
-            public Vector3 camPosition;
-
-            public DumbProjectileCheckerNetwork(Vector3 camForward, Vector3 camPosition)
-            {
-                this.camForward = camForward;
-                this.camPosition = camPosition;
-            }
-
-            public override void Serialize(FastBufferWriter writer)
-            {
-                writer.WriteValueSafe(camForward);
-                writer.WriteValueSafe(camPosition);
-            }
-
-            public static new AbilityPayload Deserialize(FastBufferReader reader)
-            {
-                reader.ReadValueSafe(out Vector3 camForward);
-                reader.ReadValueSafe(out Vector3 camPosition);
-                return new DumbProjectileCheckerNetwork(camForward, camPosition);
-            }
+            this.camForward = camForward;
+            this.camPosition = camPosition;
         }
 
+        public override void Serialize(FastBufferWriter writer)
+        {
+            writer.WriteValueSafe(camForward);
+            writer.WriteValueSafe(camPosition);
+        }
+
+        public static new AbilityPayload Deserialize(FastBufferReader reader)
+        {
+            reader.ReadValueSafe(out Vector3 camForward);
+            reader.ReadValueSafe(out Vector3 camPosition);
+            return new DumbProjectileCheckerNetwork(camForward, camPosition);
+        }
+    }
+
+    class DumbProjectileChecker : ITargetChecker
+    {
         public string spawnObjectPath;
         public Vector3 offset;
 

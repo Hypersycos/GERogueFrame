@@ -25,10 +25,10 @@ namespace Hypersycos.GERogueFrame
         public override Ability CreateAbility()
         {
             if (Cooldown > 0)
-                return new CooldownAbility(Cooldown, 1, false, new() { { 0, GetChecker() } }, new() { { 0, TargetChecker.Clone() } }, new() { { 0, CastEffect.Clone() } },
+                return new CooldownAbility(Cooldown, 1, false, endlag, queueFor, new() { { 0, GetChecker() } }, new() { { 0, TargetChecker.Clone() } }, new() { { 0, CastEffect.Clone() } },
                                    new() { { 0, 0 } }, new() { { 0, 0 } }, new() { 0 }, new(), new(), new());
             else
-                return new Ability(1, false, new() { { 0, GetChecker()} }, new() { { 0, TargetChecker.Clone()} }, new() { { 0, CastEffect.Clone()} },
+                return new GenericAbility(1, false, endlag, queueFor, new() { { 0, GetChecker()} }, new() { { 0, TargetChecker.Clone()} }, new() { { 0, CastEffect.Clone()} },
                                    new() { { 0, 0} }, new() { { 0, 0} }, new() { 0 }, new(), new(), new());
         }
 

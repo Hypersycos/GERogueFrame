@@ -55,14 +55,13 @@ namespace Hypersycos.GERogueFrame
 
         public override Ability CreateAbility()
         {
-            int i = 0;
             var costCheckers = GetCheckers().Select((value, index) => (value, index)).ToDictionary(pair => pair.index, pair => pair.value.Clone());
             var targetCheckers = TargetCheckers.Select((value, index) => (value, index)).ToDictionary(pair => pair.index, pair => pair.value.Clone());
             var effects = Effects.Select((value, index) => (value, index)).ToDictionary(pair => pair.index, pair => pair.value.Clone());
             if (Cooldown > 0)
-                return new CooldownAbility(Cooldown, 1, false, costCheckers, targetCheckers, effects, costToTarget, targetToEffect, startCheckers, finalCheckers, updateCheckers, fixedUpdateCheckers);
+                return new CooldownAbility(Cooldown, 1, false, endlag, queueFor, costCheckers, targetCheckers, effects, costToTarget, targetToEffect, startCheckers, finalCheckers, updateCheckers, fixedUpdateCheckers);
             else
-                return new Ability(1, false, costCheckers, targetCheckers, effects, costToTarget, targetToEffect, startCheckers, finalCheckers, updateCheckers, fixedUpdateCheckers);
+                return new GenericAbility(1, false, endlag, queueFor, costCheckers, targetCheckers, effects, costToTarget, targetToEffect, startCheckers, finalCheckers, updateCheckers, fixedUpdateCheckers);
         }
 
         public List<ICastCostChecker> GetCheckers()

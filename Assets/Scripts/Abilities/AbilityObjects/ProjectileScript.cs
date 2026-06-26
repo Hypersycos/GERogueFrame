@@ -13,7 +13,13 @@ namespace Hypersycos.GERogueFrame
         public ProjectileID myID { get; private set; }
         public int ownerTeam { get; protected set; }
         public CharacterState owner { get; protected set; }
+        Rigidbody rb;
         [SerializeField] float lifetime;
+        ProjectileSpawnParams spawnParams;
+
+        protected bool isServer = false;
+        protected float targetTime;
+        protected float startTime;
 
         public UnityEvent<ProjectileScript, CharacterState, CharacterState> hitAlly;
         public UnityEvent<ProjectileScript, CharacterState, CharacterState> hitEnemy;
@@ -21,34 +27,52 @@ namespace Hypersycos.GERogueFrame
         public UnityEvent<ProjectileScript> onDespawnServer;
         public UnityEvent<ProjectileScript> onDespawnClient;
 
-        void SetLinearVelocity(float velocity)
+        protected virtual Vector3 GetDummyPosition(float time)
         {
-            GetComponent<Rigidbody>().linearVelocity = transform.rotation * Vector3.forward * velocity;
+            float progress = time - startTime;
+            return spawnParams.fakePosition + spawnParams.fakeRotation * Vector3.forward * spawnParams.velocity * progress;
+        }
+        protected virtual Vector3 GetServerPosition(float time)
+        {
+            float progress = time - startTime;
+            return spawnParams.position + spawnParams.rotation * Vector3.forward * spawnParams.velocity * progress;
         }
 
-        public void Anticipate(ProjectileSpawnParams spawnParams)
+        public virtual void Common(ProjectileSpawnParams spawnParams)
         {
-            SetLinearVelocity(spawnParams.velocity);
-            enabled = false;
-        }
-
-        public void Dummy(ProjectileID ID, ProjectileSpawnParams spawnParams)
-        {
-            SetLinearVelocity(spawnParams.velocity);
-            enabled = false;
-        }
-
-        public void Server(ProjectileID ID, ProjectileSpawnParams spawnParams)
-        {
-            SetLinearVelocity(spawnParams.velocity);
-            GetComponent<Collider>().enabled = true;
-            myID = ID;
-            owner = NetworkManager.Singleton.ConnectedClients[ID.ownerID].PlayerObject.GetComponent<CharacterState>();
-            ownerTeam = owner.Team;
+            startTime = Time.time;
+            enabled = true;
+            this.spawnParams = spawnParams;
+            targetTime = (spawnParams.focusPoint - spawnParams.position).magnitude / spawnParams.velocity + startTime;
             enabled = true;
         }
 
-        private void OnTriggerEnter(Collider other)
+        public virtual void Anticipate(ProjectileSpawnParams spawnParams)
+        {
+            lifetime = spawnParams.lifetime * 2;
+            Common(spawnParams);
+        }
+
+        public virtual void Dummy(ProjectileID ID, ProjectileSpawnParams spawnParams)
+        {
+            lifetime = spawnParams.lifetime * 2;
+            Common(spawnParams);
+        }
+
+        public virtual void Server(ProjectileID ID, ProjectileSpawnParams spawnParams)
+        {
+            lifetime = spawnParams.lifetime;
+            GetComponent<Collider>().enabled = true;
+            GetComponent<Renderer>().enabled = false;
+            myID = ID;
+            owner = NetworkManager.Singleton.ConnectedClients[ID.ownerID].PlayerObject.GetComponent<CharacterState>();
+            ownerTeam = owner.Team;
+            isServer = true;
+
+            Common(spawnParams);
+        }
+
+        protected void OnTriggerEnter(Collider other)
         {
             if (other.gameObject.TryGetComponent(out CharacterState state))
             {
@@ -67,11 +91,35 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
-        private void FixedUpdate()
+        protected virtual void FixedUpdate()
         {
             lifetime -= Time.fixedDeltaTime;
             if (lifetime <= 0)
-                DespawnThis();
+            {
+                if (isServer)
+                    DespawnThis();
+                else
+                    Destroy(gameObject);
+            }
+            
+            if (!isServer)
+            {
+                Vector3 dummyPos = GetDummyPosition(Time.time);
+                Vector3 serverPos = GetServerPosition(Time.time);
+                float lerp = (Time.time - startTime) / (targetTime - startTime);
+                if (lerp >= 1)
+                    rb.MovePosition(serverPos);
+                else
+                    rb.MovePosition(dummyPos * (1 - lerp) + serverPos * lerp);
+            }
+            else
+                rb.MovePosition(GetServerPosition(Time.time));
+        }
+
+        void Awake()
+        {
+            rb = GetComponent<Rigidbody>();
+            rb.isKinematic = true;
         }
 
         public void DespawnThis()
@@ -93,6 +141,7 @@ namespace Hypersycos.GERogueFrame
 
         public void DespawnVisual(Vector3 position)
         {
+            enabled = false;
             transform.position = position;
             onDespawnClient?.Invoke(this);
         }

@@ -41,7 +41,10 @@ namespace Hypersycos.GERogueFrame
         private void Awake()
         {
             myState = GetComponent<PlayerState>();
-            playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
+            if (IsOwner)
+                playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
+            else
+                playerCamera = transform.Find("CameraPos").gameObject;
 
             controlWrapper = ControlsWrapper.Singleton;
         }
@@ -67,12 +70,9 @@ namespace Hypersycos.GERogueFrame
         {
             if (currentlyCasting != null)
             {
-/*                if (IsOwner)
-                    currentlyCasting.currentEffect.OwnerCastUpdate();
-                if (IsServer)
-                    currentlyCasting.currentEffect.ServerCastUpdate();
-                if (IsClient)
-                    currentlyCasting.currentEffect.ClientCastUpdate();*/
+                Vector3 cameraForward = playerCamera.transform.forward;
+                Vector3 cameraPos = playerCamera.transform.position;
+                currentlyCasting.CastingUpdate(cameraForward, transform.position, cameraPos, myState);
             }
 
             foreach (Ability ability in abilityMap.Keys)
@@ -83,31 +83,44 @@ namespace Hypersycos.GERogueFrame
 
         private void FixedUpdate()
         {
-            if (currentlyCasting != null && currentlyCasting.currentID != -1)
+            if (currentlyCasting != null)
             {
-/*                if (IsOwner)
-                    currentlyCasting.currentEffect.OwnerCastFixedUpdate();
-                if (IsServer)
-                    currentlyCasting.currentEffect.ServerCastFixedUpdate();
-                if (IsClient)
-                    currentlyCasting.currentEffect.ClientCastFixedUpdate();*/
+                Vector3 cameraForward = playerCamera.transform.forward;
+                Vector3 cameraPos = playerCamera.transform.position;
+                currentlyCasting.CastingFixedUpdate(cameraForward, transform.position, cameraPos, myState);
             }
 
             foreach (Ability ability in abilityMap.Keys)
             {
                 ability.FixedUpdate(myState);
+                if (ability.IsDirty)
+                {
+                    SyncAbilityRpc(abilityMap[ability], ability.Sync());
+                }
             }
+        }
+
+        [Rpc(SendTo.ClientsAndHost)]
+        private void SyncAbilityRpc(uint id, AbilityNetworkPayload payload)
+        {
+            Ability ability = abilityMap[id];
+            ability.SyncClient(payload);
+            if (IsOwner && ability.HasOwnerSync)
+                ability.SyncOwner(payload);
         }
 
         #region CastAbility
         private void CastAbility(Ability ability, bool isEnd)
         {
+            if (!ability.chargeAtStart && !isEnd)
+                return;
+
             if (currentlyCasting == null)
                 currentlyCasting = ability;
             else if (!isEnd || currentlyCasting != ability)
                 return;
 
-            if (ability.chargeAtStart && !isEnd)
+            if (!ability.chargeAtStart && !isEnd)
             {
                 if (!ability.CanCast(myState))
                     currentlyCasting = null;
@@ -116,25 +129,25 @@ namespace Hypersycos.GERogueFrame
 
             Vector3 cameraForward = playerCamera.transform.forward;
             Vector3 cameraPos = playerCamera.transform.position;
-            bool success = ability.OwnerCast(cameraForward, transform.position, cameraPos, myState, out AbilityPayload verifyData, out AbilityPayload abilityPayload);
+            bool success = ability.OwnerCast(cameraForward, transform.position, cameraPos, myState, out int chosenEffect, out AbilityPayload verifyData, out AbilityPayload abilityPayload);
             if (success)
             {
                 if (IsHost)
                 {
-                    ServerCastAbility(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial, verifyData, abilityPayload);
+                    ServerCastAbility(abilityMap[ability], chosenEffect, NetworkManager.ServerTime.TickWithPartial, verifyData, abilityPayload);
                 }
                 else
                 {
                     if (abilityPayload != null)
                         if (verifyData != null)
-                            CastAbilityRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial, verifyData, abilityPayload);
+                            CastAbilityRpc(abilityMap[ability], chosenEffect, NetworkManager.ServerTime.TickWithPartial, verifyData, abilityPayload);
                         else
-                            CastAbilityPayloadRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial, abilityPayload);
+                            CastAbilityPayloadRpc(abilityMap[ability], chosenEffect, NetworkManager.ServerTime.TickWithPartial, abilityPayload);
                     else
                         if (verifyData != null)
-                            CastAbilityVerifyRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial, verifyData);
+                            CastAbilityVerifyRpc(abilityMap[ability], chosenEffect, NetworkManager.ServerTime.TickWithPartial, verifyData);
                         else
-                            CastAbilityRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial);
+                            CastAbilityRpc(abilityMap[ability], chosenEffect, NetworkManager.ServerTime.TickWithPartial);
                 }
             }
             
@@ -153,13 +166,13 @@ namespace Hypersycos.GERogueFrame
                 return;
             }
 
-            bool success = ability.ServerCast(effectID, verifyData, abilityPayload, myState, out AbilityPayload payload);
+            bool success = ability.ServerCast(effectID, verifyData, abilityPayload, myState, out int chosenEffect, out AbilityPayload payload);
             if (success)
             {
                 if (payload != null)
-                    AbilityCastPayloadRpc(abilityMap[ability], ability.currentID, time, payload);
+                    AbilityCastPayloadRpc(abilityMap[ability], chosenEffect, time, payload);
                 else
-                    AbilityCastRpc(abilityMap[ability], ability.currentID, time);
+                    AbilityCastRpc(abilityMap[ability], chosenEffect, time);
 
                 if (!ability.chargeAtStart)
                     currentlyCasting = null;
@@ -205,20 +218,9 @@ namespace Hypersycos.GERogueFrame
         private void AbilityCast(uint id, int effectID, double time, AbilityPayload payload)
         {
             Ability ability = abilityMap[id];
-            if (!ability.chargeAtStart)
+            if (ability.chargeAtStart)
                 currentlyCasting = ability;
-            ability.currentID = effectID;
-            var effect = ability.effects[ability.targetToEffect[ability.costToTarget[effectID]]];
-            if (IsHost)
-            {
-                if (effect.HasOwnerClientCast)
-                    effect.ClientCast(payload);
-            }
-            else
-            {
-                if (effect.HasClientCast)
-                    effect.ClientCast(payload);
-            }
+            ability.ClientCast(effectID, payload, myState);
         }
 
         [Rpc(SendTo.ClientsAndHost)]
@@ -237,14 +239,14 @@ namespace Hypersycos.GERogueFrame
         #region EndCast
         private void EndCastAbility(Ability ability)
         {
-            if (currentlyCasting != ability)
-                return;
-
-            if (!currentlyCasting.chargeAtStart)
+            if (!ability.chargeAtStart && currentlyCasting == null)
             {
                 CastAbility(ability, true);
                 return;
             }
+
+            if (currentlyCasting != ability)
+                return;
 
             Vector3 cameraForward = playerCamera.transform.forward;
             Vector3 cameraPos = playerCamera.transform.position;
@@ -327,17 +329,7 @@ namespace Hypersycos.GERogueFrame
         private void AbilityCastEnd(double time, AbilityPayload payload)
         {
             var ability = currentlyCasting;
-            var effect = ability.effects[ability.targetToEffect[ability.costToTarget[currentlyCasting.currentID]]];
-            if (IsHost)
-            {
-                if (effect.HasOwnerClientCast)
-                    effect.ClientCast(payload);
-            }
-            else
-            {
-                if (effect.HasClientCast)
-                    effect.ClientCast(payload);
-            }
+            ability.ClientCastEnd(payload, myState);
         }
 
         [Rpc(SendTo.ClientsAndHost)]

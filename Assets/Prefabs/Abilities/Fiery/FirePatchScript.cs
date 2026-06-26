@@ -19,7 +19,7 @@ namespace Hypersycos.GERogueFrame
 
         List<CharacterState> victims = new();
         List<float> timers = new();
-        StatTypeTarget ValidStatTypes = StatTypeTarget.AllValid;
+        IStatTypeTarget ValidStatTypes = StatTypeTarget.AllValid;
 
         private void Start()
         {
