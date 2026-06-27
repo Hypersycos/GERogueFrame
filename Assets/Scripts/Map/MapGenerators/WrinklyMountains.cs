@@ -1,44 +1,69 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace Hypersycos.GERogueFrame
 {
     class WrinklyMountains : IMapGenerator
     {
-        int octaves = 7;
+        public struct WrinklyMountainsJob : IJobParallelFor
+        {
+            public NativeArray<float> HeightMap;
+            public int Width;
+            public int Height;
+            public void Execute(int index)
+            {
+                int x = index % Width;
+                int y = index / Width;
+
+                HeightMap[index] = GetValue(x, y);
+            }
+        }
+
+        const int octaves = 7;
         const float perlinScale = 0.01f / 16 / 2;
-        Vector2[] octaveOffsets;
-        static List<Func<Vector2, float>> generators = new() { gen2, gen1, gen1, gen1, gen1, gen1, gen2, noise };
+        static Vector2[] octaveOffsets;
+        static List<Func<float, float, float>> generators = new() { gen2, gen1, gen1, gen1, gen1, gen1, gen2, noise };
 
-        private static float noise(Vector2 v) => Mathf.PerlinNoise(v.x, v.y);
+        private static float noise(float x, float y) => Mathf.PerlinNoise(x, y);
 
-        private static float gen1(Vector2 v)
+        private static float gen1(float x, float y)
         {
-            Vector2 q = new Vector2(noise(v), noise(v + new Vector2(5.2f, 1.3f)));
+            float qx = noise(x, y);
+            float qy = noise(x + 5.2f, y + 1.3f);
 
-            return noise(v + 4 * q);
+            return noise(x + 4 * qx, y + 4 * qy);
         }
 
-        private static float gen2(Vector2 v)
+        private static float gen2(float x, float y)
         {
-            Vector2 q = new Vector2(noise(v), noise(v + new Vector2(5.2f, 1.3f)));
-            Vector2 r = new Vector2(noise(v + 4 * q + new Vector2(1.7f, 9.2f)),
-                                    noise(v + 4 * q + new Vector2(8.3f, 2.8f)));
+            float qx = noise(x, y);
+            float qy = noise(x + 5.2f, y + 1.3f);
 
-            return noise(v + 4 * r);
+            float rx = noise(x + 4 * qx + 1.7f, y + 4 * qy + 9.2f);
+            float ry = noise(x + 4 * qx + 8.3f, y + 4 * qy + 2.8f);
+
+            return noise(x + 4 * rx, y + 4 * ry);
         }
-        public float GetValue(int x, int y)
+        public static float GetValue(int x, int y)
         {
-            Vector2 p = new Vector2(x, y) * perlinScale;
-            float result = generators[0](p + octaveOffsets[0]);
+            float px = x * perlinScale;
+            float py = y * perlinScale;
+            float result = generators[0](px + octaveOffsets[0].x, py + octaveOffsets[0].y);
 
             for (int i = 1; i < octaves; i++)
             {
                 float mask = Mathf.SmoothStep(1.0f, i > 4 ? 0.5f : 0.15f, result);
 
-                Vector2 op = p * (1 << i) + octaveOffsets[i];
-                float octave = generators[i](op) - .5f;
+                float opx = px * (1 << i) + octaveOffsets[i].x;
+                float opy = py * (1 << i) + octaveOffsets[i].y;
+                float octave = generators[i](opx, opy) - .5f;
                 result += octave * mask / (1 << i);
 
                 if (i == 4 && result <= 0.3f)
@@ -47,7 +72,7 @@ namespace Hypersycos.GERogueFrame
             return result;
         }
 
-        public void Setup(int seed, out float resolution, out float heightScale)
+        public async Task Setup(int seed, int width, int height, GameObject parent)
         {
             octaveOffsets = new Vector2[octaves];
 
@@ -61,8 +86,42 @@ namespace Hypersycos.GERogueFrame
                 octaveOffsets[o] = new Vector2(offsetX, offsetY);
             }
 
-            resolution = 2;
-            heightScale = 100;
+            width = Mathf.FloorToInt(width * 2);
+            height = Mathf.FloorToInt(height * 2);
+
+            //TODO: Replace with AddComponent
+            var drawer = parent.GetComponent<TerrainDrawer>();
+            drawer.scale = new Vector3(1f / 2, 100, 1f / 2);
+
+            Debug.Log("SetSize");
+            drawer.SetSize(width, height, out float[] heightMap, out int hMapX, out int hMapY);
+
+            Debug.Log("Running in paralell");
+            await Task.Run(() =>
+            {
+                Parallel.For(0, hMapY, (j) =>
+                {
+                    for (int i = 0; i < hMapX; ++i)
+                    {
+                        heightMap[i + hMapX * j] = GetValue(i, j);
+                    }
+                });
+            });
+
+            /*            NativeArray<float> heights = new NativeArray<float>(hMapX * hMapY, Allocator.Persistent);
+                        var job = new WrinklyMountainsJob()
+                        {
+                            HeightMap = heights,
+                            Width = hMapX
+                        };
+
+                        JobHandle handle = job.Schedule(hMapX * hMapY, 64);
+                        handle.Complete();
+                        heights.CopyTo(heightMap);
+                        heights.Dispose();*/
+
+            Debug.Log("Building Meshes");
+            await drawer.BuildMeshes();
         }
     }
 }

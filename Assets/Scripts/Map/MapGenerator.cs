@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -8,37 +9,45 @@ namespace Hypersycos.GERogueFrame
 {
     public interface IMapGenerator
     {
-        public void Setup(int seed, out float resolution, out float heightScale);
-        public float GetValue(int x, int y);
+        public Task Setup(int seed, int width, int height, GameObject parent);
     }
 
-    [RequireComponent(typeof(TerrainDrawer))]
     public class MapGenerator : MonoBehaviour
     {
+        public MapGeneratorSO so;
+
+        Task generator;
+
+        float time = 0;
         public void Start()
         {
-            GenerateFromSeed(UnityEngine.Random.Range(0, 10000), 1000, 1000, new LowPolyFields());
+            //generator = GenerateFromSeed(UnityEngine.Random.Range(0, 10000), 1000, 1000, so);
         }
 
-        public void GenerateFromSeed(int seed, int width, int height, IMapGenerator generator)
+        public async Task GenerateFromSeed(int seed, int width, int height, MapGeneratorSO generator)
         {
-            generator.Setup(seed, out float resolution, out float heightScale);
+            GameObject prefab = Instantiate(generator.worldPrefab, transform);
+            await generator.generator.Setup(seed, width, height, prefab);
+        }
 
-            width = Mathf.FloorToInt(width * resolution);
-            height = Mathf.FloorToInt(height * resolution);
-
-            var drawer = GetComponent<TerrainDrawer>();
-            drawer.scale = new Vector3(1 / resolution, heightScale, 1 / resolution);
-            drawer.SetSize(width, height, out float[,] heightMap);
-
-            for (int j = 0; j < heightMap.GetLength(1); ++j)
+        public void Update()
+        {
+            time += Time.deltaTime;
+            if (generator == null)
             {
-                for (int i = 0; i < heightMap.GetLength(0); ++i)
+                if (time > 3)
                 {
-                    heightMap[i, j] = generator.GetValue(i, j);
+                    time = 0;
+                    Debug.Log("Starting generation!");
+                    generator = GenerateFromSeed(UnityEngine.Random.Range(0, 10000), 1000, 1000, so);
                 }
             }
-            drawer.BuildMeshes();
+            else if (generator.IsCompleted)
+            {
+                Debug.Log($"Took {time}s to generate.");
+                time = -1000000;
+                generator = null;
+            }
         }
     }
 }

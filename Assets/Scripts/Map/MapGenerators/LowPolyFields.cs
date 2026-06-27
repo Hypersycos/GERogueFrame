@@ -1,4 +1,4 @@
-﻿using System;
+﻿/*using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,7 +27,7 @@ namespace Hypersycos.GERogueFrame
             return result;
         }
 
-        public void Setup(int seed, out float resolution, out float heightScale)
+        public void Setup(int seed, int width, int height, GameObject parent)
         {
             octaveOffsets = new Vector2[octaves];
 
@@ -40,9 +40,7 @@ namespace Hypersycos.GERogueFrame
                 float offsetY = rand.Next(-100, 100);
                 octaveOffsets[o] = new Vector2(offsetX, offsetY);
             }
-
-            resolution = 0.008f;
-            heightScale = 40;
         }
     }
 }
+*/

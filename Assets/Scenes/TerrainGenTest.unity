@@ -128,7 +128,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1370665899}
-  - component: {fileID: 1370665898}
+  - component: {fileID: 1370665900}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -136,22 +136,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1370665898
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1370665897}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed3430902c6f52545b8e8090f35631d5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  xSize: 1000
-  zSize: 1000
-  terrainRenderer: {fileID: 8931258611260301504, guid: e62c2897ef7a3324a8d6c72e22dd9b39, type: 3}
-  scale: {x: 1, y: 50, z: 1}
 --- !u!4 &1370665899
 Transform:
   m_ObjectHideFlags: 0
@@ -167,6 +151,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1370665900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1370665897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56c4e8f0121d8e249b366a581d1d1fae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.MapGenerator
+  so: {fileID: 11400000, guid: 7ceb3b51ac0709e46b85fa7e93dc2ff6, type: 2}
 --- !u!1 &1540271719
 GameObject:
   m_ObjectHideFlags: 0
