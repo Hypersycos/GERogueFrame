@@ -39,7 +39,7 @@ namespace Hypersycos.GERogueFrame
                 {
                     time = 0;
                     Debug.Log("Starting generation!");
-                    generator = GenerateFromSeed(UnityEngine.Random.Range(0, 10000), 1000, 1000, so);
+                    generator = GenerateFromSeed(UnityEngine.Random.Range(0, 10000), 2000, 2000, so);
                 }
             }
             else if (generator.IsCompleted)

@@ -94,7 +94,10 @@ namespace Hypersycos.GERogueFrame
             drawer.scale = new Vector3(1f / 2, 100, 1f / 2);
 
             Debug.Log("SetSize");
-            drawer.SetSize(width, height, out float[] heightMap, out int hMapX, out int hMapY);
+            Tuple<float[], int, int> sizes = await drawer.SetSize(width, height);
+            float[] heightMap = sizes.Item1;
+            int hMapX = sizes.Item2;
+            int hMapY = sizes.Item3;
 
             Debug.Log("Running in paralell");
             await Task.Run(() =>

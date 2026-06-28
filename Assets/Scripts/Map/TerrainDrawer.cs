@@ -1,7 +1,9 @@
 using Hypersycos.Utils;
+using System;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class TerrainDrawer : MonoBehaviour
@@ -36,7 +38,7 @@ public class TerrainDrawer : MonoBehaviour
     const int maxChunkWidth = (1 << 8) - 3;
     const int maxChunkHeight = (1 << 8) - 3;
 
-    public void SetSize(int x, int z, out float[] heightmap, out int hMapX, out int hMapY)
+    public async Task<Tuple<float[], int, int>> SetSize(int x, int z)
     {
         xSize = x;
         zSize = z;
@@ -49,9 +51,6 @@ public class TerrainDrawer : MonoBehaviour
         int totalMeshCount = meshCount.x * meshCount.y;
 
         heightMap = new float[(x+2) * (z+2)];
-        heightmap = heightMap;
-        hMapX = x + 2;
-        hMapY = z + 2;
 
         triangles = new int[totalMeshCount][];
         vertices = new Vector3[totalMeshCount][];
@@ -72,8 +71,14 @@ public class TerrainDrawer : MonoBehaviour
             obj.transform.position = new Vector3(i % meshCount.x * maxChunkWidth + xOffset, 0, i / meshCount.x * maxChunkHeight + zOffset);
         }
 
-        for (int m = 0; m < meshCount.x * meshCount.y; m++)
+        /*
+        await Task.Run(() =>
         {
+            Parallel.For(0, meshCount.x * meshCount.y, (m) =>
+            {
+         */
+        for (int m = 0; m < meshCount.x * meshCount.y; m++)
+        { 
             int width;
             int height;
             if (meshCount.x == 1)
@@ -103,6 +108,8 @@ public class TerrainDrawer : MonoBehaviour
                 }
             }
         }
+
+        return new(heightMap, x + 2, z + 2);
     }
 
     public int BuildTriangle(int i, int j, int k, Vector3[] vertices, int[] triangles, int width, float minimumThreshold, float maximumThreshold)

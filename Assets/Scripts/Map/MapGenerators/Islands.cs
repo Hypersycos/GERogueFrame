@@ -176,8 +176,13 @@ namespace Hypersycos.GERogueFrame
             topDrawer.scale = new Vector3(1f, 80, 1f);
             botDrawer.scale = new Vector3(1, -1, 1);
 
-            topDrawer.SetSize(width, height, out float[] heightMap, out int hMapWidth, out int hMapHeight);
-            botDrawer.SetSize(width, height, out float[] botHeightMap, out _, out _);
+            Tuple<float[], int, int> sizes = await topDrawer.SetSize(width, height);
+            float[] heightMap = sizes.Item1;
+            int hMapWidth = sizes.Item2;
+            int hMapHeight = sizes.Item3;
+
+            Tuple<float[], int, int> sizes2 = await botDrawer.SetSize(width, height);
+            float[] botHeightMap = sizes2.Item1;
 
             await Task.Run(() =>
             {
