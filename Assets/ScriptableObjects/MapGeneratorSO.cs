@@ -12,5 +12,8 @@ namespace Hypersycos.GERogueFrame
     {
         [OdinSerialize, ShowInInspector] public IMapGenerator generator;
         public GameObject worldPrefab;
+
+        public string Name;
+        public string Description;
     }
 }

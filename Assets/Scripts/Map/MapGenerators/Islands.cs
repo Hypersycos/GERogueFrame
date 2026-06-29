@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -16,6 +17,8 @@ namespace Hypersycos.GERogueFrame
         static List<Func<float, float, float>> baseGenerators = new() { noise, gen1 };
         static List<Func<float, float, float>> topGenerators = new() { gen2, gen1, gen2 };
         static List<Func<float, float, float>> botGenerators = new() { noise, gen1, gen2 };
+
+        Tuple<float[], int, int> heightMapData;
 
         private static float noise(float x, float y) => Mathf.PerlinNoise(x, y);
 
@@ -152,7 +155,7 @@ namespace Hypersycos.GERogueFrame
             return result;
         }
 
-        public async Task Setup(int seed, int width, int height, GameObject parent)
+        public async Task Setup(int seed, int width, int height, GameObject parent, IProgress<float> progress)
         {
             octaveOffsets = new Vector2[Mathf.Max(botOctaves, topOctaves) + baseOctaves];
 
@@ -176,13 +179,21 @@ namespace Hypersycos.GERogueFrame
             topDrawer.scale = new Vector3(1f, 80, 1f);
             botDrawer.scale = new Vector3(1, -1, 1);
 
-            Tuple<float[], int, int> sizes = await topDrawer.SetSize(width, height);
-            float[] heightMap = sizes.Item1;
-            int hMapWidth = sizes.Item2;
-            int hMapHeight = sizes.Item3;
+            heightMapData = await topDrawer.SetSize(width, height);
+            float[] heightMap = heightMapData.Item1;
+            int hMapWidth = heightMapData.Item2;
+            int hMapHeight = heightMapData.Item3;
 
             Tuple<float[], int, int> sizes2 = await botDrawer.SetSize(width, height);
             float[] botHeightMap = sizes2.Item1;
+
+            int progressCount = 0;
+
+            void updateProgress()
+            {
+                Interlocked.Increment(ref progressCount);
+                progress.Report((progressCount * 200) / (hMapWidth * 8f));
+            }
 
             await Task.Run(() =>
             {
@@ -192,6 +203,8 @@ namespace Hypersycos.GERogueFrame
                     {
                         heightMap[i + j * hMapWidth] = GetValueTop(i, j);
                     }
+                    if (j % 200 == 99)
+                        updateProgress();
                 });
 
                 Parallel.For(0, hMapHeight, (j) =>
@@ -200,11 +213,70 @@ namespace Hypersycos.GERogueFrame
                     {
                         botHeightMap[i + j * hMapWidth] = GetValueBot(i, j);
                     }
+                    if (j % 200 == 99)
+                        updateProgress();
                 });
             });
 
-            await topDrawer.BuildMeshes(0.45f, 1);
-            await botDrawer.BuildMeshes(0.45f, 1);
+            Progress<float> buildProgress = new Progress<float>();
+            EventHandler<float> update = (_, x) => progress.Report(x * 3f / 8 + .25f);
+            buildProgress.ProgressChanged += update;
+            await topDrawer.BuildMeshes(buildProgress, 0.45f, 1);
+
+            buildProgress.ProgressChanged -= update;
+            update = (_, x) => progress.Report(x * 3f / 8 + 5f / 8);
+            buildProgress.ProgressChanged += update;
+            await botDrawer.BuildMeshes(buildProgress, 0.45f, 1);
+        }
+
+        public void GetSpawnPoint(int count, out Vector3[] positions, out Quaternion[] rotations)
+        {
+            float rotation = 360 / count;
+            float distance = count * 15 / (2 * Mathf.PI);
+
+            positions = new Vector3[count];
+            rotations = new Quaternion[count];
+
+            bool succeeded = false;
+
+            while (!succeeded)
+            {
+                Vector3 basePos = new Vector3(UnityEngine.Random.Range(-heightMapData.Item2, heightMapData.Item2), 0, UnityEngine.Random.Range(-heightMapData.Item3, heightMapData.Item3)) * 0.4f;
+                succeeded = true;
+
+                for (int i = 0; i < count; i++)
+                {
+                    rotations[i] = Quaternion.AngleAxis(rotation * i, Vector3.up);
+                    positions[i] = basePos + rotations[i] * (Vector3.forward * distance);// + Vector3.up * 2;
+                    Vector3 heightmapPos = positions[i] + new Vector3(heightMapData.Item2, heightMapData.Item3) / 2;
+
+                    int minX = Mathf.FloorToInt(heightmapPos.x);
+                    int minY = Mathf.FloorToInt(heightmapPos.z);
+
+                    try
+                    {
+                        int index1 = heightMapData.Item2 * minY + minX;
+                        int index2 = heightMapData.Item2 * (minY + 1) + minX;
+                        float maxHeight = Mathf.Max(heightMapData.Item1[index1], heightMapData.Item1[index1 + 1], heightMapData.Item1[index2], heightMapData.Item1[index2 + 1]);
+                        float minHeight = Mathf.Min(heightMapData.Item1[index1], heightMapData.Item1[index1 + 1], heightMapData.Item1[index2], heightMapData.Item1[index2 + 1]);
+
+                        if (minHeight < 0.51f)
+                        {
+                            succeeded = false;
+                            break;
+                        }
+
+                        positions[i].y = maxHeight * 80 + 2;
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Debug.LogException(e);
+                        Debug.Log($"{minX}, {minY}");
+                        succeeded = false;
+                        break;
+                    }
+                }
+            }
         }
     }
 }

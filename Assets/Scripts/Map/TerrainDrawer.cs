@@ -67,47 +67,47 @@ public class TerrainDrawer : MonoBehaviour
             obj.name = $"{i}: {i % meshCount.x},{i / meshCount.x}";
             meshes[i] = new();
             obj.GetComponent<MeshFilter>().mesh = meshes[i];
-            obj.GetComponent<MeshCollider>().sharedMesh = meshes[i];
+            //obj.GetComponent<MeshCollider>().sharedMesh = meshes[i];
             obj.transform.position = new Vector3(i % meshCount.x * maxChunkWidth + xOffset, 0, i / meshCount.x * maxChunkHeight + zOffset);
         }
 
-        /*
+        /*        for (int m = 0; m < meshCount.x * meshCount.y; m++)
+        { */
+
         await Task.Run(() =>
         {
             Parallel.For(0, meshCount.x * meshCount.y, (m) =>
             {
-         */
-        for (int m = 0; m < meshCount.x * meshCount.y; m++)
-        { 
-            int width;
-            int height;
-            if (meshCount.x == 1)
-                width = x;
-            else if (m % meshCount.x == meshCount.x - 1)
-                width = x - maxChunkWidth * (meshCount.x - 1);
-            else
-                width = maxChunkWidth + 1;
+                int width;
+                int height;
+                if (meshCount.x == 1)
+                    width = x;
+                else if (m % meshCount.x == meshCount.x - 1)
+                    width = x - maxChunkWidth * (meshCount.x - 1);
+                else
+                    width = maxChunkWidth + 1;
 
-            if (meshCount.y == 1)
-                height = z;
-            else if (m / meshCount.x >= meshCount.y - 1)
-                height = z - maxChunkHeight * (meshCount.y - 1);
-            else
-                height = maxChunkHeight + 1;
+                if (meshCount.y == 1)
+                    height = z;
+                else if (m / meshCount.x >= meshCount.y - 1)
+                    height = z - maxChunkHeight * (meshCount.y - 1);
+                else
+                    height = maxChunkHeight + 1;
 
-            sizes[m] = new(width, height);
+                sizes[m] = new(width, height);
 
-            triangles[m] = new int[(width - 1) * (height - 1) * 6];
-            vertices[m] = new Vector3[width * height];
-            for (int j = 0; j < height; j++)
-            {
-                for (int i = 0; i < width; i++)
+                triangles[m] = new int[(width - 1) * (height - 1) * 6];
+                vertices[m] = new Vector3[width * height];
+                for (int j = 0; j < height; j++)
                 {
-                    vertices[m][i + j * width].x = i;
-                    vertices[m][i + j * width].z = j;
+                    for (int i = 0; i < width; i++)
+                    {
+                        vertices[m][i + j * width].x = i;
+                        vertices[m][i + j * width].z = j;
+                    }
                 }
-            }
-        }
+            });
+        });
 
         return new(heightMap, x + 2, z + 2);
     }
@@ -168,7 +168,7 @@ public class TerrainDrawer : MonoBehaviour
         return k;
     }
 
-    public async Task BuildMeshes(float minimumThreshold=0, float maximumThreshold=1)
+    public async Task BuildMeshes(IProgress<float> progress, float minimumThreshold=0, float maximumThreshold=1)
     {
         if (minimumThreshold <= 0)
             minimumThreshold = float.MinValue;
@@ -177,6 +177,14 @@ public class TerrainDrawer : MonoBehaviour
 
         int[][] trianglesWithEdges = new int[meshCount.x * meshCount.y][];
         Vector3[][] verticesWithEdges = new Vector3[meshCount.x * meshCount.y][];
+
+        int[] progressTracker = new int[meshCount.x * meshCount.y];
+
+        void updateProgress(int m)
+        {
+            progressTracker[m]++;
+            progress.Report(progressTracker.Sum() / (4f * meshCount.x * meshCount.y));
+        }
 
         await Task.Run(() =>
         {
@@ -210,6 +218,7 @@ public class TerrainDrawer : MonoBehaviour
                         vertices[m][i + j * width].y = heightMap[i + xBase + (j + yBase) * (xSize + 2)];
                     }
                 }
+                updateProgress(m);
 
                 int k = 0;
                 for (int j = 0; j < height - 1; j++)
@@ -228,6 +237,7 @@ public class TerrainDrawer : MonoBehaviour
                         k = BuildTriangle(i, j, k, verticesWithEdges[m], trianglesWithEdges[m], edgeWidth, float.MinValue, float.MaxValue);
                     }
                 }
+                updateProgress(m);
             });
         });
 
@@ -246,6 +256,7 @@ public class TerrainDrawer : MonoBehaviour
             meshes[m].triangles = trianglesWithEdges[m];
             meshes[m].RecalculateNormals();
             meshes[m].RecalculateTangents();
+            updateProgress(m);
 
             Vector3[] normals = meshes[m].normals;
             Vector4[] tangents = meshes[m].tangents;
@@ -270,8 +281,16 @@ public class TerrainDrawer : MonoBehaviour
             meshes[m].triangles = triangles[m];
             meshes[m].normals = croppedNormals;
             meshes[m].tangents = croppedtangents;
+
+            updateProgress(m);
         }
 
         transform.localScale = scale;
+
+        foreach(MeshCollider collider in GetComponentsInChildren<MeshCollider>())
+        {
+            collider.sharedMesh = collider.GetComponent<MeshFilter>().mesh;
+            collider.providesContacts = true;
+        }
     }
 }

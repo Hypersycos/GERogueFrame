@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Unity.Burst;
 using Unity.Collections;
@@ -12,24 +13,12 @@ namespace Hypersycos.GERogueFrame
 {
     class WrinklyMountains : IMapGenerator
     {
-        public struct WrinklyMountainsJob : IJobParallelFor
-        {
-            public NativeArray<float> HeightMap;
-            public int Width;
-            public int Height;
-            public void Execute(int index)
-            {
-                int x = index % Width;
-                int y = index / Width;
-
-                HeightMap[index] = GetValue(x, y);
-            }
-        }
-
         const int octaves = 7;
         const float perlinScale = 0.01f / 16 / 2;
         static Vector2[] octaveOffsets;
         static List<Func<float, float, float>> generators = new() { gen2, gen1, gen1, gen1, gen1, gen1, gen2, noise };
+
+        Tuple<float[], int, int> heightMapData;
 
         private static float noise(float x, float y) => Mathf.PerlinNoise(x, y);
 
@@ -72,7 +61,7 @@ namespace Hypersycos.GERogueFrame
             return result;
         }
 
-        public async Task Setup(int seed, int width, int height, GameObject parent)
+        public async Task Setup(int seed, int width, int height, GameObject parent, IProgress<float> progress)
         {
             octaveOffsets = new Vector2[octaves];
 
@@ -93,13 +82,19 @@ namespace Hypersycos.GERogueFrame
             var drawer = parent.GetComponent<TerrainDrawer>();
             drawer.scale = new Vector3(1f / 2, 100, 1f / 2);
 
-            Debug.Log("SetSize");
-            Tuple<float[], int, int> sizes = await drawer.SetSize(width, height);
-            float[] heightMap = sizes.Item1;
-            int hMapX = sizes.Item2;
-            int hMapY = sizes.Item3;
+            heightMapData = await drawer.SetSize(width, height);
+            float[] heightMap = heightMapData.Item1;
+            int hMapX = heightMapData.Item2;
+            int hMapY = heightMapData.Item3;
 
-            Debug.Log("Running in paralell");
+            int progressCount = 0;
+
+            void updateProgress()
+            {
+                Interlocked.Increment(ref progressCount);
+                progress.Report(progressCount / (hMapY * 2f));
+            }
+
             await Task.Run(() =>
             {
                 Parallel.For(0, hMapY, (j) =>
@@ -108,23 +103,37 @@ namespace Hypersycos.GERogueFrame
                     {
                         heightMap[i + hMapX * j] = GetValue(i, j);
                     }
+                    updateProgress();
                 });
             });
 
-            /*            NativeArray<float> heights = new NativeArray<float>(hMapX * hMapY, Allocator.Persistent);
-                        var job = new WrinklyMountainsJob()
-                        {
-                            HeightMap = heights,
-                            Width = hMapX
-                        };
+            Progress<float> buildProgress = new Progress<float>();
+            buildProgress.ProgressChanged += (_, x) => progress.Report(x / 2 + .5f);
+            await drawer.BuildMeshes(buildProgress);
+        }
 
-                        JobHandle handle = job.Schedule(hMapX * hMapY, 64);
-                        handle.Complete();
-                        heights.CopyTo(heightMap);
-                        heights.Dispose();*/
+        public void GetSpawnPoint(int count, out Vector3[] positions, out Quaternion[] rotations)
+        {
+            float rotation = 360 / count;
+            float distance = count * 15 / (2 * Mathf.PI);
 
-            Debug.Log("Building Meshes");
-            await drawer.BuildMeshes();
+            positions = new Vector3[count];
+            rotations = new Quaternion[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                rotations[i] = Quaternion.AngleAxis(rotation * i, Vector3.up);
+                positions[i] = rotations[i] * (Vector3.forward * distance);// + Vector3.up * 2;
+                Vector3 heightmapPos = positions[i] * 2 + new Vector3(heightMapData.Item2, heightMapData.Item3) / 2;
+
+                int minX = Mathf.FloorToInt(heightmapPos.x);
+                int minY = Mathf.FloorToInt(heightmapPos.z);
+
+                int index1 = heightMapData.Item2 * minY + minX;
+                int index2 = heightMapData.Item2 * (minY + 1) + minX;
+                float maxHeight = Mathf.Max(heightMapData.Item1[index1], heightMapData.Item1[index1 + 1], heightMapData.Item1[index2], heightMapData.Item1[index2 + 1]);
+                positions[i].y = maxHeight * 100 + 2;
+            }
         }
     }
 }

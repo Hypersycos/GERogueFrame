@@ -1,7 +1,9 @@
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,44 +11,98 @@ namespace Hypersycos.GERogueFrame
 {
     public interface IMapGenerator
     {
-        public Task Setup(int seed, int width, int height, GameObject parent);
+        public Task Setup(int seed, int width, int height, GameObject parent, IProgress<float> progress);
+        public void GetSpawnPoint(int playerCount, out Vector3[] positions, out Quaternion[] rotations);
+        //TODO: public void PlaceObjectives();
     }
 
-    public class MapGenerator : MonoBehaviour
+    public struct MapState : INetworkSerializable
     {
         public MapGeneratorSO so;
+        public int seed;
+        public int width;
+        public int height;
 
-        Task generator;
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref seed);
+            serializer.SerializeValue(ref width);
+            serializer.SerializeValue(ref height);
+            if (serializer.IsWriter)
+            {
+                serializer.GetFastBufferWriter().WriteValueSafe(MapDatabase.singleton.maps.IndexOf(so));
+            }
+            else
+            {
+                serializer.GetFastBufferReader().ReadValueSafe<int>(out int index);
+                so = MapDatabase.singleton.maps[index];
+            }
+        }
+    }
 
-        float time = 0;
+    public class MapGenerator : NetworkBehaviour
+    {
+        MapState mapState => PersistentStateManager.Singleton.mapState;
+
+        float timeSinceLastUpdate;
+        float progress;
+        BetterNetworkList<KeyIndexPair<ulong>> readyKeys = new();
+        BetterNetworkList<float> readyValues = new();
+        NetworkDict<ulong, float> mapBuildProgress;
+
+        Task generatorTask;
         public void Start()
         {
             //generator = GenerateFromSeed(UnityEngine.Random.Range(0, 10000), 1000, 1000, so);
         }
 
-        public async Task GenerateFromSeed(int seed, int width, int height, MapGeneratorSO generator)
+        public override void OnNetworkSpawn()
         {
-            GameObject prefab = Instantiate(generator.worldPrefab, transform);
-            await generator.generator.Setup(seed, width, height, prefab);
+            mapBuildProgress = new(readyKeys, readyValues, !IsServer);
+            if (IsServer)
+            {
+                foreach(ulong id in NetworkManager.ConnectedClientsIds)
+                {
+                    mapBuildProgress.Add(id, 0);
+                }
+                if (!IsHost)
+                    mapBuildProgress.Add(0, 0);
+            }
+
+            generatorTask = GenerateFromSeed(mapState, new Progress<float>());
+            timeSinceLastUpdate = 0;
+            enabled = true;
+        }
+
+        public async Task GenerateFromSeed(MapState state, Progress<float> progress)
+        {
+            GameObject prefab = Instantiate(state.so.worldPrefab, transform);
+            progress.ProgressChanged += (_, x) => this.progress = x;
+            await state.so.generator.Setup(state.seed, state.width, state.height, prefab, progress);
+        }
+
+        [Rpc(SendTo.Server)]
+        public void UpdateProgressRpc(float progress, RpcParams rpcParams = default)
+        {
+            mapBuildProgress[rpcParams.Receive.SenderClientId] = progress;
+
+            if (progress == 1 && mapBuildProgress.Values.Where((x) => x < 1).Count() == 0)
+                PersistentStateManager.Singleton.AllPlayersLoaded?.Invoke();
         }
 
         public void Update()
         {
-            time += Time.deltaTime;
-            if (generator == null)
+            timeSinceLastUpdate += Time.deltaTime;
+            if (timeSinceLastUpdate > 0.1f)
             {
-                if (time > 3)
+                if (generatorTask.IsCompleted)
                 {
-                    time = 0;
-                    Debug.Log("Starting generation!");
-                    generator = GenerateFromSeed(UnityEngine.Random.Range(0, 10000), 2000, 2000, so);
+                    enabled = false;
+                    progress = 1;
+                    generatorTask = null;
                 }
-            }
-            else if (generator.IsCompleted)
-            {
-                Debug.Log($"Took {time}s to generate.");
-                time = -1000000;
-                generator = null;
+                UpdateProgressRpc(progress);
+                timeSinceLastUpdate = 0;
             }
         }
     }

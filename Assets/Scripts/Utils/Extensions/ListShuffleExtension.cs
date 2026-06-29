@@ -35,6 +35,11 @@ namespace Hypersycos.Utils
 
             return copy.Take(count).ToList();
         }
+
+        public static T TakeRandom<T>(this IList<T> list)
+        {
+            return list[UnityEngine.Random.Range(0, list.Count)];
+        }
     }
 
     public static class ThreadSafeRandom

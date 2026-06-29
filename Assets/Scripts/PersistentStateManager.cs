@@ -1,8 +1,12 @@
+using Hypersycos.Utils;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using static UnityEditor.FilePathAttribute;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -38,6 +42,7 @@ namespace Hypersycos.GERogueFrame
 
     public class PersistentStateManager : NetworkBehaviour
     {
+        [SerializeField] GameObject loadingScreen;
 
         readonly Dictionary<string, uint> characterMap = new();
         public readonly List<BaseCharacterSO> availableCharacters = new();
@@ -45,9 +50,14 @@ namespace Hypersycos.GERogueFrame
         NetworkVariable<GameState> _gameState = new NetworkVariable<GameState>(GameState.Lobby);
         public GameState gameState => _gameState.Value;
 
+        NetworkVariable<MapState> _mapState = new NetworkVariable<MapState>();
+        public MapState mapState => _mapState.Value;
+
         BetterNetworkList<KeyIndexPair<ulong>> playerIDs = new();
         BetterNetworkList<PlayerInfo> playerCharacters = new();
         NetworkDict<ulong, PlayerInfo> playerCharacterMap;
+
+        public UnityEvent AllPlayersLoaded;
 
         public uint GetCharacterID(BaseCharacterSO so)
         {
@@ -116,6 +126,37 @@ namespace Hypersycos.GERogueFrame
                 _gameState.Value = GameState.Lobby;
             playerCharacterMap = new(playerIDs, playerCharacters, NetworkManager.IsServer);
             DontDestroyOnLoad(this);
+
+            NetworkManager.SceneManager.OnLoad += ShowLoadingScreen;
+
+            _gameState.OnValueChanged += HandleGameStateValueChange;
+        }
+
+        private void HandleGameStateValueChange(GameState previousValue, GameState newValue)
+        {
+            if (previousValue == GameState.LoadingGame && newValue != GameState.LoadingGame)
+                HideLoadingScreen();
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            NetworkManager.SceneManager.OnLoad -= ShowLoadingScreen;
+        }
+
+        void ShowLoadingScreen(ulong clientId, string sceneName, LoadSceneMode loadSceneMode, AsyncOperation asyncOperation)
+        {
+            if (clientId == NetworkManager.LocalClientId)
+                ShowLoadingScreen();
+        }
+
+        void ShowLoadingScreen()
+        {
+            loadingScreen.SetActive(true);
+        }
+
+        void HideLoadingScreen()
+        {
+            loadingScreen.SetActive(false);
         }
 
         public void SetPlayerCharacter(ulong id, uint characterID)
@@ -129,6 +170,16 @@ namespace Hypersycos.GERogueFrame
                 return;
             _gameState.Value = GameState.LoadingGame;
 
+            StartPreRound();
+        }
+
+        public void StartPreRound()
+        {
+            MapState newMap = new() { width = 1000, height = 1000, seed = UnityEngine.Random.Range(0, 10000) };
+            newMap.so = MapDatabase.singleton.maps.TakeRandom();
+            _mapState.Value = newMap;
+
+            AllPlayersLoaded.AddListener(SpawnPlayers);
             NetworkManager.SceneManager.OnLoadEventCompleted += OnGameSceneLoaded;
             NetworkManager.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
@@ -151,39 +202,51 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
-        private void OnGameSceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+        private void SpawnPlayers()
         {
-            NetworkManager.SceneManager.OnLoadEventCompleted -= OnGameSceneLoaded;
-            _gameState.Value = GameState.Playing;
-            ControlsWrapper.Singleton.CloseMenu(default);
+            AllPlayersLoaded.RemoveListener(SpawnPlayers);
 
-            float rotation = 360 / playerCharacterMap.Count;
-            float distance = playerCharacterMap.Count * 15 / (2 * Mathf.PI);
-            int i = 0;
+            ControlsWrapper.Singleton.CloseMenu(default);
 
             Dictionary<ulong, NetworkObject> spawns = new();
 
+            mapState.so.generator.GetSpawnPoint(playerCharacterMap.Count, out Vector3[] positions, out Quaternion[] rotations);
+
+            int i = 0;
+
             foreach (var player in playerCharacterMap)
             {
-                Quaternion rot = Quaternion.AngleAxis(rotation * i++, Vector3.up);
-                Vector3 pos = rot * (Vector3.forward * distance) + Vector3.up * 2;
-
-                NetworkObject PlayerPrefab = availableCharacters[(int)player.Value.characterID].NetworkPrefab;
-
-                NetworkObject spawned = NetworkManager.Singleton.SpawnManager
-                                        .InstantiateAndSpawn(PlayerPrefab, player.Key, true, true,
-                                                             position: pos, rotation: Quaternion.Inverse(rot));
-
-                spawned.GetComponent<PlayerCharacterManager>().characterID = player.Value.characterID;
-                spawns.Add(player.Key, spawned);
+                spawns.Add(player.Key, SpawnPlayerAt(player.Key, player.Value.characterID, positions[i], rotations[i]));
+                i++;
             }
 
-            foreach(var spawn in spawns)
+            foreach (var spawn in spawns)
             {
                 var copy = playerCharacterMap[spawn.Key];
                 copy.playerObj = spawn.Value;
                 playerCharacterMap[spawn.Key] = copy;
             }
+
+            _gameState.Value = GameState.Playing;
+        }
+
+        private NetworkObject SpawnPlayerAt(ulong playerID, uint characterID, Vector3 pos, Quaternion rot)
+        {
+            NetworkObject PlayerPrefab = availableCharacters[(int)characterID].NetworkPrefab;
+
+            NetworkObject spawned = NetworkManager.Singleton.SpawnManager
+                                    .InstantiateAndSpawn(PlayerPrefab, playerID, true, true,
+                                                         position: pos, rotation: Quaternion.Inverse(rot));
+
+            spawned.GetComponent<PlayerCharacterManager>().characterID = characterID;
+            return spawned;
+        }
+
+        private void OnGameSceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+        {
+            NetworkManager.SceneManager.OnLoadEventCompleted -= OnGameSceneLoaded;
+
+            //TODO: still needed?
         }
     }
 }
