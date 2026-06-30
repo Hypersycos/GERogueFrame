@@ -55,7 +55,7 @@ namespace Hypersycos.GERogueFrame
         public string UUID;
         public string CharacterName;
         public string CharacterDescription;
-        public Texture2D Icon;
+        public Sprite Icon;
         public GameObject Model;
         public NetworkObject NetworkPrefab;
         public List<Canvas> UI;

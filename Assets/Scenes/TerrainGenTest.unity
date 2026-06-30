@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56c4e8f0121d8e249b366a581d1d1fae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.MapGenerator
-  so: {fileID: 11400000, guid: 7ceb3b51ac0709e46b85fa7e93dc2ff6, type: 2}
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &1540271719
 GameObject:
   m_ObjectHideFlags: 0

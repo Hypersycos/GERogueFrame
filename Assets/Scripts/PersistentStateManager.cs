@@ -42,7 +42,7 @@ namespace Hypersycos.GERogueFrame
 
     public class PersistentStateManager : NetworkBehaviour
     {
-        [SerializeField] GameObject loadingScreen;
+        [SerializeField] LoadingScreenManager loadingScreen;
 
         readonly Dictionary<string, uint> characterMap = new();
         public readonly List<BaseCharacterSO> availableCharacters = new();
@@ -55,7 +55,7 @@ namespace Hypersycos.GERogueFrame
 
         BetterNetworkList<KeyIndexPair<ulong>> playerIDs = new();
         BetterNetworkList<PlayerInfo> playerCharacters = new();
-        NetworkDict<ulong, PlayerInfo> playerCharacterMap;
+        public NetworkDict<ulong, PlayerInfo> playerCharacterMap;
 
         public UnityEvent AllPlayersLoaded;
 
@@ -127,7 +127,8 @@ namespace Hypersycos.GERogueFrame
             playerCharacterMap = new(playerIDs, playerCharacters, NetworkManager.IsServer);
             DontDestroyOnLoad(this);
 
-            NetworkManager.SceneManager.OnLoad += ShowLoadingScreen;
+            NetworkManager.SceneManager.OnLoad += SceneChangeStarted;
+            NetworkManager.SceneManager.OnLoadComplete += SceneChangeCompleted;
 
             _gameState.OnValueChanged += HandleGameStateValueChange;
         }
@@ -135,28 +136,25 @@ namespace Hypersycos.GERogueFrame
         private void HandleGameStateValueChange(GameState previousValue, GameState newValue)
         {
             if (previousValue == GameState.LoadingGame && newValue != GameState.LoadingGame)
-                HideLoadingScreen();
+                loadingScreen.Hide();
         }
 
         public override void OnNetworkDespawn()
         {
-            NetworkManager.SceneManager.OnLoad -= ShowLoadingScreen;
+            NetworkManager.SceneManager.OnLoad -= SceneChangeStarted;
+            NetworkManager.SceneManager.OnLoadComplete -= SceneChangeCompleted;
         }
 
-        void ShowLoadingScreen(ulong clientId, string sceneName, LoadSceneMode loadSceneMode, AsyncOperation asyncOperation)
+        void SceneChangeStarted(ulong clientId, string sceneName, LoadSceneMode loadSceneMode, AsyncOperation asyncOperation)
         {
-            if (clientId == NetworkManager.LocalClientId)
-                ShowLoadingScreen();
+            if (clientId == NetworkManager.LocalClientId && sceneName == "GameScene")
+                loadingScreen.ShowMapLoad();
         }
 
-        void ShowLoadingScreen()
+        private void SceneChangeCompleted(ulong clientId, string sceneName, LoadSceneMode loadSceneMode)
         {
-            loadingScreen.SetActive(true);
-        }
-
-        void HideLoadingScreen()
-        {
-            loadingScreen.SetActive(false);
+            if (clientId == NetworkManager.LocalClientId && sceneName == "GameScene")
+                loadingScreen.DisplayMapProgress();
         }
 
         public void SetPlayerCharacter(ulong id, uint characterID)

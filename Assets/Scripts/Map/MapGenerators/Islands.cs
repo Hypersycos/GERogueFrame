@@ -12,7 +12,19 @@ namespace Hypersycos.GERogueFrame
         const int baseOctaves = 2;
         const int topOctaves = 3;
         const int botOctaves = 3;
-        const float perlinScale = 0.01f / 2;
+
+        [SerializeField] float resolutionScalar = 1f;
+        [SerializeField] float generationScalar = 1f;
+        [SerializeField] float heightScalar = 80;
+        const float _perlinScale = 0.01f / 2;
+
+        float perlinScale;
+        float resolution;
+        float heightScale;
+
+        const float bigIslandCutoff = 0.48f;
+        const float smallIslandCutoff = 0.55f;
+
         Vector2[] octaveOffsets;
         static List<Func<float, float, float>> baseGenerators = new() { noise, gen1 };
         static List<Func<float, float, float>> topGenerators = new() { gen2, gen1, gen2 };
@@ -57,17 +69,17 @@ namespace Hypersycos.GERogueFrame
 
             f = 1;
 
-            if (result < 0.45f)
+            if (result < bigIslandCutoff)
             {
-                float mult = Mathf.SmoothStep(1, 0, result / 0.45f * 2 - 1);
+                float mult = Mathf.SmoothStep(1, 0, result / bigIslandCutoff * 2 - 1);
                 float result2 = baseGenerators[0](px * 8 + octaveOffsets[baseOctaves].x, py * 8 + octaveOffsets[baseOctaves].y);
                 f = 8;
                 result2 -= 0.5f;
                 result2 *= mult;
                 result2 += 0.5f;
-                if (result2 >= 0.55f)
+                if (result2 >= smallIslandCutoff)
                 {
-                    result = result2 - 0.1f;
+                    result = result2 - smallIslandCutoff + bigIslandCutoff;
                 }
             }
             return result;
@@ -121,7 +133,7 @@ namespace Hypersycos.GERogueFrame
 
             if (result <= 0.52f)
             {
-                if (f == 1)
+                if (f == 1 && result > 0.5f)
                 {
                     result -= 0.5f;
                     result *= 2;
@@ -159,6 +171,10 @@ namespace Hypersycos.GERogueFrame
         {
             octaveOffsets = new Vector2[Mathf.Max(botOctaves, topOctaves) + baseOctaves];
 
+            resolution = resolutionScalar;
+            perlinScale = _perlinScale / (generationScalar * resolutionScalar);
+            heightScale = heightScalar * 80;
+
             //TODO: Replace with platform-agnostic random
             System.Random rand = new System.Random(seed);
 
@@ -169,22 +185,22 @@ namespace Hypersycos.GERogueFrame
                 octaveOffsets[o] = new Vector2(offsetX, offsetY);
             }
 
-            width = Mathf.FloorToInt(width);
-            height = Mathf.FloorToInt(height);
+            width = Mathf.FloorToInt(width * resolution);
+            height = Mathf.FloorToInt(height * resolution);
 
             //TODO: Replace with AddComponent
             var topDrawer = parent.GetComponent<TerrainDrawer>();
             var botDrawer = parent.transform.GetChild(0).GetComponent<TerrainDrawer>();
 
-            topDrawer.scale = new Vector3(1f, 80, 1f);
-            botDrawer.scale = new Vector3(1, -1, 1);
+            topDrawer.scale = new Vector3(1 / resolution, heightScale, 1 / resolution);
+            botDrawer.scale = new Vector3(1f, -1, 1f);
 
-            heightMapData = await topDrawer.SetSize(width, height);
+            heightMapData = await topDrawer.SetSize(width, height, 200, 200);
             float[] heightMap = heightMapData.Item1;
             int hMapWidth = heightMapData.Item2;
             int hMapHeight = heightMapData.Item3;
 
-            Tuple<float[], int, int> sizes2 = await botDrawer.SetSize(width, height);
+            Tuple<float[], int, int> sizes2 = await botDrawer.SetSize(width, height, 200, 200);
             float[] botHeightMap = sizes2.Item1;
 
             int progressCount = 0;
@@ -221,12 +237,12 @@ namespace Hypersycos.GERogueFrame
             Progress<float> buildProgress = new Progress<float>();
             EventHandler<float> update = (_, x) => progress.Report(x * 3f / 8 + .25f);
             buildProgress.ProgressChanged += update;
-            await topDrawer.BuildMeshes(buildProgress, 0.45f, 1);
+            await topDrawer.BuildMeshes(buildProgress, 0.5f);
 
             buildProgress.ProgressChanged -= update;
             update = (_, x) => progress.Report(x * 3f / 8 + 5f / 8);
             buildProgress.ProgressChanged += update;
-            await botDrawer.BuildMeshes(buildProgress, 0.45f, 1);
+            await botDrawer.BuildMeshes(buildProgress, 0.5f);
         }
 
         public void GetSpawnPoint(int count, out Vector3[] positions, out Quaternion[] rotations)
@@ -248,7 +264,7 @@ namespace Hypersycos.GERogueFrame
                 {
                     rotations[i] = Quaternion.AngleAxis(rotation * i, Vector3.up);
                     positions[i] = basePos + rotations[i] * (Vector3.forward * distance);// + Vector3.up * 2;
-                    Vector3 heightmapPos = positions[i] + new Vector3(heightMapData.Item2, heightMapData.Item3) / 2;
+                    Vector3 heightmapPos = positions[i] * resolution + new Vector3(heightMapData.Item2, 0, heightMapData.Item3) / 2;
 
                     int minX = Mathf.FloorToInt(heightmapPos.x);
                     int minY = Mathf.FloorToInt(heightmapPos.z);
@@ -266,7 +282,7 @@ namespace Hypersycos.GERogueFrame
                             break;
                         }
 
-                        positions[i].y = maxHeight * 80 + 2;
+                        positions[i].y = maxHeight * heightScale + 2;
                     }
                     catch (IndexOutOfRangeException e)
                     {

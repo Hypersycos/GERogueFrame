@@ -24,7 +24,18 @@ MonoBehaviour:
     - Name: generator
       Entry: 7
       Data: 0|Hypersycos.GERogueFrame.WrinklyMountains, Assembly-CSharp
+    - Name: resolutionScalar
+      Entry: 4
+      Data: 1
+    - Name: heightScalar
+      Entry: 4
+      Data: 1
+    - Name: generationScalar
+      Entry: 4
+      Data: 1
     - Name: 
       Entry: 8
       Data: 
   worldPrefab: {fileID: 6711266910980765983, guid: ff648fb238a47ac4284bca841e943886, type: 3}
+  Name: 
+  Description: 

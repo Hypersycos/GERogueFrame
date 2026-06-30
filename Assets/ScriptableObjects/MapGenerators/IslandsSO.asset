@@ -24,7 +24,18 @@ MonoBehaviour:
     - Name: generator
       Entry: 7
       Data: 0|Hypersycos.GERogueFrame.Islands, Assembly-CSharp
+    - Name: resolutionScalar
+      Entry: 4
+      Data: 1
+    - Name: generationScalar
+      Entry: 4
+      Data: 1
+    - Name: heightScalar
+      Entry: 4
+      Data: 1
     - Name: 
       Entry: 8
       Data: 
   worldPrefab: {fileID: 6711266910980765983, guid: 4dc6ce217852bef4f807f832312c2278, type: 3}
+  Name: 
+  Description: 

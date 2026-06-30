@@ -14,7 +14,17 @@ namespace Hypersycos.GERogueFrame
     class WrinklyMountains : IMapGenerator
     {
         const int octaves = 7;
-        const float perlinScale = 0.01f / 16 / 2;
+
+        [SerializeField] float resolutionScalar = 1;
+        [SerializeField] float heightScalar = 1;
+        [SerializeField] float generationScalar = 1;
+
+        const float _perlinScale = 0.01f / 16;
+
+        float perlinScale;
+        float resolution;
+        float heightScale;
+
         static Vector2[] octaveOffsets;
         static List<Func<float, float, float>> generators = new() { gen2, gen1, gen1, gen1, gen1, gen1, gen2, noise };
 
@@ -40,7 +50,7 @@ namespace Hypersycos.GERogueFrame
 
             return noise(x + 4 * rx, y + 4 * ry);
         }
-        public static float GetValue(int x, int y)
+        public float GetValue(int x, int y)
         {
             float px = x * perlinScale;
             float py = y * perlinScale;
@@ -63,6 +73,10 @@ namespace Hypersycos.GERogueFrame
 
         public async Task Setup(int seed, int width, int height, GameObject parent, IProgress<float> progress)
         {
+            resolution = resolutionScalar;
+            perlinScale = _perlinScale / (generationScalar * resolutionScalar);
+            heightScale = heightScalar * 80;
+
             octaveOffsets = new Vector2[octaves];
 
             //TODO: Replace with platform-agnostic random
@@ -75,12 +89,12 @@ namespace Hypersycos.GERogueFrame
                 octaveOffsets[o] = new Vector2(offsetX, offsetY);
             }
 
-            width = Mathf.FloorToInt(width * 2);
-            height = Mathf.FloorToInt(height * 2);
+            width = Mathf.FloorToInt(width * resolution);
+            height = Mathf.FloorToInt(height * resolution);
 
             //TODO: Replace with AddComponent
             var drawer = parent.GetComponent<TerrainDrawer>();
-            drawer.scale = new Vector3(1f / 2, 100, 1f / 2);
+            drawer.scale = new Vector3(1f / resolution, heightScale, 1f / resolution);
 
             heightMapData = await drawer.SetSize(width, height);
             float[] heightMap = heightMapData.Item1;
@@ -124,7 +138,7 @@ namespace Hypersycos.GERogueFrame
             {
                 rotations[i] = Quaternion.AngleAxis(rotation * i, Vector3.up);
                 positions[i] = rotations[i] * (Vector3.forward * distance);// + Vector3.up * 2;
-                Vector3 heightmapPos = positions[i] * 2 + new Vector3(heightMapData.Item2, heightMapData.Item3) / 2;
+                Vector3 heightmapPos = positions[i] * resolution + new Vector3(heightMapData.Item2, 0, heightMapData.Item3) / 2;
 
                 int minX = Mathf.FloorToInt(heightmapPos.x);
                 int minY = Mathf.FloorToInt(heightmapPos.z);
@@ -132,7 +146,8 @@ namespace Hypersycos.GERogueFrame
                 int index1 = heightMapData.Item2 * minY + minX;
                 int index2 = heightMapData.Item2 * (minY + 1) + minX;
                 float maxHeight = Mathf.Max(heightMapData.Item1[index1], heightMapData.Item1[index1 + 1], heightMapData.Item1[index2], heightMapData.Item1[index2 + 1]);
-                positions[i].y = maxHeight * 100 + 2;
+
+                positions[i].y = maxHeight * heightScale + 2;
             }
         }
     }
