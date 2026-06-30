@@ -274,6 +274,8 @@ public class TerrainDrawer : MonoBehaviour
     
     public async Task BuildMeshes(IProgress<float> progress, float minimumThreshold=float.MinValue, float maximumThreshold=float.MaxValue)
     {
+        transform.localScale = scale;
+
         bool hasThreshold = minimumThreshold > float.MinValue || maximumThreshold < float.MaxValue;
 
         List<int>[] triangles = new List<int>[meshCount.x * meshCount.y];
@@ -390,8 +392,6 @@ public class TerrainDrawer : MonoBehaviour
 
             updateProgress(m);
         }
-
-        transform.localScale = scale;
 
         foreach(MeshCollider collider in GetComponentsInChildren<MeshCollider>())
         {
