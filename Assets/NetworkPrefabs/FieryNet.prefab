@@ -493,7 +493,7 @@ CharacterController:
   m_Height: 1.8
   m_Radius: 0.28
   m_SlopeLimit: 45
-  m_StepOffset: 0.25
+  m_StepOffset: 0.2
   m_SkinWidth: 0.02
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.93, z: 0}
@@ -509,7 +509,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1955243327
+  GlobalObjectIdHash: 3909642722
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -561,7 +561,7 @@ MonoBehaviour:
     Layer: 0
     OriginatingState: -1071854972
     DestinationState: 819769265
-    TransitionDuration: 0.07026373
+    TransitionDuration: 0.1
     TriggerNameHash: 125937960
     TransitionIndex: 1
   - IsCrossFadeExit: 0
@@ -575,7 +575,7 @@ MonoBehaviour:
     Layer: 0
     OriginatingState: 861170204
     DestinationState: -164936600
-    TransitionDuration: 0.05
+    TransitionDuration: 0.1
     TriggerNameHash: 125937960
     TransitionIndex: 3
   - IsCrossFadeExit: 0
@@ -602,10 +602,10 @@ MonoBehaviour:
   - IsCrossFadeExit: 0
     Layer: 0
     OriginatingState: 862260416
-    DestinationState: -164936600
-    TransitionDuration: 0.25
+    DestinationState: 819769265
+    TransitionDuration: 0.07026373
     TriggerNameHash: 125937960
-    TransitionIndex: 2
+    TransitionIndex: 3
   AnimatorParameterEntries:
     ParameterEntries:
     - name: Speed

@@ -15,5 +15,6 @@ namespace Hypersycos.GERogueFrame
 
         public string Name;
         public string Description;
+        public Texture2D Image;
     }
 }

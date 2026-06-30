@@ -48,7 +48,7 @@ namespace Hypersycos.GERogueFrame
         float progress;
         BetterNetworkList<KeyIndexPair<ulong>> readyKeys = new();
         BetterNetworkList<float> readyValues = new();
-        NetworkDict<ulong, float> mapBuildProgress;
+        public NetworkDict<ulong, float> mapBuildProgress;
 
         Task generatorTask;
         public void Start()

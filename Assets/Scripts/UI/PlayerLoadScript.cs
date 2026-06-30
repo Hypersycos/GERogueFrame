@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,8 +13,14 @@ namespace Hypersycos.GERogueFrame
 
         public void Setup(string uname, BaseCharacterSO character)
         {
-            username.text = uname;
+            //username.text = uname;
             characterImage.sprite = character.Icon;
+            loadingProgress.color = character.Color;
+        }
+
+        internal void SetProgress(float value)
+        {
+            loadingProgress.transform.localScale = new(value, 1, 1);
         }
     }
 }

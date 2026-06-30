@@ -50,7 +50,8 @@ MonoBehaviour:
   UUID: Fiery
   CharacterName: Fiery
   CharacterDescription: 
-  Icon: {fileID: 3506167780502562645, guid: 3dfe51f11806ed542a96ceca1f765e20, type: 3}
+  Icon: {fileID: 8757602080057577540, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
+  Color: {r: 1, g: 0.41661727, b: 0, a: 1}
   Model: {fileID: 7511950717358091015, guid: 4b7e6241c3e5ecc4aae9dcec18702617, type: 3}
   NetworkPrefab: {fileID: 4724389780327334411, guid: 53c128ead6b5a0342a2dd44d21165f53, type: 3}
   UI: []

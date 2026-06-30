@@ -133,6 +133,9 @@ namespace Hypersycos.GERogueFrame
             if (jumpsAvailable == 0)
                 return;
 
+            jumpsAvailable--;
+            lastJump = 0.5f;
+
             if (canSuperJump && superJumpAvailable && crouching)
             {
                 Vector3 direction = playerCamera.transform.forward;
@@ -154,6 +157,8 @@ namespace Hypersycos.GERogueFrame
 
                 velocity = direction * jumpMagnitude;
                 superJumpAvailable = false;
+
+                OnJump?.Invoke();
                 CanSuperJumpChanged?.Invoke(superJumpAvailable);
             }
             else
@@ -170,11 +175,9 @@ namespace Hypersycos.GERogueFrame
                 float magnitude = horizontalVelocity.magnitude;
                 velocity.x = inputForce.x * component * magnitude;
                 velocity.z = inputForce.z * component * magnitude;
-            }
 
-            jumpsAvailable--;
-            lastJump = 0.5f;
-            OnJump?.Invoke();
+                OnJump?.Invoke();
+            }
         }
 
         public void AddMovementModifier(float modifier, string name)
@@ -310,22 +313,22 @@ namespace Hypersycos.GERogueFrame
                             superJumpAvailable = true;
                             CanSuperJumpChanged?.Invoke(superJumpAvailable);
                         }
-                        Ray ray = new Ray(transform.position + Vector3.up * 0.25f, Vector3.down);
-                        if (Physics.Raycast(ray, out RaycastHit hit, 0.3f, 0xFFFF ^ (1 << 6 | 1 << 7)))
+                        Ray ray = new Ray(transform.position + Vector3.up * 0.05f, Vector3.down);
+                        if (Physics.Raycast(ray, out RaycastHit hit, 0.05f + characterController.stepOffset, 0xFFFF ^ (1 << 6 | 1 << 7)))
                         {
-                            forcedMove.y = 0.25f - hit.distance;
+                            forcedMove.y = -(hit.distance - .05f);
                         }
                     }
                 }
             }
             else
             {
-                if (velocity.y <= 0f)
+                if (velocity.y == 0f)
                 { //check if stairs
-                    Ray ray = new Ray(this.transform.position + Vector3.up * 0.25f, Vector3.down);
-                    if (Physics.Raycast(ray, out RaycastHit hit, 0.3f + characterController.stepOffset))
+                    Ray ray = new Ray(this.transform.position + Vector3.up * 0.05f, Vector3.down);
+                    if (Physics.Raycast(ray, out RaycastHit hit, 0.05f + characterController.stepOffset))
                     { //force player down fast
-                        velocity.y = -1;
+                        forcedMove.y = -(hit.distance - 0.05f);
                     }
                     else
                     {

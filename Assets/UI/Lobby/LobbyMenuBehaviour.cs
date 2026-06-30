@@ -173,7 +173,7 @@ namespace Hypersycos.GERogueFrame
             {
                 var template = characterSelectButton.Instantiate();
                 Button btn = template.Q<Button>();
-                btn.style.backgroundImage = so.Icon;
+                btn.style.backgroundImage = so.Icon.texture;
                 //element.style.backgroundColor;
 
                 btn.clicked += () => SelectCharacter(so, btn);

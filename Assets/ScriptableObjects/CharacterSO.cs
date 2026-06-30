@@ -56,6 +56,8 @@ namespace Hypersycos.GERogueFrame
         public string CharacterName;
         public string CharacterDescription;
         public Sprite Icon;
+        public Color Color;
+
         public GameObject Model;
         public NetworkObject NetworkPrefab;
         public List<Canvas> UI;
