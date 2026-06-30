@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f1622b170d21014e9b0042e1d864b15, type: 3}
   m_Name: BaseCharacterDatabase
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.CharacterDatabase
-  characterList:
+  List:
   - {fileID: 11400000, guid: 57b1472237919074b9192c209ab44bcf, type: 2}

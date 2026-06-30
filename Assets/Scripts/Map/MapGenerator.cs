@@ -14,6 +14,10 @@ namespace Hypersycos.GERogueFrame
         public Task Setup(int seed, int width, int height, GameObject parent, IProgress<float> progress);
         public void GetSpawnPoint(int playerCount, out Vector3[] positions, out Quaternion[] rotations);
         //TODO: public void PlaceObjectives();
+        public void ModifyPlayer(GameObject player) { }
+        public void ModifyPlayerOnOwner(GameObject player) { }
+        public void ModifyEnemy(GameObject enemy) { }
+        public void ModifyEnemyOnServer(GameObject enemy) { }
     }
 
     public struct MapState : INetworkSerializable
@@ -22,7 +26,6 @@ namespace Hypersycos.GERogueFrame
         public int seed;
         public int width;
         public int height;
-
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
             serializer.SerializeValue(ref seed);
@@ -30,12 +33,12 @@ namespace Hypersycos.GERogueFrame
             serializer.SerializeValue(ref height);
             if (serializer.IsWriter)
             {
-                serializer.GetFastBufferWriter().WriteValueSafe(MapDatabase.singleton.maps.IndexOf(so));
+                serializer.GetFastBufferWriter().WriteValueSafe(SODatabase.NetworkedDB.MapIDs[so.UUID]);
             }
             else
             {
-                serializer.GetFastBufferReader().ReadValueSafe<int>(out int index);
-                so = MapDatabase.singleton.maps[index];
+                serializer.GetFastBufferReader().ReadValueSafe(out int index);
+                so = SODatabase.NetworkedDB.Maps[index];
             }
         }
     }

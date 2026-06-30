@@ -8,10 +8,6 @@ using TMPro;
 using Sirenix.Serialization;
 using Sirenix.OdinInspector;
 
-
-
-
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -19,47 +15,8 @@ using UnityEditor;
 namespace Hypersycos.GERogueFrame
 {
     [CreateAssetMenu(fileName = "New Character", menuName = "GERogueFrame/Character", order = 0)]
-    public class BaseCharacterSO : SerializedScriptableObject, IEquatable<BaseCharacterSO>
+    public class BasePCharacterSO : BaseCharacterSO, IEquatable<BasePCharacterSO>
     {
-        [Serializable]
-        public struct ResourceRegen
-        {
-            public float Value;
-            public float Delay;
-            public float ReducedRate;
-        }
-
-        [Serializable]
-        public struct Resource
-        {
-            public float Max;
-            public ResourceRegen FlatRegen;
-            public ResourceRegen MaxRegen;
-            public ResourceRegen CurrentRegen;
-            public StatType StatType;
-        }
-
-        [Serializable]
-        public struct Defense
-        {
-            public float Max;
-            public bool HasResist;
-            public float Resist;
-            public ResourceRegen FlatRegen;
-            public ResourceRegen MaxRegen;
-            public ResourceRegen CurrentRegen;
-            public StatType StatType;
-            public StatType ResistStatType;
-        }
-
-        public string UUID;
-        public string CharacterName;
-        public string CharacterDescription;
-        public Sprite Icon;
-        public Color Color;
-
-        public GameObject Model;
-        public NetworkObject NetworkPrefab;
         public List<Canvas> UI;
 
         public float Speed;
@@ -88,48 +45,9 @@ namespace Hypersycos.GERogueFrame
             Overhealth = new Defense { StatType = StatType.StatTypeMap["OverHealth"], Max = -1, FlatRegen = new ResourceRegen { Value = -5, Delay = 0 }, CurrentRegen = new ResourceRegen { Value = -0.2f, Delay = 0 } };
         }
 
-        public bool Equals(BaseCharacterSO other)
+        public bool Equals(BasePCharacterSO other)
         {
             return UUID == other.UUID;
-        }
-
-        protected void ApplyResource(BoundedStatInstance inst, ref Resource values, float tickRate)
-        {
-            if (values.FlatRegen.Value != 0)
-                inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.Flat, null, values.FlatRegen.Value, null, tickRate, values.FlatRegen.Delay, values.FlatRegen.ReducedRate));
-            if (values.MaxRegen.Value != 0)
-                inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.Multiplicative, null, values.MaxRegen.Value, null, tickRate, values.MaxRegen.Delay, values.MaxRegen.ReducedRate));
-            if (values.CurrentRegen.Value != 0)
-                inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.MultiplicativeAdditive, null, values.CurrentRegen.Value, null, tickRate, values.CurrentRegen.Delay, values.CurrentRegen.ReducedRate));
-        }
-
-        protected void ApplyDefense(DefenseStatInstance inst, ref Defense values, float tickRate)
-        {
-            if (values.FlatRegen.Value != 0)
-                inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.Flat, null, values.FlatRegen.Value, null, tickRate, values.FlatRegen.Delay, values.FlatRegen.ReducedRate));
-            if (values.MaxRegen.Value != 0)
-                inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.Multiplicative, null, values.MaxRegen.Value, null, tickRate, values.MaxRegen.Delay, values.MaxRegen.ReducedRate));
-            if (values.CurrentRegen.Value != 0)
-                inst.AddModifier(new StatRegenerationModifier(StatModifier.StackType.MultiplicativeAdditive, null, values.CurrentRegen.Value, null, tickRate, values.CurrentRegen.Delay, values.CurrentRegen.ReducedRate));
-        }
-
-        protected void CreateDefense(ref DefenseStatInstance inst, ref Defense def, bool isOverhealth)
-        {
-            if (def.Max < 0)
-            {
-                if (isOverhealth)
-                    def.Max = float.MaxValue;
-                else
-                    def.Max = 0;
-            }
-            if (def.HasResist)
-                inst = new(def.Max, new SemiBoundedStatInstance(def.Resist, 0, def.ResistStatType), def.StatType, isOverhealth);
-            else
-                inst = new(def.Max, null, def.StatType, isOverhealth);
-            if (def.Max > 0)
-            {
-                ApplyDefense(inst, ref def, 0);
-            }
         }
 
         public void Apply(PlayerState state, ref List<BoundedStatInstance> defenses)
@@ -137,12 +55,12 @@ namespace Hypersycos.GERogueFrame
             state.Energy = new(Energy.Max, 0, Energy.Max, Energy.StatType);
             if (Energy.Max > 0)
             {
-                ApplyResource(state.Energy, ref Energy, 0);
+                ApplyResource(state.Energy, Energy, 0);
             }
 
-            CreateDefense(ref state.Health, ref Health, false);
-            CreateDefense(ref state.Shields, ref Shields, false);
-            CreateDefense(ref state.OverHealth, ref Overhealth, true);
+            CreateDefense(ref state.Health, Health, false);
+            CreateDefense(ref state.Shields, Shields, false);
+            CreateDefense(ref state.OverHealth, Overhealth, true);
             state.OverHealth.AddValue(100);
 
             state.ApplyDefensePool(new List<DefenseStatInstance>() { state.Health, state.Shields, state.OverHealth });
@@ -209,7 +127,7 @@ namespace Hypersycos.GERogueFrame
             camTrans.SyncScaleZ = false;
             camPos.transform.SetParent(copy.transform);
 
-            GameObject basePrefab = PrefabUtility.SaveAsPrefabAsset(copy, $"Assets/NetworkPrefabs/{CharacterName}Net.prefab", out bool success);
+            GameObject basePrefab = PrefabUtility.SaveAsPrefabAsset(copy, $"Assets/NetworkPrefabs/{ItemName}Net.prefab", out bool success);
 
             if (success)
             {
@@ -217,24 +135,8 @@ namespace Hypersycos.GERogueFrame
                 EditorUtility.SetDirty(this);
             }
             PrefabUtility.UnloadPrefabContents(copy);
-            Debug.Log($"Generated Assets/NetworkPrefabs/{CharacterName}Net.prefab");
+            Debug.Log($"Generated Assets/NetworkPrefabs/{ItemName}Net.prefab");
         }
 #endif
-    }
-
-
-
-    public static class SerializationExtensions
-    {
-        public static void ReadValueSafe(this FastBufferReader reader, out BaseCharacterSO so)
-        {
-            reader.ReadValueSafe(out string val);
-            so = CharacterLoader.characterDict[val];
-        }
-
-        public static void WriteValueSafe(this FastBufferWriter writer, in BaseCharacterSO so)
-        {
-            writer.WriteValueSafe(so.UUID);
-        }
     }
 }

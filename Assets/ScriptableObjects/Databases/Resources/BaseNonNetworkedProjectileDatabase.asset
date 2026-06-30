@@ -10,8 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ab7d7704af9a0ba41adb72475ac70ceb, type: 3}
-  m_Name: New ProjectileDatabase
+  m_Name: BaseNonNetworkedProjectileDatabase
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.ProjectileDatabase
-  dumbProjectileList:
-  - {fileID: 1433497647348325309, guid: f551747c1f93bc043a0b06f13db3b9a5, type: 3}
-  networkedProjectileList: []
+  List:
+  - {fileID: 11400000, guid: 26ccba738a326934ba11d7dfb9e99495, type: 2}

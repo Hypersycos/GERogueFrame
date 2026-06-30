@@ -47,9 +47,9 @@ MonoBehaviour:
     - Name: Ultimate
       Entry: 6
       Data: 
-  UUID: Fiery
-  CharacterName: Fiery
-  CharacterDescription: 
+  UUID: base.Fiery
+  ItemName: Fiery
+  Description: 
   Icon: {fileID: 8757602080057577540, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
   Color: {r: 1, g: 0.41661727, b: 0, a: 1}
   Model: {fileID: 7511950717358091015, guid: 4b7e6241c3e5ecc4aae9dcec18702617, type: 3}

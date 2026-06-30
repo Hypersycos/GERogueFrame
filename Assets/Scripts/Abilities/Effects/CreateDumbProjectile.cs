@@ -11,7 +11,7 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects
 {
     class CreateDumbProjectile : ICastEffect
     {
-        [SerializeField] ProjectileScript obj;
+        [SerializeField] NonNetworkedProjectile obj;
         [SerializeField] LayerMask mask;
         [SerializeField] float velocity;
         [SerializeField] float maxRange = 10000;
@@ -22,7 +22,7 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects
 
         }
 
-        public CreateDumbProjectile(ProjectileScript obj, LayerMask mask, float velocity, float maxRange, float lifetime)
+        public CreateDumbProjectile(NonNetworkedProjectile obj, LayerMask mask, float velocity, float maxRange, float lifetime)
         {
             this.obj = obj;
             this.mask = mask;
@@ -63,7 +63,7 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects
             Quaternion fakeRotation = Quaternion.FromToRotation(Vector3.forward, convergePos - fakePos);
             Quaternion camRotation = Quaternion.FromToRotation(Vector3.forward, target.camForward);
             ProjectileSpawnParams spawnParams = new(fakePos, offsetCameraStart, camRotation, fakeRotation, convergePos, velocity, lifetime);
-            if (ProjectileManager.Singleton.AnticipateDumbProjectile(spawnParams, obj.gameObject, out uint spawnID, out int projectileID, out GameObject spawned))
+            if (ProjectileManager.Singleton.AnticipateDumbProjectile(spawnParams, obj, out uint spawnID, out int projectileID))
             {
                 return new ProjectilePayload(spawnParams, projectileID, new(NetworkManager.Singleton.LocalClientId, spawnID));
             }
@@ -86,7 +86,7 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects
             spawnParams.lifetime = lifetime;
             spawnParams.fakePosition = target.fakePos;
             spawnParams.fakeRotation = Quaternion.FromToRotation(Vector3.forward, spawnParams.focusPoint - spawnParams.fakePosition);
-            ProjectileManager.Singleton.SpawnDumbProjectile(projPayload.SpawnID, obj.gameObject, spawnParams);
+            ProjectileManager.Singleton.SpawnDumbProjectile(projPayload.SpawnID, obj, spawnParams);
             return null;
         }
     }

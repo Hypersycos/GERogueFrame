@@ -21,7 +21,7 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
-        public void ProjectileCast(ProjectileScript projScript)
+        public void ProjectileCast(NonNetworkedProjectileScript projScript)
         {
             owner = projScript.owner;
             Cast();

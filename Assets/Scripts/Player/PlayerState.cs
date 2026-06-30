@@ -160,42 +160,42 @@ namespace Hypersycos.GERogueFrame
             CreateHealNumberClientRpc(victim.NetworkObject, healNumber, c, clientRpcParams);
         }
 
-        //TODO: Code re-use: only change is CreateDamageNumberCommon(..,.., dict)
         [ClientRpc]
         private void CreateHealNumberClientRpc(NetworkObjectReference victimRef, float number, Color c, ClientRpcParams clientRpcParams = default)
         {
-            CharacterState victim = ((GameObject)victimRef).GetComponent<CharacterState>();
-            StatBarRotator statBarRotator = victim.GetComponentInChildren<StatBarRotator>();
-            DamageTextInstance instance = CreateDamageNumberCommon(statBarRotator, number, LastHealNumbers);
-            float coefficient = (number / victim.HitPoints.MaxValue * 4 + 1);
-            UpdateDamageText(instance, coefficient, c);
+            CreateDamageNumberCommon(victimRef, number, c, LastHealNumbers);
         }
 
 
         [ClientRpc]
         private void CreateDamageNumberClientRpc(NetworkObjectReference victimRef, float number, Color c, ClientRpcParams clientRpcParams = default)
         {
-            CharacterState victim = ((GameObject)victimRef).GetComponent<CharacterState>();
-            StatBarRotator statBarRotator = victim.GetComponentInChildren<StatBarRotator>();
-            DamageTextInstance instance = CreateDamageNumberCommon(statBarRotator, number, LastDamageNumbers);
-            float coefficient = (number / victim.HitPoints.MaxValue * 4 + 1);
-            UpdateDamageText(instance, coefficient, c);
+            CreateDamageNumberCommon(victimRef, number, c, LastDamageNumbers);
         }
 
-        private DamageTextInstance CreateDamageNumberCommon(StatBarRotator statBarRotator, float number, Dictionary<StatBarRotator, DamageTextInstance> dict)
-        {
-            if (dict.ContainsKey(statBarRotator))
+        private void CreateDamageNumberCommon(NetworkObjectReference victimRef, float number, Color c, Dictionary<StatBarRotator, DamageTextInstance> dict)
+        { 
+            DamageTextInstance CreateDamageNumberCommonInner(StatBarRotator statBarRotator, float number, Dictionary<StatBarRotator, DamageTextInstance> dict)
             {
-                dict[statBarRotator].damage += number;
-                return dict[statBarRotator];
+                if (dict.ContainsKey(statBarRotator))
+                {
+                    dict[statBarRotator].damage += number;
+                    return dict[statBarRotator];
+                }
+                else
+                {
+                    TMP_Text text = Instantiate(DamageTickPrefab, statBarRotator.transform);
+                    DamageTextInstance instance = new DamageTextInstance(text, number, TextMergeTimer, Random.Range(-1f, 1f));
+                    dict.Add(statBarRotator, instance);
+                    return instance;
+                }
             }
-            else
-            {
-                TMP_Text text = Instantiate(DamageTickPrefab, statBarRotator.transform);
-                DamageTextInstance instance = new DamageTextInstance(text, number, TextMergeTimer, Random.Range(-1f, 1f));
-                dict.Add(statBarRotator, instance);
-                return instance;
-            }
+
+            CharacterState victim = ((GameObject)victimRef).GetComponent<CharacterState>();
+            StatBarRotator statBarRotator = victim.GetComponentInChildren<StatBarRotator>();
+            DamageTextInstance instance = CreateDamageNumberCommonInner(statBarRotator, number, dict);
+            float coefficient = (number / victim.HitPoints.MaxValue * 4 + 1);
+            UpdateDamageText(instance, coefficient, c);
         }
 
         private void UpdateDamageText(DamageTextInstance inst, float coefficient, Color c)

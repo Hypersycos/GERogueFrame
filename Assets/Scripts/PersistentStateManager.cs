@@ -19,10 +19,10 @@ namespace Hypersycos.GERogueFrame
 
     public struct PlayerInfo : IEquatable<PlayerInfo>, INetworkSerializable
     {
-        public uint characterID;
+        public int characterID;
         public NetworkObjectReference playerObj;
 
-        public PlayerInfo(uint characterID)
+        public PlayerInfo(int characterID)
         {
             this.characterID = characterID;
             playerObj = new();
@@ -44,9 +44,6 @@ namespace Hypersycos.GERogueFrame
     {
         [SerializeField] LoadingScreenManager loadingScreen;
 
-        readonly Dictionary<string, uint> characterMap = new();
-        public readonly List<BaseCharacterSO> availableCharacters = new();
-
         NetworkVariable<GameState> _gameState = new NetworkVariable<GameState>(GameState.Lobby);
         public GameState gameState => _gameState.Value;
 
@@ -59,12 +56,10 @@ namespace Hypersycos.GERogueFrame
 
         public UnityEvent AllPlayersLoaded;
 
-        public uint GetCharacterID(BaseCharacterSO so)
-        {
-            return characterMap[so.UUID];
-        }
+        public SODatabase SODB => SODatabase.NetworkedDB;
 
-        public BaseCharacterSO GetCharacterFromID(string id) => CharacterLoader.characterDict[id];
+        public int GetCharacterID(BasePCharacterSO so) => SODB.PlayerCharacterIDs[so.UUID];
+        public BasePCharacterSO GetCharacterFromID(string id) => SODB.PlayerCharacters[SODB.PlayerCharacterIDs[id]];
 
         public static PersistentStateManager Singleton { get; private set; }
 
@@ -74,28 +69,12 @@ namespace Hypersycos.GERogueFrame
             if (serializer.IsWriter)
             {
                 var writer = serializer.GetFastBufferWriter();
-                writer.WriteValueSafe(characterMap.Count);
-                foreach(var kvp in characterMap)
-                {
-                    writer.WriteValueSafe(kvp.Key);
-                    writer.WriteValueSafe(kvp.Value);
-                }
+                SODatabase.Write(writer);
             }
             else
             {
-                characterMap.Clear();
                 var reader = serializer.GetFastBufferReader();
-                int count;
-                reader.ReadValueSafe(out count);
-                for (int i = 0; i < count; i++)
-                {
-                    string UUID;
-                    uint gameID;
-                    reader.ReadValueSafe(out UUID);
-                    reader.ReadValueSafe(out gameID);
-                    characterMap.Add(UUID, gameID);
-                    availableCharacters.Add(CharacterLoader.characterDict[UUID]);
-                }
+                SODatabase.Read(reader);
             }
         }
 
@@ -109,13 +88,7 @@ namespace Hypersycos.GERogueFrame
         {
             if (networkManager.IsServer)
             {
-                characterMap.Clear();
-                uint count = 0;
-                foreach (BaseCharacterSO so in CharacterLoader.characters)
-                {
-                    characterMap.Add(so.UUID, count++);
-                    availableCharacters.Add(so);
-                }
+                SODatabase.Copy();
             }
         }
 
@@ -157,7 +130,7 @@ namespace Hypersycos.GERogueFrame
                 loadingScreen.DisplayMapProgress();
         }
 
-        public void SetPlayerCharacter(ulong id, uint characterID)
+        public void SetPlayerCharacter(ulong id, int characterID)
         {
             playerCharacterMap.Add(id, new PlayerInfo(characterID));
         }
@@ -174,7 +147,7 @@ namespace Hypersycos.GERogueFrame
         public void StartPreRound()
         {
             MapState newMap = new() { width = 1000, height = 1000, seed = UnityEngine.Random.Range(0, 10000) };
-            newMap.so = MapDatabase.singleton.maps.TakeRandom();
+            newMap.so = SODB.Maps.TakeRandom();
             _mapState.Value = newMap;
 
             AllPlayersLoaded.AddListener(SpawnPlayers);
@@ -228,9 +201,9 @@ namespace Hypersycos.GERogueFrame
             _gameState.Value = GameState.Playing;
         }
 
-        private NetworkObject SpawnPlayerAt(ulong playerID, uint characterID, Vector3 pos, Quaternion rot)
+        private NetworkObject SpawnPlayerAt(ulong playerID, int characterID, Vector3 pos, Quaternion rot)
         {
-            NetworkObject PlayerPrefab = availableCharacters[(int)characterID].NetworkPrefab;
+            NetworkObject PlayerPrefab = SODB.PlayerCharacters[characterID].NetworkPrefab;
 
             NetworkObject spawned = NetworkManager.Singleton.SpawnManager
                                     .InstantiateAndSpawn(PlayerPrefab, playerID, true, true,

@@ -294,5 +294,12 @@ namespace Hypersycos.GERogueFrame
                 }
             }
         }
+
+        void IMapGenerator.ModifyPlayerOnOwner(GameObject player)
+        {
+            var mod = player.AddComponent<LowGravityAboveNothing>();
+            mod.lowGravity = 0.1f;
+            mod.mask = 1;
+        }
     }
 }

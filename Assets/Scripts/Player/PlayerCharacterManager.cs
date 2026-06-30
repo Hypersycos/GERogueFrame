@@ -4,15 +4,15 @@ using System.Linq;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
-using static Hypersycos.GERogueFrame.BaseCharacterSO;
+using static Hypersycos.GERogueFrame.BasePCharacterSO;
 
 namespace Hypersycos.GERogueFrame
 {
     //[RequireComponent(typeof(NetworkAnimator))]
     public class PlayerCharacterManager : NetworkBehaviour
     {
-        public uint characterID;
-        public BaseCharacterSO so;
+        public int characterID;
+        public BasePCharacterSO so;
         public NetworkAnimator netAnimator;
         public CharacterController controller;
         public Transform bar;
@@ -39,12 +39,16 @@ namespace Hypersycos.GERogueFrame
                 Destroy(bar.gameObject);
 
                 GameObject.FindWithTag("MainCamera").GetComponent<CameraManager>().SetMyCamera(GetComponent<PlayerState>());
+
+                PersistentStateManager.Singleton.mapState.so.generator.ModifyPlayerOnOwner(gameObject);
             }
             else
             {
                 bar.gameObject.SetActive(true);
                 bar.GetComponentInChildren<StatBarScript>().SetStats(defenses);
             }
+
+            PersistentStateManager.Singleton.mapState.so.generator.ModifyPlayer(gameObject);
         }
     }
 }

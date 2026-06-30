@@ -36,7 +36,8 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+  UUID: base.Islands
+  ItemName: Islands
   worldPrefab: {fileID: 6711266910980765983, guid: 4dc6ce217852bef4f807f832312c2278, type: 3}
-  Name: Islands
   Description: 
   Image: {fileID: 2800000, guid: 6eb709479df05954086905d083ead443, type: 3}

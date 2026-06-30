@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Hypersycos.GERogueFrame
@@ -9,22 +11,31 @@ namespace Hypersycos.GERogueFrame
         void Start()
         {
             Team = 1;
+        }
+
+        public NetworkVariable<int> id;
+        public EnemySO so => SODatabase.NetworkedDB.Enemies[id.Value];
+        public List<BoundedStatInstance> Resources;
+        public List<DefenseStatInstance> Defenses;
+
+        public Transform bar;
+
+        public void ApplyDefensePool()
+        {
+            HitPoints = new DefensePool(Defenses, this);
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+            so.Apply(this);
+            bar.GetComponentInChildren<StatBarScript>().SetStats(Defenses.ToList<BoundedStatInstance>());
+
             if (IsServer)
             {
-                Health.OnEmpty.AddListener((_, _, _) => StartCoroutine(FullHealAfter(3)));
+                PersistentStateManager.Singleton.mapState.so.generator.ModifyEnemyOnServer(gameObject);
             }
-            StartSyncingValues(new List<ISyncStat> { Health });
-            Health.AddModifier(new StatRegenerationModifier(StatModifier.StackType.Flat, null, 5, null, 0, 2, 0));
-            HitPoints = new DefensePool(new List<DefenseStatInstance> { Health }, this);
-            GetComponentInChildren<StatBarScript>().AddStats(new List<BoundedStatInstance>() { Health });
+            PersistentStateManager.Singleton.mapState.so.generator.ModifyEnemy(gameObject);
         }
-
-        IEnumerator FullHealAfter(float seconds)
-        {
-            yield return new WaitForSeconds(seconds);
-            Health.AddValue(10000000);
-        }
-
-        [SerializeField] DefenseStatInstance Health = new DefenseStatInstance(100);
     }
 }

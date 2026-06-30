@@ -11,7 +11,7 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] Image characterImage;
         [SerializeField] Image loadingProgress;
 
-        public void Setup(string uname, BaseCharacterSO character)
+        public void Setup(string uname, BasePCharacterSO character)
         {
             //username.text = uname;
             characterImage.sprite = character.Icon;

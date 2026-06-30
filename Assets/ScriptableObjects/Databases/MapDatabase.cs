@@ -6,16 +6,8 @@ using UnityEngine;
 
 namespace Hypersycos.GERogueFrame
 {
-    [CreateAssetMenu(fileName = "New MapDatabase", menuName = "GERogueFrame/MapDatabase", order = 0)]
-    public class MapDatabase : ScriptableObject
+    [CreateAssetMenu(fileName = "New MapDatabase", menuName = "GERogueFrame/Database/MapDatabase", order = 0)]
+    public class MapDatabase : ModDatabase<MapGeneratorSO>
     {
-        public static MapDatabase singleton;
-
-        public List<MapGeneratorSO> maps;
-
-        private void OnEnable()
-        {
-            singleton = this;
-        }
     }
 }

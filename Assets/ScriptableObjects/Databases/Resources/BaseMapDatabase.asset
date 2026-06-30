@@ -10,8 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f70bfb9cf10456459d476e2bc6d51f0, type: 3}
-  m_Name: New MapDatabase
+  m_Name: BaseMapDatabase
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.MapDatabase
-  maps:
-  - {fileID: 11400000, guid: 7ceb3b51ac0709e46b85fa7e93dc2ff6, type: 2}
+  List:
   - {fileID: 11400000, guid: e678d8fcd6c9ea248bf5188962ae006f, type: 2}

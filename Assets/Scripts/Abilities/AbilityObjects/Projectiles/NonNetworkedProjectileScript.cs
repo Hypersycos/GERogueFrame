@@ -8,7 +8,7 @@ using UnityEngine.Events;
 namespace Hypersycos.GERogueFrame
 {
     [RequireComponent(typeof(Rigidbody))]
-    class ProjectileScript : MonoBehaviour
+    public class NonNetworkedProjectileScript : MonoBehaviour, IProjectileScript
     {
         public ProjectileID myID { get; private set; }
         public int ownerTeam { get; protected set; }
@@ -21,11 +21,11 @@ namespace Hypersycos.GERogueFrame
         protected float targetTime;
         protected float startTime;
 
-        public UnityEvent<ProjectileScript, CharacterState, CharacterState> hitAlly;
-        public UnityEvent<ProjectileScript, CharacterState, CharacterState> hitEnemy;
-        public UnityEvent<ProjectileScript, CharacterState> hitTerrain;
-        public UnityEvent<ProjectileScript> onDespawnServer;
-        public UnityEvent<ProjectileScript> onDespawnClient;
+        public UnityEvent<NonNetworkedProjectileScript, CharacterState, CharacterState> hitAlly;
+        public UnityEvent<NonNetworkedProjectileScript, CharacterState, CharacterState> hitEnemy;
+        public UnityEvent<NonNetworkedProjectileScript, CharacterState> hitTerrain;
+        public UnityEvent<NonNetworkedProjectileScript> onDespawnServer;
+        public UnityEvent<NonNetworkedProjectileScript> onDespawnClient;
 
         protected virtual Vector3 GetDummyPosition(float time)
         {

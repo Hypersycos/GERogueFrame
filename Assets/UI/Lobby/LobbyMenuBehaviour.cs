@@ -13,13 +13,13 @@ namespace Hypersycos.GERogueFrame
         {
             public ulong id;
             public bool isReady;
-            public uint characterID;
+            public int characterID;
 
             public LobbyPlayerState(ulong id)
             {
                 this.id = id;
                 isReady = false;
-                characterID = uint.MaxValue;
+                characterID = int.MaxValue;
             }
 
             public override bool Equals(object obj)
@@ -169,7 +169,7 @@ namespace Hypersycos.GERogueFrame
                 yield return null;
             }
             characterList.Clear();
-            foreach (BaseCharacterSO so in PersistentStateManager.Singleton.availableCharacters)
+            foreach (BasePCharacterSO so in SODatabase.NetworkedDB.PlayerCharacters)
             {
                 var template = characterSelectButton.Instantiate();
                 Button btn = template.Q<Button>();
@@ -206,23 +206,26 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
-        private void SelectCharacter(BaseCharacterSO character, VisualElement visualElement)
+        private void SelectCharacter(BasePCharacterSO character, VisualElement visualElement)
         {
             if (myCharacterObj)
                 Destroy(myCharacterObj);
             myCharacterObj = Instantiate(character.Model,
                                          spawnTransform.position + character.Model.transform.position,
                                          spawnTransform.rotation * character.Model.transform.rotation);
-            SetCharacterRpc(character);
+            SetCharacterRpc(SODatabase.NetworkedDB.PlayerCharacterIDs[character.UUID]);
             readyButton.enabledSelf = true;
         }
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-        public void SetCharacterRpc(BaseCharacterSO so, RpcParams rpcParams = default)
+        public void SetCharacterRpc(int id, RpcParams rpcParams = default)
         {
+            if (id < 0 || id >= SODatabase.NetworkedDB.PlayerCharacters.Count)
+                return;
+
             ulong senderID = rpcParams.Receive.SenderClientId;
             LobbyPlayerState state = readyData[senderID];
-            state.characterID = PersistentStateManager.Singleton.GetCharacterID(so);
+            state.characterID = id;
             readyData[senderID] = state;
         }
 
@@ -233,7 +236,7 @@ namespace Hypersycos.GERogueFrame
 
             LobbyPlayerState state = readyData[senderID];
             bool oldReady = state.isReady;
-            state.isReady = ready && state.characterID != uint.MaxValue;
+            state.isReady = ready && state.characterID != int.MaxValue;
 
             if (oldReady != state.isReady)
             {
