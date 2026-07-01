@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -11,10 +12,15 @@ namespace Hypersycos.GERogueFrame
         void Start()
         {
             Team = 1;
+            agent = GetComponent<NavMeshAgent>();
         }
 
         public NetworkVariable<int> id;
         public EnemySO so => SODatabase.NetworkedDB.Enemies[id.Value];
+
+        NavMeshAgent agent;
+        public override Vector3 CentrePos => transform.position + Vector3.up * agent.height / 2;
+
         public List<BoundedStatInstance> Resources;
         public List<DefenseStatInstance> Defenses;
 

@@ -40,6 +40,8 @@ namespace Hypersycos.GERogueFrame
         public CharacterStateStatusEvent BeforeStatusRemoved = new();
         public CharacterStateStatusEvent AfterStatusRemoved = new();
 
+        public abstract Vector3 CentrePos { get; }
+
         public void StartSyncingValues(List<ISyncStat> stats)
         {
             for (int i = 0; i < stats.Count; i++)

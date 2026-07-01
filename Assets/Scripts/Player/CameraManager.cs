@@ -22,6 +22,8 @@ namespace Hypersycos.GERogueFrame
 
         float yaw = 0;
         float pitch = 0;
+        Vector3 lastPos = new();
+        Vector3 targetPos = new();
 
         ControlsWrapper controlWrapper;
 
@@ -98,11 +100,11 @@ namespace Hypersycos.GERogueFrame
             Debug.DrawRay(target.position, dir * cameraDistance, Color.hotPink);
             if (Physics.Raycast(target.position, dir, out RaycastHit hit, cameraDistance, layerMask, QueryTriggerInteraction.Ignore))
             {
-                transform.position = hit.point;
-                Debug.DrawLine(target.transform.position, hit.point, Color.red);
+                targetPos = hit.point;
+                lastPos = hit.point;
             }
             else
-                transform.position = position;
+                targetPos = position;
         }
 
         private void Update()
@@ -110,14 +112,14 @@ namespace Hypersycos.GERogueFrame
             if (spectateTarget == null)
             {
                 HandleLookInput(myPlayer);
-                myCamera.transform.position = transform.position;
+                myCamera.transform.position = targetPos;
                 myCamera.transform.rotation = transform.rotation;
             }
             else
             {
                 if (lockedSpectate)
                 {
-                    transform.position = spectateCamera.position;
+                    targetPos = spectateCamera.position;
                     transform.rotation = spectateCamera.rotation;
                 }
                 else
@@ -125,6 +127,15 @@ namespace Hypersycos.GERogueFrame
                     HandleLookInput(spectateTarget);
                 }
             }
+
+            if ((targetPos - lastPos).magnitude > 5f)
+            {
+                transform.position = targetPos;
+                lastPos = targetPos;
+            }
+            float t = 1;// Mathf.Clamp01(Time.deltaTime * 10f);
+            transform.position = targetPos * t + lastPos * (1 - t);
+            lastPos = transform.position;
         }
     }
 }

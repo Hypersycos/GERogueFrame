@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed3430902c6f52545b8e8090f35631d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  heightMap: []
   xSize: 1000
   zSize: 1000
   terrainRenderer: {fileID: 8931258611260301504, guid: 469a050183ef9cb4e85d07e60a3183bf, type: 3}
@@ -93,6 +94,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed3430902c6f52545b8e8090f35631d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  heightMap: []
   xSize: 1000
   zSize: 1000
   terrainRenderer: {fileID: 8931258611260301504, guid: 0b42ead03fedb6d4997c7fbfa7032ccc, type: 3}

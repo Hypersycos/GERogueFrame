@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2878728b2e9f8ef4eb39b167639237cc, type: 3}
+  m_Name: SimpleMelee
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.EnemySO
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: abilities
+      Entry: 6
+      Data: 
+  UUID: 
+  ItemName: Simple Melee
+  Description: 
+  Icon: {fileID: 0}
+  Color: {r: 0, g: 0, b: 0, a: 0}
+  Model: {fileID: 0}
+  NetworkPrefab: {fileID: 0}
+  defenses:
+  - Max: 100
+    HasResist: 0
+    Resist: 50
+    FlatRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    MaxRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    CurrentRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    StatType: {fileID: 11400000, guid: 4d08cedfe6dbc144e873a312b724f912, type: 2}
+    ResistStatType: {fileID: 0}
+  resources: []

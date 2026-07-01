@@ -14,7 +14,7 @@ using UnityEditor;
 
 namespace Hypersycos.GERogueFrame
 {
-    [CreateAssetMenu(fileName = "New Character", menuName = "GERogueFrame/Character", order = 0)]
+    [CreateAssetMenu(fileName = "New Character", menuName = "GERogueFrame/PlayerCharacter", order = 0)]
     public class BasePCharacterSO : BaseCharacterSO, IEquatable<BasePCharacterSO>
     {
         public List<Canvas> UI;

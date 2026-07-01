@@ -78,8 +78,8 @@ namespace Hypersycos.GERogueFrame
             controls.Player.Crouch.canceled += DoCrouch;
             controls.Player.ToggleCrouch.started += DoCrouch;
 
-            controlWrapper.MenuOpened += () => enabled = false;
-            controlWrapper.MenuClosed += () => enabled = true;
+            //controlWrapper.MenuOpened += () => enabled = false;
+            //controlWrapper.MenuClosed += () => enabled = true;
             move = controls.Player.Move;
         }
 

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.AI.Navigation;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -13,7 +14,7 @@ namespace Hypersycos.GERogueFrame
     {
         public Task Setup(int seed, int width, int height, GameObject parent, IProgress<float> progress);
         public void GetSpawnPoint(int playerCount, out Vector3[] positions, out Quaternion[] rotations);
-        //TODO: public void PlaceObjectives();
+        //public void PlaceObjectives();
         public void ModifyPlayer(GameObject player) { }
         public void ModifyPlayerOnOwner(GameObject player) { }
         public void ModifyEnemy(GameObject enemy) { }
@@ -68,8 +69,6 @@ namespace Hypersycos.GERogueFrame
                 {
                     mapBuildProgress.Add(id, 0);
                 }
-                if (!IsHost)
-                    mapBuildProgress.Add(0, 0);
             }
 
             generatorTask = GenerateFromSeed(mapState, new Progress<float>());
@@ -80,8 +79,23 @@ namespace Hypersycos.GERogueFrame
         public async Task GenerateFromSeed(MapState state, Progress<float> progress)
         {
             GameObject prefab = Instantiate(state.so.worldPrefab, transform);
-            progress.ProgressChanged += (_, x) => this.progress = x;
+            if (IsServer)
+                progress.ProgressChanged += (_, x) => this.progress = x * 0.9f;
+            else
+                progress.ProgressChanged += (_, x) => this.progress = x;
             await state.so.generator.Setup(state.seed, state.width, state.height, prefab, progress);
+            if (IsServer)
+            {
+                //state.so.generator.PlaceObjectives();
+                this.progress = 0.9f;
+                var navMeshes = GetComponents<NavMeshSurface>();
+                float inc = 0.1f * navMeshes.Length;
+                foreach (var nav in navMeshes)
+                {
+                    nav.BuildNavMesh();
+                    this.progress += inc;
+                }
+            }
         }
 
         [Rpc(SendTo.Server)]

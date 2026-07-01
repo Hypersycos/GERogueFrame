@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Hypersycos.GERogueFrame
 {
+    [CreateAssetMenu(fileName = "New Character", menuName = "GERogueFrame/EnemyCharacter", order = 0)]
     public class EnemySO : BaseCharacterSO
     {
         public List<Defense> defenses;
