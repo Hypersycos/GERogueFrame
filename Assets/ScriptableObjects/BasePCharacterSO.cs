@@ -37,6 +37,7 @@ namespace Hypersycos.GERogueFrame
         public Defense Shields;
         public Defense Overhealth;
 
+#if UNITY_EDITOR
         public void Reset()
         {
             Energy = new Resource { StatType = StatType.StatTypeMap["Energy"], Max = 100, MaxRegen = new ResourceRegen { Value = .25f, Delay = 0.2f } };
@@ -44,6 +45,7 @@ namespace Hypersycos.GERogueFrame
             Shields = new Defense { StatType = StatType.StatTypeMap["Shields"], Max = 0, MaxRegen = new ResourceRegen { Value = .25f, Delay = 3 } };
             Overhealth = new Defense { StatType = StatType.StatTypeMap["OverHealth"], Max = -1, FlatRegen = new ResourceRegen { Value = -5, Delay = 0 }, CurrentRegen = new ResourceRegen { Value = -0.2f, Delay = 0 } };
         }
+#endif
 
         public bool Equals(BasePCharacterSO other)
         {

@@ -33,7 +33,7 @@ namespace Hypersycos.GERogueFrame
         {
             state.Tick(myChar, Time.fixedDeltaTime);
 
-            if (animator != null)
+            if (animator != null && false)
             {
 
                 Vector3 worldDeltaPosition = agent.nextPosition - transform.position;

@@ -2,11 +2,9 @@ using Hypersycos.Utils;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
-using static UnityEditor.FilePathAttribute;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -65,7 +63,6 @@ namespace Hypersycos.GERogueFrame
 
         protected override void OnSynchronize<T>(ref BufferSerializer<T> serializer)
         {
-            base.OnSynchronize(ref serializer);
             if (serializer.IsWriter)
             {
                 var writer = serializer.GetFastBufferWriter();
@@ -76,6 +73,7 @@ namespace Hypersycos.GERogueFrame
                 var reader = serializer.GetFastBufferReader();
                 SODatabase.Read(reader);
             }
+            base.OnSynchronize(ref serializer);
         }
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -104,6 +102,8 @@ namespace Hypersycos.GERogueFrame
             NetworkManager.SceneManager.OnLoadComplete += SceneChangeCompleted;
 
             _gameState.OnValueChanged += HandleGameStateValueChange;
+
+            _mapState.OnValueChanged += (_, _) => loadingScreen.UpdateMapLoad();
         }
 
         private void HandleGameStateValueChange(GameState previousValue, GameState newValue)
@@ -150,7 +150,7 @@ namespace Hypersycos.GERogueFrame
             newMap.so = SODB.Maps.TakeRandom();
             _mapState.Value = newMap;
 
-            AllPlayersLoaded.AddListener(SpawnPlayers);
+            AllPlayersLoaded.AddListener(StartRound);
             NetworkManager.SceneManager.OnLoadEventCompleted += OnGameSceneLoaded;
             NetworkManager.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
@@ -171,6 +171,12 @@ namespace Hypersycos.GERogueFrame
             {
                 Destroy(Singleton.gameObject);
             }
+        }
+
+        private void StartRound()
+        {
+            SpawnPlayers();
+            GameObject.FindWithTag("Managers").GetComponent<EnemySpawnManager>().enabled = true;
         }
 
         private void SpawnPlayers()

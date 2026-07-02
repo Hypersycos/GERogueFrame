@@ -26,8 +26,8 @@ MonoBehaviour:
       Entry: 7
       Data: 0|Hypersycos.GERogueFrame.StandardAbilityData, Assembly-CSharp
     - Name: AbilityName
-      Entry: 6
-      Data: 
+      Entry: 1
+      Data: Flashbang
     - Name: AbilityDescription
       Entry: 6
       Data: 

@@ -2162,6 +2162,8 @@ GameObject:
   - component: {fileID: 9174404814534057885}
   - component: {fileID: 7236810026480893657}
   - component: {fileID: 3111372434837530}
+  - component: {fileID: 5357347672853745169}
+  - component: {fileID: -892317270509594765}
   m_Layer: 7
   m_Name: RangedDummy
   m_TagString: Untagged
@@ -2321,7 +2323,7 @@ NavMeshAgent:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7788894545764550758}
-  m_Enabled: 1
+  m_Enabled: 0
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 3.5
@@ -2353,6 +2355,11 @@ MonoBehaviour:
   attackInterval: 5
   attackDistance: 30
   minimumAttackDistance: 10
+  attackSource: {fileID: 7447941128830472924}
+  attackOffset: {x: 0, y: 1.5, z: 1}
+  myProj: {fileID: 11400000, guid: 26ccba738a326934ba11d7dfb9e99495, type: 2}
+  velocity: 10
+  lifetime: 5
   wanderDistance: 10
   wanderWait: 1
   targetAcquisitionRange: 40
@@ -2362,6 +2369,45 @@ MonoBehaviour:
   losMask:
     serializedVersion: 2
     m_Bits: 1
+--- !u!114 &5357347672853745169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7788894545764550758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3a96152be12abc42baef38bfa7c25d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.EnemyAbilityManager
+--- !u!54 &-892317270509594765
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7788894545764550758}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &7862025110262846133
 GameObject:
   m_ObjectHideFlags: 0

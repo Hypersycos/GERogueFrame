@@ -10,27 +10,41 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2878728b2e9f8ef4eb39b167639237cc, type: 3}
-  m_Name: SimpleMelee
+  m_Name: SimpleProjectile
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.EnemySO
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
-    ReferencedUnityObjects: []
+    ReferencedUnityObjects:
+    - {fileID: 11400000, guid: 3f90f08cd458dd14ab8b85854ccd8da8, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
     - Name: abilities
-      Entry: 6
+      Entry: 7
+      Data: 0|System.Collections.Generic.List`1[[Hypersycos.GERogueFrame.IAbilityData,
+        Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 10
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
       Data: 
   UUID: 
-  ItemName: Simple Melee
+  ItemName: Simple Projectile
   Description: 
   Icon: {fileID: 0}
   Color: {r: 0, g: 0, b: 0, a: 0}
   Model: {fileID: 0}
-  NetworkPrefab: {fileID: 39828721480881588, guid: 8787f2947508a16429aa043ea5b1f3f8, type: 3}
+  NetworkPrefab: {fileID: 39828721480881588, guid: 09892d1c1846f0d4181ecf6a99fe355d, type: 3}
   defenses:
   - Max: 100
     HasResist: 0
@@ -50,5 +64,5 @@ MonoBehaviour:
     StatType: {fileID: 11400000, guid: 4d08cedfe6dbc144e873a312b724f912, type: 2}
     ResistStatType: {fileID: 0}
   resources: []
-  spawnCost: 1
+  spawnCost: 2
   navmeshID: 0

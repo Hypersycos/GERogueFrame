@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: BaseEnemyDatabase
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.EnemyDatabase
   List:
-  - {fileID: 11400000, guid: 59fbe5b2e32a49647b4cb7c7ec4738cd, type: 2}
+  - {fileID: 11400000, guid: 4fcdf2e6202659a44b3ddc7fd945202f, type: 2}

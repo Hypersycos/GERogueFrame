@@ -18,6 +18,11 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] float attackInterval = 5;
         [SerializeField] float attackDistance = 30;
         [SerializeField] float minimumAttackDistance = 10;
+        [SerializeField] Transform attackSource;
+        [SerializeField] Vector3 attackOffset;
+        [SerializeField] NonNetworkedProjectile myProj;
+        [SerializeField] float projVelocity;
+        [SerializeField] float lifetime;
 
         [SerializeField] float wanderDistance = 10f;
         [SerializeField] float wanderWait = 1f;
@@ -28,6 +33,7 @@ namespace Hypersycos.GERogueFrame
 
         CharacterState currentTarget;
         float attackTimer = 0;
+        Ability projectileAbility;
 
         new void Awake()
         {
@@ -55,7 +61,8 @@ namespace Hypersycos.GERogueFrame
                 name = "PreAttack",
                 duration = attackWindup,
                 behaviour = PlayWindup,
-                transitions = new() { new() { condition = null, target = "Attack" } }
+                transitions = new() { new() { condition = null, target = "Attack" } },
+                IsOneShot = true
             });
 
             state.states.Add(new()
@@ -77,20 +84,27 @@ namespace Hypersycos.GERogueFrame
             state.entryState = "Wander";
         }
 
+        public new void Start()
+        {
+            base.Start();
+        }
+
         private bool NoTargets(CharacterState state)
         {
             return currentTarget == null || !currentTarget.HitPoints.IsActive || !AcquireTarget(state);
         }
 
+        Vector3 source => attackSource.position + attackSource.rotation * attackOffset;
+
         private void Attack(CharacterState state, float dt)
         {
             //TODO: fire projectile
             attackTimer = -attackInterval;
+            ProjectileManager.Singleton.ServerSpawnDumbProjectile(myProj, source, attackSource.rotation, projVelocity, lifetime);
         }
 
         private void PlayWindup(CharacterState state, float dt)
         {
-            //TODO: Play animation
             agent.destination = transform.position;
         }
 

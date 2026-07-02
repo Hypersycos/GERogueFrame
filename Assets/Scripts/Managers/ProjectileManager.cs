@@ -125,6 +125,12 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
+        public void ServerSpawnDumbProjectile(NonNetworkedProjectile obj, Vector3 source, Quaternion rotation, float velocity, float lifetime)
+        {
+            ProjectileSpawnParams spawnParams = new(source, source, rotation, rotation, source, velocity, lifetime);
+            SpawnDumbProjectile(new(0, myCount++), obj, spawnParams);
+        }
+
         public void SpawnDumbProjectile(ProjectileID id, NonNetworkedProjectile obj, ProjectileSpawnParams spawnParams)
         {
             SpawnClientProjectileRpc(id, Dumb[obj.UUID], spawnParams);

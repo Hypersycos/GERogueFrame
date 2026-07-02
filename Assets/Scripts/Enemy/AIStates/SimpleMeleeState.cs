@@ -58,7 +58,8 @@ namespace Hypersycos.GERogueFrame
                 name = "PreAttack",
                 duration = attackWindup,
                 behaviour = PlayWindup,
-                transitions = new() { new() { condition = null, target = "Attack" } }
+                transitions = new() { new() { condition = null, target = "Attack" } },
+                IsOneShot = true
             });
 
             state.states.Add(new()

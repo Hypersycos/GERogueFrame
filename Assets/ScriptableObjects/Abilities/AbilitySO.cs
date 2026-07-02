@@ -13,6 +13,8 @@ namespace Hypersycos.GERogueFrame
         [ShowInInspector]
         [OdinSerialize] IAbilityData AbilityData;
 
+        public string Name => AbilityData.Name;
+
         public Ability CreateAbility()
         {
             return AbilityData.CreateAbility();

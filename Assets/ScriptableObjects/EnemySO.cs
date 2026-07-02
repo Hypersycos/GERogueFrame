@@ -13,12 +13,14 @@ namespace Hypersycos.GERogueFrame
         public List<Defense> defenses;
         public List<Resource> resources;
         public List<IAbilityData> abilities;
+        public float spawnCost;
+        public int navmeshID;
 
         public void Apply(EnemyState state)
         {
             foreach(Resource resource in resources)
             {
-                BoundedStatInstance resInst = new();
+                BoundedStatInstance resInst = new(0, 0, resource.Max, resource.StatType);
                 state.Resources.Add(resInst);
                 ApplyResource(resInst, resource, 0);
             }
@@ -26,20 +28,23 @@ namespace Hypersycos.GERogueFrame
             foreach (Defense def in defenses)
             {
                 DefenseStatInstance defInst = new();
+                CreateDefense(ref defInst, def, def.StatType.Name.ToLower() == "overhealth");
                 state.Defenses.Add(defInst);
-                ApplyDefense(defInst, def, 0);
             }
 
             state.ApplyDefensePool();
             state.StartSyncingValues(state.Defenses.ToList<ISyncStat>());
             state.StartSyncingValues(state.Resources.ToList<ISyncStat>());
 
-/*            EnemyAbilityManager aManager = state.GetComponent<EnemyAbilityManager>();
+            EnemyAbilityManager aManager = state.GetComponent<EnemyAbilityManager>();
 
-            foreach(IAbilityData ability in abilities)
+            if (abilities != null)
             {
-                aManager.Abilities.Add(ability.CreateAbility());
-            }*/
+                foreach (IAbilityData ability in abilities)
+                {
+                    aManager.AddAbility(ability);
+                }
+            }
         }
 
 #if false && UNITY_EDITOR

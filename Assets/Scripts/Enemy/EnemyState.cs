@@ -37,9 +37,14 @@ namespace Hypersycos.GERogueFrame
             so.Apply(this);
             bar.GetComponentInChildren<StatBarScript>().SetStats(Defenses.ToList<BoundedStatInstance>());
 
+            agent = GetComponent<NavMeshAgent>();
+            agent.enabled = false;
             if (IsServer)
             {
                 PersistentStateManager.Singleton.mapState.so.generator.ModifyEnemyOnServer(gameObject);
+                NavMesh.SamplePosition(transform.position, out NavMeshHit hit, agent.height * 2, agent.areaMask);
+                transform.position = hit.position;
+                agent.enabled = true;
             }
             PersistentStateManager.Singleton.mapState.so.generator.ModifyEnemy(gameObject);
         }

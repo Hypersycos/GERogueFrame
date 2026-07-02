@@ -20,6 +20,18 @@ namespace Hypersycos.GERogueFrame
             public float duration;
             public List<Transition> transitions;
             public Action<CharacterState, float> behaviour;
+            public bool IsOneShot;
+
+            bool debounce;
+
+            public void Tick(CharacterState owner, float dt)
+            {
+                if (behaviour != null && !debounce)
+                {
+                    behaviour(owner, dt);
+                    debounce = IsOneShot;
+                }
+            }
 
             public string Transition(CharacterState state, Dictionary<string, int> stateDict)
             {
@@ -27,11 +39,17 @@ namespace Hypersycos.GERogueFrame
                 {
                     if ((t.condition == null || t.condition(state)) && stateDict.ContainsKey(t.target))
                     {
+                        debounce = false;
                         return t.target;
                     }
                 }
                 duration = 0;
                 return null;
+            }
+
+            public void ResetDebounce()
+            {
+                debounce = false;
             }
         }
 
@@ -55,6 +73,9 @@ namespace Hypersycos.GERogueFrame
 
         public void Reset()
         {
+            if (currentState != null && stateDict.TryGetValue(currentState, out int index))
+                states[index].ResetDebounce();
+
             if (stateDict.ContainsKey(entryState))
                 currentState = entryState;
             else
@@ -64,6 +85,9 @@ namespace Hypersycos.GERogueFrame
 
         public bool ForceState(string target)
         {
+            if (currentState != null && stateDict.TryGetValue(currentState, out int index))
+                states[index].ResetDebounce();
+
             if (stateDict.ContainsKey(target))
             {
                 currentState = target;
@@ -84,8 +108,7 @@ namespace Hypersycos.GERogueFrame
             while(loop)
             {
                 var state = states[stateDict[currentState]];
-                if (state.behaviour != null)
-                    state.behaviour(owner, dt);
+                state.Tick(owner, dt);
                 if (currentTime >= state.duration)
                 {
                     string target = state.Transition(owner, stateDict);

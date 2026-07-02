@@ -12,9 +12,12 @@ namespace Hypersycos.GERogueFrame
     {
         public string AbilityName;
         public string AbilityDescription;
-        public Texture2D AbilityIcon;
+        public Sprite AbilityIcon;
         public float endlag;
         public float queueFor;
+
+        public string Name => AbilityName;
+
         public abstract Ability CreateAbility();
     }
 }

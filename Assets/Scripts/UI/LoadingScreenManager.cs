@@ -17,19 +17,24 @@ namespace Hypersycos.GERogueFrame
         MapGenerator mapGen;
 
         Dictionary<ulong, PlayerLoadScript> loadScripts = new();
+
         public void ShowMapLoad()
         {
             enabled = false;
             gameObject.SetActive(true);
-            mapName.text = stateManager.mapState.so.ItemName;
-            mapBackground.texture = stateManager.mapState.so.Image;
-            mapBackground.GetComponent<AspectRatioFitter>().aspectRatio = (float)mapBackground.texture.width / mapBackground.texture.height;
             foreach (var player in stateManager.playerCharacterMap)
             {
                 var playerImg = Instantiate(playerLoadPrefab, playerLoadHolder);
                 playerImg.Setup(player.Key.ToString(), stateManager.SODB.PlayerCharacters[player.Value.characterID]);
                 loadScripts.Add(player.Key, playerImg);
             }
+        }
+
+        public void UpdateMapLoad()
+        {
+            mapName.text = stateManager.mapState.so.ItemName;
+            mapBackground.texture = stateManager.mapState.so.Image;
+            mapBackground.GetComponent<AspectRatioFitter>().aspectRatio = (float)mapBackground.texture.width / mapBackground.texture.height;
         }
 
         public void DisplayMapProgress()

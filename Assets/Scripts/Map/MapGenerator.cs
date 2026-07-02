@@ -34,12 +34,16 @@ namespace Hypersycos.GERogueFrame
             serializer.SerializeValue(ref height);
             if (serializer.IsWriter)
             {
-                serializer.GetFastBufferWriter().WriteValueSafe(SODatabase.NetworkedDB.MapIDs[so.UUID]);
+                if (so == null)
+                    serializer.GetFastBufferWriter().WriteValueSafe(-1);
+                else
+                    serializer.GetFastBufferWriter().WriteValueSafe(SODatabase.NetworkedDB.MapIDs[so.UUID]);
             }
             else
             {
                 serializer.GetFastBufferReader().ReadValueSafe(out int index);
-                so = SODatabase.NetworkedDB.Maps[index];
+                if (index > 0)
+                    so = SODatabase.NetworkedDB.Maps[index];
             }
         }
     }

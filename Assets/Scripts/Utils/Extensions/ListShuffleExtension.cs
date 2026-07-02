@@ -40,6 +40,11 @@ namespace Hypersycos.Utils
         {
             return list[UnityEngine.Random.Range(0, list.Count)];
         }
+
+        public static T TakeRandomFromReadOnly<T>(this IReadOnlyList<T> list)
+        {
+            return list[UnityEngine.Random.Range(0, list.Count)];
+        }
     }
 
     public static class ThreadSafeRandom
