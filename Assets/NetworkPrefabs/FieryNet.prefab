@@ -744,6 +744,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3025666902513634889}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3156673368865337938}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -5055750329640581587}
   m_SourcePrefab: {fileID: 100100000, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
 --- !u!95 &543140129966221314 stripped
 Animator:
@@ -784,7 +790,7 @@ CharacterController:
   m_StepOffset: 0.2
   m_SkinWidth: 0.02
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.93, z: 0}
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!114 &4724389780327334411
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -827,6 +833,7 @@ MonoBehaviour:
   so: {fileID: 11400000, guid: 57b1472237919074b9192c209ab44bcf, type: 2}
   netAnimator: {fileID: 1248173252709669646}
   controller: {fileID: 5731168349060335801}
+  nonOwnerCollider: {fileID: -5055750329640581587}
   bar: {fileID: 8254214210042972492}
 --- !u!114 &1248173252709669646
 MonoBehaviour:
@@ -1057,6 +1064,71 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.PlayerAbilityManager
   ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &3156673368865337938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6494862919844030658}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96f0169631ada224bba5d5bbd7bf73f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.PlayerMovementController
+  ShowTopMostFoldoutHeaderGroup: 1
+  movementSpeed: 4
+  airStrafeRate: 0.4
+  drag: 0.7
+  smoothing: 0.1
+  overspeedControl: 0.4
+  overspeedCarry: 0.25
+  <crouchSpeed>k__BackingField: 0.4
+  slideThreshold: 0.5
+  slideImpulse: 0
+  jumpHeight: 1
+  airJumpHeight: 0.7
+  superJumpHeight: 4
+  airSuperJumpHeight: 3
+  maxJumps: 2
+  <canSuperJump>k__BackingField: 0
+  <movementModifiers>k__BackingField: 1
+  gravityMultiplier: 1
+  velocity: {x: 0, y: 0, z: 0}
+  <crouching>k__BackingField: 0
+  <superJumpAvailable>k__BackingField: 0
+  jumpsAvailable: 0
+  lastJump: 0
+  lockedToCamera: 0
+  networkVelocity:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: {x: 0, y: 0, z: 0}
+  velocityAvgPeriod: 0.5
+--- !u!136 &-5055750329640581587
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6494862919844030658}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.28
+  m_Height: 1.8
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1001 &7143003838695300785
 PrefabInstance:
   m_ObjectHideFlags: 0

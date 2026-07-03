@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 
 namespace Hypersycos.GERogueFrame
 {
-    public class PlayerMovementController : MonoBehaviour
+    public class PlayerMovementController : NetworkBehaviour
     {
         CharacterController characterController;
         Transform playerCamera;
@@ -41,6 +41,11 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] float lastJump = 0f;
         public bool lockedToCamera;
 
+        public NetworkVariable<Vector3> networkVelocity = new(writePerm: NetworkVariableWritePermission.Owner);
+        Queue<Vector3> pastVelocities = new();
+        [SerializeField] float velocityAvgPeriod = 0.5f;
+        int velocityAvgCount;
+
         Dictionary<string, float> movementModifierTracker = new Dictionary<string, float>();
         Dictionary<string, float> gravityModifierTracker = new Dictionary<string, float>();
 
@@ -70,7 +75,7 @@ namespace Hypersycos.GERogueFrame
         void Awake()
         {
             characterController = GetComponent<CharacterController>();
-            playerCamera = transform.Find("CameraPos");
+            playerCamera = GameObject.FindWithTag("MainCamera").transform;
             controlWrapper = ControlsWrapper.Singleton;
 
             controls.Player.Jump.started += DoJump;
@@ -81,6 +86,7 @@ namespace Hypersycos.GERogueFrame
             //controlWrapper.MenuOpened += () => enabled = false;
             //controlWrapper.MenuClosed += () => enabled = true;
             move = controls.Player.Move;
+            velocityAvgCount = Mathf.CeilToInt(velocityAvgPeriod / Time.fixedDeltaTime);
         }
 
         private Vector3 GetHorizontalCameraForward(Transform playerCamera)
@@ -342,6 +348,10 @@ namespace Hypersycos.GERogueFrame
             }
 
             characterController.Move(velocity * Time.fixedDeltaTime + forcedMove);
+            pastVelocities.Enqueue(characterController.velocity);
+            networkVelocity.Value += characterController.velocity / velocityAvgCount;
+            if (pastVelocities.Count > velocityAvgCount)
+                networkVelocity.Value -= pastVelocities.Dequeue() / velocityAvgCount;
 
             if (lastJump > 0f)
             {

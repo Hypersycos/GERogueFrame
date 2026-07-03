@@ -45,6 +45,7 @@ namespace Hypersycos.GERogueFrame
                 NavMesh.SamplePosition(transform.position, out NavMeshHit hit, agent.height * 2, agent.areaMask);
                 transform.position = hit.position;
                 agent.enabled = true;
+                GetComponent<AIState>().enabled = true;
             }
             PersistentStateManager.Singleton.mapState.so.generator.ModifyEnemy(gameObject);
         }

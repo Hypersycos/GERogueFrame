@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Unity.AI.Navigation;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UIElements;
 
 namespace Hypersycos.GERogueFrame
@@ -42,7 +43,7 @@ namespace Hypersycos.GERogueFrame
             else
             {
                 serializer.GetFastBufferReader().ReadValueSafe(out int index);
-                if (index > 0)
+                if (index >= 0)
                     so = SODatabase.NetworkedDB.Maps[index];
             }
         }
@@ -75,34 +76,63 @@ namespace Hypersycos.GERogueFrame
                 }
             }
 
+            PersistentStateManager.Singleton.MapUpdated.AddListener(StartGenerating);
+            if (PersistentStateManager.Singleton.isLatestMap)
+                StartGenerating();
+        }
+
+        public void StartGenerating()
+        {
             generatorTask = GenerateFromSeed(mapState, new Progress<float>());
             timeSinceLastUpdate = 0;
             enabled = true;
+            PersistentStateManager.Singleton.isLatestMap = false;
+            PersistentStateManager.Singleton.MapUpdated.RemoveListener(StartGenerating);
         }
 
         public async Task GenerateFromSeed(MapState state, Progress<float> progress)
         {
             GameObject prefab = Instantiate(state.so.worldPrefab, transform);
             if (IsServer)
-                progress.ProgressChanged += (_, x) => this.progress = x * 0.9f;
+                progress.ProgressChanged += (_, x) => this.progress = x * 0.8f;
             else
                 progress.ProgressChanged += (_, x) => this.progress = x;
             await state.so.generator.Setup(state.seed, state.width, state.height, prefab, progress);
             if (IsServer)
             {
                 //state.so.generator.PlaceObjectives();
-                this.progress = 0.9f;
+                this.progress = 0.8f;
                 var navMeshes = GetComponents<NavMeshSurface>();
-                float inc = 0.1f * navMeshes.Length;
+                float inc = 0.2f * (navMeshes.Length + 2);
+
+                var colliders = GetComponentsInChildren<Collider>();
+                Bounds navMeshBounds = new();
+
+                foreach (Collider collider in colliders)
+                {
+                    navMeshBounds.Encapsulate(collider.bounds);
+                    this.progress += inc / colliders.Length;
+                }
+                navMeshBounds.Expand(2.0f);
+
+                List<NavMeshBuildSource> sources = new();
+                List<NavMeshBuildMarkup> markups = new();
+                NavMeshBuilder.CollectSources(navMeshBounds, navMeshes[0].layerMask,
+                                                NavMeshCollectGeometry.PhysicsColliders, 0, markups, sources);
+                this.progress += inc;
+
                 foreach (var nav in navMeshes)
                 {
-                    nav.BuildNavMesh();
+                    var navMeshData = new NavMeshData();
+                    nav.navMeshData = navMeshData;
+                    NavMesh.AddNavMeshData(navMeshData);
+                    await NavMeshBuilder.UpdateNavMeshDataAsync(navMeshData, nav.GetBuildSettings(), sources, navMeshBounds);
                     this.progress += inc;
                 }
             }
         }
 
-        [Rpc(SendTo.Server)]
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         public void UpdateProgressRpc(float progress, RpcParams rpcParams = default)
         {
             mapBuildProgress[rpcParams.Receive.SenderClientId] = progress;

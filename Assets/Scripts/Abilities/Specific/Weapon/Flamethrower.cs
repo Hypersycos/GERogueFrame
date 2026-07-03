@@ -163,8 +163,8 @@ namespace Hypersycos.GERogueFrame
         {
             if (!myState.IsOwner)
             {
-                myState = (payload as IComponentPayload<CharacterState>).Component;
                 myCamera = myState.transform.Find("CameraPos");
+                this.myState = myState;
 
                 DoParticles();
             }

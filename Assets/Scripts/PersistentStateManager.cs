@@ -44,9 +44,9 @@ namespace Hypersycos.GERogueFrame
 
         NetworkVariable<GameState> _gameState = new NetworkVariable<GameState>(GameState.Lobby);
         public GameState gameState => _gameState.Value;
-
-        NetworkVariable<MapState> _mapState = new NetworkVariable<MapState>();
-        public MapState mapState => _mapState.Value;
+        public MapState mapState = new();
+        public bool isLatestMap = false;
+        public UnityEvent MapUpdated;
 
         BetterNetworkList<KeyIndexPair<ulong>> playerIDs = new();
         BetterNetworkList<PlayerInfo> playerCharacters = new();
@@ -63,6 +63,7 @@ namespace Hypersycos.GERogueFrame
 
         protected override void OnSynchronize<T>(ref BufferSerializer<T> serializer)
         {
+            base.OnSynchronize(ref serializer);
             if (serializer.IsWriter)
             {
                 var writer = serializer.GetFastBufferWriter();
@@ -73,7 +74,7 @@ namespace Hypersycos.GERogueFrame
                 var reader = serializer.GetFastBufferReader();
                 SODatabase.Read(reader);
             }
-            base.OnSynchronize(ref serializer);
+            serializer.SerializeValue(ref mapState);
         }
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -95,15 +96,13 @@ namespace Hypersycos.GERogueFrame
             base.OnNetworkSpawn();
             if (NetworkManager.IsServer)
                 _gameState.Value = GameState.Lobby;
-            playerCharacterMap = new(playerIDs, playerCharacters, NetworkManager.IsServer);
+            playerCharacterMap = new(playerIDs, playerCharacters, !NetworkManager.IsServer);
             DontDestroyOnLoad(this);
 
             NetworkManager.SceneManager.OnLoad += SceneChangeStarted;
             NetworkManager.SceneManager.OnLoadComplete += SceneChangeCompleted;
 
             _gameState.OnValueChanged += HandleGameStateValueChange;
-
-            _mapState.OnValueChanged += (_, _) => loadingScreen.UpdateMapLoad();
         }
 
         private void HandleGameStateValueChange(GameState previousValue, GameState newValue)
@@ -148,11 +147,22 @@ namespace Hypersycos.GERogueFrame
         {
             MapState newMap = new() { width = 1000, height = 1000, seed = UnityEngine.Random.Range(0, 10000) };
             newMap.so = SODB.Maps.TakeRandom();
-            _mapState.Value = newMap;
+            mapState = newMap;
+            isLatestMap = true;
+            SyncMapRpc(newMap);
 
             AllPlayersLoaded.AddListener(StartRound);
             NetworkManager.SceneManager.OnLoadEventCompleted += OnGameSceneLoaded;
             NetworkManager.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        }
+
+        [Rpc(SendTo.ClientsAndHost)]
+        public void SyncMapRpc(MapState newMap)
+        {
+            mapState = newMap;
+            loadingScreen.UpdateMapLoad();
+            isLatestMap = true;
+            MapUpdated?.Invoke();
         }
 
         public static void SingletonQuitToMenu() => Singleton?.QuitToMenu();
@@ -175,6 +185,7 @@ namespace Hypersycos.GERogueFrame
 
         private void StartRound()
         {
+            AllPlayersLoaded.RemoveListener(StartRound);
             SpawnPlayers();
             GameObject.FindWithTag("Managers").GetComponent<EnemySpawnManager>().enabled = true;
         }

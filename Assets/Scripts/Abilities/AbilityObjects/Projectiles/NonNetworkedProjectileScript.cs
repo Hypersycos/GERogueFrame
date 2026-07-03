@@ -49,13 +49,13 @@ namespace Hypersycos.GERogueFrame
 
         public virtual void Anticipate(ProjectileSpawnParams spawnParams)
         {
-            lifetime = spawnParams.lifetime * 2;
+            lifetime = spawnParams.lifetime + 1;
             Common(spawnParams);
         }
 
         public virtual void Dummy(ProjectileID ID, ProjectileSpawnParams spawnParams)
         {
-            lifetime = spawnParams.lifetime * 2;
+            lifetime = spawnParams.lifetime + 1;
             Common(spawnParams);
         }
 
@@ -66,6 +66,19 @@ namespace Hypersycos.GERogueFrame
             GetComponent<Renderer>().enabled = false;
             myID = ID;
             owner = NetworkManager.Singleton.ConnectedClients[ID.ownerID].PlayerObject.GetComponent<CharacterState>();
+            ownerTeam = owner.Team;
+            isServer = true;
+
+            Common(spawnParams);
+        }
+
+        public virtual void ServerAI(ProjectileID ID, CharacterState owner, ProjectileSpawnParams spawnParams)
+        {
+            lifetime = spawnParams.lifetime;
+            GetComponent<Collider>().enabled = true;
+            GetComponent<Renderer>().enabled = false;
+            myID = ID;
+            this.owner = owner;
             ownerTeam = owner.Team;
             isServer = true;
 

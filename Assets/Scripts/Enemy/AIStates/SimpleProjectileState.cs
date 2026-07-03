@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using Unity.Burst.CompilerServices;
+using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem.HID;
@@ -100,7 +101,40 @@ namespace Hypersycos.GERogueFrame
         {
             //TODO: fire projectile
             attackTimer = -attackInterval;
-            ProjectileManager.Singleton.ServerSpawnDumbProjectile(myProj, source, attackSource.rotation, projVelocity, lifetime);
+
+            Vector3 relativePos = currentTarget.CentrePos - source;
+            Vector3 targetVelocity = currentTarget.GetComponent<PlayerMovementController>().networkVelocity.Value;
+            float a = targetVelocity.sqrMagnitude - projVelocity * projVelocity;
+            float b = 2f * Vector3.Dot(relativePos, targetVelocity);
+            float c = relativePos.sqrMagnitude;
+
+            float discriminant = b * b - 4 * a * c;
+
+            if (discriminant < 0 || a == 0)
+            {
+                ProjectileManager.Singleton.SpawnAIDumbProjectile(myProj, myChar, source, Quaternion.FromToRotation(Vector3.forward, relativePos.normalized), projVelocity, lifetime);
+                return;
+            }
+
+            float sqrtDiscriminant = Mathf.Sqrt(discriminant);
+            float t1 = (-b - sqrtDiscriminant) / (2 * a);
+            float t2 = (-b + sqrtDiscriminant) / (2 * a);
+            float t;
+
+            if (t1 > 0 && t2 > 0)
+                t = Mathf.Min(t1, t2);
+            else if (t1 > 0)
+                t = t1;
+            else if (t2 > 0)
+                t = t2;
+            else
+            {
+                ProjectileManager.Singleton.SpawnAIDumbProjectile(myProj, myChar, source, Quaternion.FromToRotation(Vector3.forward, relativePos.normalized), projVelocity, lifetime);
+                return;
+            }
+
+            Vector3 intercept = currentTarget.CentrePos + targetVelocity * t - source;
+            ProjectileManager.Singleton.SpawnAIDumbProjectile(myProj, myChar, source, Quaternion.FromToRotation(Vector3.forward, intercept.normalized), projVelocity, lifetime);
         }
 
         private void PlayWindup(CharacterState state, float dt)
@@ -158,7 +192,7 @@ namespace Hypersycos.GERogueFrame
             {
                 if (target.TryGetComponent<CharacterState>(out var targetState))
                 {
-                    if (targetState.Team != s.Team)
+                    if (targetState.Team != s.Team && targetState.HitPoints.IsActive)
                     {
                         if (!Physics.Raycast(s.CentrePos, targetState.CentrePos - s.CentrePos, 1, losMask, QueryTriggerInteraction.Ignore))
                             realTargets.Add(targetState);

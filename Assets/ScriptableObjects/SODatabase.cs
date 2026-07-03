@@ -28,6 +28,8 @@ namespace Hypersycos.GERogueFrame
         public TwoWayDictionary<string, int> NonNetworkedProjectileIDs = new();
         public TwoWayDictionary<string, int> NetworkedProjectileIDs = new();
 
+        public static List<string> missingIDs = new();
+
         public void Load<T>(List<T> list, string prefix) where T: ModDatabaseItem
         {
             switch(list)
@@ -150,12 +152,21 @@ namespace Hypersycos.GERogueFrame
                 for (int i = 0; i < count; i++)
                 {
                     reader.ReadValueSafe(out string id);
-                    dest.Add(source[sourceIdMap[id]]);
-                    destIdMap.Add(id, i);
+                    if (sourceIdMap.TryGetValue(id, out int index))
+                    {
+                        dest.Add(source[sourceIdMap[id]]);
+                        destIdMap.Add(id, i);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Local map does not contain UUID {id}");
+                        missingIDs.Add(id);
+                    }
                 }
             }
 
             NetworkedDB.Clear();
+            missingIDs.Clear();
 
             Read(LocalDB.PlayerCharacters, NetworkedDB.PlayerCharacters, LocalDB.PlayerCharacterIDs, NetworkedDB.PlayerCharacterIDs);
             Read(LocalDB.Maps, NetworkedDB.Maps, LocalDB.MapIDs, NetworkedDB.MapIDs);

@@ -64,7 +64,8 @@ namespace Hypersycos.GERogueFrame
         void OnAnimatorMove()
         {
             // Update position to agent position
-            transform.position = agent.nextPosition;
+            if (enabled)
+                transform.position = agent.nextPosition;
         }
     }
 }

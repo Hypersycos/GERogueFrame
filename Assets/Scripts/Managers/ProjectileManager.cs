@@ -125,10 +125,14 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
-        public void ServerSpawnDumbProjectile(NonNetworkedProjectile obj, Vector3 source, Quaternion rotation, float velocity, float lifetime)
+        public void SpawnAIDumbProjectile(NonNetworkedProjectile obj, CharacterState owner, Vector3 source, Quaternion rotation, float velocity, float lifetime)
         {
-            ProjectileSpawnParams spawnParams = new(source, source, rotation, rotation, source, velocity, lifetime);
-            SpawnDumbProjectile(new(0, myCount++), obj, spawnParams);
+            ProjectileSpawnParams spawnParams = new(source, source, rotation, rotation, source + rotation * Vector3.forward, velocity, lifetime);
+            ProjectileID id = new(ulong.MaxValue, myCount++);
+            SpawnClientProjectileRpc(id, Dumb[obj.UUID], spawnParams);
+            var spawned = Instantiate(obj.projectileObj, spawnParams.position, spawnParams.rotation);
+            spawned.ServerAI(id, owner, spawnParams);
+            serverProjectiles.Add(id, spawned.gameObject);
         }
 
         public void SpawnDumbProjectile(ProjectileID id, NonNetworkedProjectile obj, ProjectileSpawnParams spawnParams)

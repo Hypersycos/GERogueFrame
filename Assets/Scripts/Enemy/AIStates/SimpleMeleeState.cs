@@ -49,8 +49,8 @@ namespace Hypersycos.GERogueFrame
                 name = "Hunt",
                 duration = 0,
                 behaviour = Hunt,
-                transitions = new() { new() { condition = CanAttack, target = "PreAttack" },
-                                      new() { condition = NoTargets, target = "Wander"} }
+                transitions = new() { new() { condition = NoTargets, target = "Wander"},
+                                      new() { condition = CanAttack, target = "PreAttack" }}
             });
 
             state.states.Add(new()
@@ -125,7 +125,7 @@ namespace Hypersycos.GERogueFrame
             agent.destination = currentTarget.CentrePos;
 
             reacquisitionTimer += dt;
-            if (reacquisitionTimer > 5 && sqrTargetDistance > targetLockedRange)
+            if (reacquisitionTimer > 5 && sqrTargetDistance > targetLockedRange || !currentTarget.HitPoints.IsActive || currentTarget == null)
             {
                 AcquireTarget(GetComponent<CharacterState>());
                 reacquisitionTimer = UnityEngine.Random.Range(-3, 0);
@@ -140,7 +140,7 @@ namespace Hypersycos.GERogueFrame
             {
                 if (target.TryGetComponent<CharacterState>(out var targetState))
                 {
-                    if (targetState.Team != s.Team)
+                    if (targetState.Team != s.Team && targetState.HitPoints.IsActive)
                     {
                         if (!Physics.Raycast(s.CentrePos, targetState.CentrePos - s.CentrePos, 1, losMask, QueryTriggerInteraction.Ignore))
                             realTargets.Add(targetState);

@@ -51,6 +51,14 @@ namespace Hypersycos.GERogueFrame
 
         private void AssignAbility(Ability ability, InputAction action, uint id)
         {
+            if (!IsOwner)
+            {
+                abilityMap.Remove(id);
+                if (ability != null)
+                    abilityMap.Add(ability, id);
+                return;
+            }
+
             if (actionMap.TryGetValue(action, out var actionPair))
             {
                 action.started -= actionPair.Item1;
@@ -292,7 +300,8 @@ namespace Hypersycos.GERogueFrame
                 EndCastFailedRpc(abilityMap[ability]);
             }
 
-            currentlyCasting = null;
+            if (!IsHost)
+                currentlyCasting = null;
         }
 
         [Rpc(SendTo.Server)]
@@ -330,6 +339,7 @@ namespace Hypersycos.GERogueFrame
         {
             var ability = currentlyCasting;
             ability.ClientCastEnd(payload, myState);
+            currentlyCasting = null;
         }
 
         [Rpc(SendTo.ClientsAndHost)]

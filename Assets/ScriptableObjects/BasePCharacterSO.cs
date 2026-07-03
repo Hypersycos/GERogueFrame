@@ -7,6 +7,8 @@ using UnityEngine.UIElements;
 using TMPro;
 using Sirenix.Serialization;
 using Sirenix.OdinInspector;
+using System.Linq;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -110,6 +112,19 @@ namespace Hypersycos.GERogueFrame
             manager.netAnimator.AuthorityMode = NetworkAnimator.AuthorityModes.Owner;
             manager.netAnimator.Animator = copy.GetComponent<Animator>();
             manager.controller = copy.GetComponent<CharacterController>();
+            if (manager.controller == null)
+            {
+                manager.controller = copy.AddComponent<CharacterController>();
+                manager.controller.enabled = false;
+            }
+            if (copy.GetComponents<Collider>().Length < 2)
+            {
+                manager.nonOwnerCollider = copy.AddComponent<CapsuleCollider>();
+            }
+            else
+            {
+                manager.nonOwnerCollider = copy.GetComponents<Collider>().Where((x) => x is not CharacterController).First();
+            }
             manager.bar = PrefabUtility.LoadPrefabContents("Assets/Prefabs/FriendlyBar.prefab").transform;
             manager.bar.SetParent(cameraTarget);
             manager.bar.localPosition = new Vector3(0, 0.5f, 0);
@@ -120,6 +135,9 @@ namespace Hypersycos.GERogueFrame
             netTransform.SyncRotAngleZ = false;
             copy.AddComponent<PlayerState>().DamageTickPrefab = AssetDatabase.LoadAssetAtPath<TMPro.TMP_Text>("Assets/UI/DamageNumber.prefab");
             copy.AddComponent<PlayerAbilityManager>();
+            var movement = copy.AddComponent<PlayerMovementController>();
+            movement.enabled = false;
+            movement.movementSpeed = Speed;
 
             GameObject camPos = new GameObject("CameraPos");
             NetworkTransform camTrans = camPos.AddComponent<NetworkTransform>();
@@ -128,6 +146,11 @@ namespace Hypersycos.GERogueFrame
             camTrans.SyncScaleY = false;
             camTrans.SyncScaleZ = false;
             camPos.transform.SetParent(copy.transform);
+
+            foreach (Transform trans in copy.GetComponentsInChildren<Transform>(true))
+            {
+                trans.gameObject.layer = 6;
+            }
 
             GameObject basePrefab = PrefabUtility.SaveAsPrefabAsset(copy, $"Assets/NetworkPrefabs/{ItemName}Net.prefab", out bool success);
 

@@ -197,14 +197,17 @@ namespace Hypersycos.GERogueFrame
                 BoundedStatInstance statInstance = stats[i];
                 int index = StatInstances.IndexOf(statInstance);
                 StatInstances.Remove(statInstance);
-                Images.RemoveAt(index);
-                total -= statInstance.MaxValue;
-                statInstance.OnMaxIncrease.RemoveListener(UpdateTotal);
-                statInstance.OnMaxDecrease.RemoveListener(UpdateTotal);
-                statInstance.OnDecrease.RemoveListener(UpdateOne);
-                statInstance.OnEmpty.RemoveListener((stat, change, _) => UpdateOne(stat, change));
-                statInstance.OnIncrease.RemoveListener(UpdateOne);
-                statInstance.OnFill.RemoveListener((stat, change, _) => UpdateOne(stat, change));
+                if (initialized)
+                {
+                    Images.RemoveAt(index);
+                    total -= statInstance.MaxValue;
+                    statInstance.OnMaxIncrease.RemoveListener(UpdateTotal);
+                    statInstance.OnMaxDecrease.RemoveListener(UpdateTotal);
+                    statInstance.OnDecrease.RemoveListener(UpdateOne);
+                    statInstance.OnEmpty.RemoveListener((stat, change, _) => UpdateOne(stat, change));
+                    statInstance.OnIncrease.RemoveListener(UpdateOne);
+                    statInstance.OnFill.RemoveListener((stat, change, _) => UpdateOne(stat, change));
+                }
             }
             Redraw();
         }

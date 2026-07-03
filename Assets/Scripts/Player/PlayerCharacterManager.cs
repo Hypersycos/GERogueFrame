@@ -15,6 +15,7 @@ namespace Hypersycos.GERogueFrame
         public BasePCharacterSO so;
         public NetworkAnimator netAnimator;
         public CharacterController controller;
+        public Collider nonOwnerCollider;
         public Transform bar;
 
         private void Reset()
@@ -33,8 +34,9 @@ namespace Hypersycos.GERogueFrame
 
             if (IsOwner)
             {
+                nonOwnerCollider.enabled = false;
                 controller.enabled = true;
-                gameObject.AddComponent<PlayerMovementController>().movementSpeed = so.Speed;
+                gameObject.GetComponent<PlayerMovementController>().enabled = true;
                 gameObject.AddComponent<PlayerAnimatorScript>();
                 Destroy(bar.gameObject);
 

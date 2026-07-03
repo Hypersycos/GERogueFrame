@@ -139,21 +139,36 @@ namespace Hypersycos.GERogueFrame
             return false;
         }
 
-        private void SpawnEnemy(CharacterState targetPlayer, EnemySO enemy)
+        private bool SpawnEnemy(CharacterState targetPlayer, EnemySO enemy)
         {
             bool success = false;
             Vector3 resultPos = Vector3.zero;
 
-            while (!success)
+            int count = 0;
+
+            while (!success && count++ < 20)
             {
                 Vector3 spawnPoint = UnityEngine.Random.insideUnitSphere * 30f + targetPlayer.CentrePos;
 
                 success = GetNavmeshPosition(spawnPoint, enemy, 15, 5, 10, out resultPos);
+
+                foreach(var player in NetworkManager.Singleton.ConnectedClientsList)
+                {
+                    if ((player.PlayerObject.GetComponent<CharacterState>().CentrePos - spawnPoint).sqrMagnitude < 5 * 5)
+                    {
+                        success = false;
+                        break;
+                    }
+                }
             }
+
+            if (!success)
+                return false;
 
             SpawnEnemy(resultPos, Quaternion.FromToRotation(Vector3.forward, targetPlayer.CentrePos - resultPos), enemy, false);
             spawnedEnemyCount++;
             credits -= enemy.spawnCost;
+            return true;
         }
 
         private bool ShouldContinueSpawning(int loopCount)

@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: BaseMapDatabase
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.MapDatabase
   List:
-  - {fileID: 11400000, guid: 7ceb3b51ac0709e46b85fa7e93dc2ff6, type: 2}
+  - {fileID: 11400000, guid: 037b6f03ac807f64fa7663b401b19745, type: 2}
