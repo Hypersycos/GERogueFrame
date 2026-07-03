@@ -17,7 +17,7 @@ namespace Hypersycos.GERogueFrame
         public float ambientCredits;
         public float ambientCreditsPerSecond;
 
-        public float difficultyMult;
+        public float difficultyMult => PersistentStateManager.Singleton.difficulty;
 
         public uint targetEnemyCount;
         public float maxEnemyCount;

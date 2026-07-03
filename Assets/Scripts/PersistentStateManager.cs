@@ -54,6 +54,9 @@ namespace Hypersycos.GERogueFrame
 
         public UnityEvent AllPlayersLoaded;
 
+        NetworkVariable<float> _difficulty = new();
+        public float difficulty { get => _difficulty.Value; set => _difficulty.Value = value; }
+
         public SODatabase SODB => SODatabase.NetworkedDB;
 
         public int GetCharacterID(BasePCharacterSO so) => SODB.PlayerCharacterIDs[so.UUID];
@@ -139,6 +142,7 @@ namespace Hypersycos.GERogueFrame
             if (gameState != GameState.Lobby)
                 return;
             _gameState.Value = GameState.LoadingGame;
+            difficulty = 1;
 
             StartPreRound();
         }

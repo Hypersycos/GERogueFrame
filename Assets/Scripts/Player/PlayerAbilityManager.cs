@@ -67,7 +67,7 @@ namespace Hypersycos.GERogueFrame
             }
             if (ability != null)
             {
-                actionMap[action] = new((_) => CastAbility(ability, false), (_) => EndCastAbility(ability));
+                actionMap[action] = new((_) => CastAbilityWrapper(ability, false), (_) => EndCastAbilityWrapper(ability));
                 action.started += actionMap[action].Item1;
                 action.canceled += actionMap[action].Item2;
                 abilityMap.Add(ability, id);
@@ -95,15 +95,31 @@ namespace Hypersycos.GERogueFrame
             {
                 Vector3 cameraForward = playerCamera.transform.forward;
                 Vector3 cameraPos = playerCamera.transform.position;
-                currentlyCasting.CastingFixedUpdate(cameraForward, transform.position, cameraPos, myState);
+                try
+                {
+                    currentlyCasting.CastingFixedUpdate(cameraForward, transform.position, cameraPos, myState);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Exception occured while running CastingFixedUpdate for currentCast {cameraForward}, {transform?.position}, {cameraPos}, {myState}");
+                    Debug.LogException(e);
+                }
             }
 
             foreach (Ability ability in abilityMap.Keys)
             {
-                ability.FixedUpdate(myState);
-                if (ability.IsDirty)
+                try
                 {
-                    SyncAbilityRpc(abilityMap[ability], ability.Sync());
+                    ability.FixedUpdate(myState);
+                    if (ability.IsDirty)
+                    {
+                        SyncAbilityRpc(abilityMap[ability], ability.Sync());
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Exception occured while running FixedUpdate for currentCast");
+                    Debug.LogException(e);
                 }
             }
         }
@@ -118,6 +134,19 @@ namespace Hypersycos.GERogueFrame
         }
 
         #region CastAbility
+        private void CastAbilityWrapper(Ability ability, bool isEnd)
+        {
+            try
+            {
+                CastAbility(ability, isEnd);
+            }
+            catch (Exception e)
+            {
+                currentlyCasting = null;
+                Debug.LogError($"Exception occured casting ability");
+                Debug.LogException(e);
+            }
+        }
         private void CastAbility(Ability ability, bool isEnd)
         {
             if (!ability.chargeAtStart && !isEnd)
@@ -163,6 +192,21 @@ namespace Hypersycos.GERogueFrame
                 currentlyCasting = null;
         }
 
+        private void ServerCastAbilityWrapper(uint id, int effectID, double time, AbilityPayload verifyData, AbilityPayload abilityPayload)
+        {
+            try
+            {
+                ServerCastAbility(id, effectID, time, verifyData, abilityPayload);
+            }
+            catch (Exception e)
+            {
+                currentlyCasting = null;
+                Debug.LogError($"Exception occured casting ability");
+                Debug.LogException(e);
+                CastFailedRpc(id);
+            }
+        }
+
         private void ServerCastAbility(uint id, int effectID, double time, AbilityPayload verifyData, AbilityPayload abilityPayload)
         {
             Ability ability = abilityMap[id];
@@ -195,25 +239,25 @@ namespace Hypersycos.GERogueFrame
         [Rpc(SendTo.Server)]
         private void CastAbilityRpc(uint id, int effectID, double time)
         {
-            ServerCastAbility(id, effectID, time, null, null);
+            ServerCastAbilityWrapper(id, effectID, time, null, null);
         }
 
         [Rpc(SendTo.Server)]
         private void CastAbilityRpc(uint id, int effectID, double time, AbilityNetworkPayload verifyData, AbilityNetworkPayload abilityPayload)
         {
-            ServerCastAbility(id, effectID, time, verifyData, abilityPayload);
+            ServerCastAbilityWrapper(id, effectID, time, verifyData, abilityPayload);
         }
 
         [Rpc(SendTo.Server)]
         private void CastAbilityPayloadRpc(uint id, int effectID, double time, AbilityNetworkPayload abilityPayload)
         {
-            ServerCastAbility(id, effectID, time, null, abilityPayload);
+            ServerCastAbilityWrapper(id, effectID, time, null, abilityPayload);
         }
 
         [Rpc(SendTo.Server)]
         private void CastAbilityVerifyRpc(uint id, int effectID, double time, AbilityNetworkPayload verifyData)
         {
-            ServerCastAbility(id, effectID, time, verifyData, null);
+            ServerCastAbilityWrapper(id, effectID, time, verifyData, null);
         }
 
         [Rpc(SendTo.Owner)]
@@ -221,6 +265,20 @@ namespace Hypersycos.GERogueFrame
         {
             currentlyCasting = null;
             throw new NotImplementedException();
+        }
+
+        private void AbilityCastWrapper(uint id, int effectID, double time, AbilityPayload payload)
+        {
+            try
+            {
+                AbilityCast(id, effectID, time, payload);
+            }
+            catch (Exception e)
+            {
+                currentlyCasting = null;
+                Debug.LogError($"Exception occured casting ability");
+                Debug.LogException(e);
+            }
         }
 
         private void AbilityCast(uint id, int effectID, double time, AbilityPayload payload)
@@ -234,17 +292,31 @@ namespace Hypersycos.GERogueFrame
         [Rpc(SendTo.ClientsAndHost)]
         private void AbilityCastRpc(uint id, int effectID, double time)
         {
-            AbilityCast(id, effectID, time, null);
+            AbilityCastWrapper(id, effectID, time, null);
         }
 
         [Rpc(SendTo.ClientsAndHost)]
         private void AbilityCastPayloadRpc(uint id, int effectID, double time, AbilityNetworkPayload payload)
         {
-            AbilityCast(id, effectID, time, payload);
+            AbilityCastWrapper(id, effectID, time, payload);
         }
         #endregion
 
         #region EndCast
+        private void EndCastAbilityWrapper(Ability ability)
+        {
+            try
+            {
+                EndCastAbility(ability);
+            }
+            catch (Exception e)
+            {
+                currentlyCasting = null;
+                Debug.LogError($"Exception occured end-casting ability");
+                Debug.LogException(e);
+                EndCastAbilityRpc(NetworkManager.ServerTime.TickWithPartial);
+            }
+        }
         private void EndCastAbility(Ability ability)
         {
             if (!ability.chargeAtStart && currentlyCasting == null)
@@ -283,6 +355,21 @@ namespace Hypersycos.GERogueFrame
                 currentlyCasting = null;
         }
 
+        private void ServerEndCastAbilityWrapper(double time, AbilityPayload verifyData, AbilityPayload abilityPayload)
+        {
+            try
+            {
+                ServerEndCastAbility(time, verifyData, abilityPayload);
+            }
+            catch (Exception e)
+            {
+                EndCastFailedRpc(abilityMap[currentlyCasting]);
+                currentlyCasting = null;
+                Debug.LogError($"Exception occured end-casting ability");
+                Debug.LogException(e);
+            }
+        }
+
         private void ServerEndCastAbility(double time, AbilityPayload verifyData, AbilityPayload abilityPayload)
         {
             Ability ability = currentlyCasting;
@@ -307,19 +394,19 @@ namespace Hypersycos.GERogueFrame
         [Rpc(SendTo.Server)]
         private void EndCastAbilityRpc(double time)
         {
-            ServerEndCastAbility(time, null, null);
+            ServerEndCastAbilityWrapper(time, null, null);
         }
 
         [Rpc(SendTo.Server)]
         private void EndCastAbilityRpc(double time, AbilityNetworkPayload verifyData, AbilityNetworkPayload abilityPayload)
         {
-            ServerEndCastAbility(time, verifyData, abilityPayload);
+            ServerEndCastAbilityWrapper(time, verifyData, abilityPayload);
         }
 
         [Rpc(SendTo.Server)]
         private void EndCastAbilityPayloadRpc(double time, AbilityNetworkPayload abilityPayload)
         {
-            ServerEndCastAbility(time, null, abilityPayload);
+            ServerEndCastAbilityWrapper(time, null, abilityPayload);
         }
 
         [Rpc(SendTo.Server)]
@@ -335,6 +422,20 @@ namespace Hypersycos.GERogueFrame
             throw new NotImplementedException();
         }
 
+        private void AbilityCastEndWrapper(double time, AbilityPayload payload)
+        {
+            try
+            {
+                AbilityCastEnd(time, payload);
+            }
+            catch (Exception e)
+            {
+                currentlyCasting = null;
+                Debug.LogError($"Exception occured end-casting ability");
+                Debug.LogException(e);
+            }
+        }
+
         private void AbilityCastEnd(double time, AbilityPayload payload)
         {
             var ability = currentlyCasting;
@@ -345,13 +446,13 @@ namespace Hypersycos.GERogueFrame
         [Rpc(SendTo.ClientsAndHost)]
         private void AbilityCastEndRpc(double time)
         {
-            AbilityCastEnd(time, null);
+            AbilityCastEndWrapper(time, null);
         }
 
         [Rpc(SendTo.ClientsAndHost)]
         private void AbilityCastEndPayloadRpc(double time, AbilityNetworkPayload payload)
         {
-            AbilityCastEnd(time, payload);
+            AbilityCastEndWrapper(time, payload);
         }
         #endregion
     }

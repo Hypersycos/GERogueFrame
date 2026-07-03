@@ -150,5 +150,44 @@ namespace Hypersycos.GERogueFrame
                 positions[i].y = maxHeight * heightScale + 2;
             }
         }
+
+        public float GetArea()
+        {
+            return heightMapData.Item2 * heightMapData.Item3 / (resolution * resolution);
+        }
+
+        public void GetObjectiveLocations(List<ObjectiveSO> objectives, out Vector3[] positions, out Quaternion[] rotations)
+        {
+            positions = new Vector3[objectives.Count];
+            rotations = new Quaternion[objectives.Count];
+            float aspect = heightMapData.Item2 / (float)heightMapData.Item3;
+            int cols = Mathf.RoundToInt(Mathf.Sqrt(objectives.Count * aspect));
+            int rows = Mathf.CeilToInt(objectives.Count / cols);
+
+            float dx = heightMapData.Item2 / cols;
+            float dy = heightMapData.Item3 / rows;
+
+            for (int i = 0; i < cols; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    if (i * rows + j >= objectives.Count)
+                        break;
+
+                    float x = i * dx + .5f * dx;
+                    float z = j * dy + .5f * dy;
+
+                    x += UnityEngine.Random.Range(-.25f, .25f) * dx;
+                    z += UnityEngine.Random.Range(-.25f, .25f) * dy;
+                    int ix = Mathf.FloorToInt(x);
+                    int iz = Mathf.FloorToInt(z);
+                    Func<int, int, float> height = (X, Y) => heightMapData.Item1[X + Y * heightMapData.Item2];
+                    float y = Mathf.Min(height(ix, iz), height(ix + 1, iz), height(ix, iz + 1), height(ix + 1, iz + 1));
+
+                    positions[i * rows + j] = new Vector3(x, y * heightScale, z);
+                    rotations[i * rows + j] = Quaternion.AngleAxis(UnityEngine.Random.Range(0, 360), Vector3.up);
+                }
+            }
+        }
     }
 }

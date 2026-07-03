@@ -21,12 +21,14 @@ namespace Hypersycos.GERogueFrame
         public List<EnemySO> Enemies = new();
         public List<NonNetworkedProjectile> NonNetworkedProjectiles = new();
         public List<NetworkedProjectile> NetworkedProjectiles = new();
+        public List<ObjectiveSO> Objectives = new();
 
         public TwoWayDictionary<string, int> PlayerCharacterIDs = new();
         public TwoWayDictionary<string, int> MapIDs = new();
         public TwoWayDictionary<string, int> EnemyIDs = new();
         public TwoWayDictionary<string, int> NonNetworkedProjectileIDs = new();
         public TwoWayDictionary<string, int> NetworkedProjectileIDs = new();
+        public TwoWayDictionary<string, int> ObjectiveIDs = new();
 
         public static List<string> missingIDs = new();
 
@@ -48,6 +50,9 @@ namespace Hypersycos.GERogueFrame
                     break;
                 case List<NetworkedProjectile> npList:
                     Load(npList, prefix);
+                    break;
+                case List<ObjectiveSO> oList:
+                    Load(oList, prefix);
                     break;
             }
         }
@@ -97,6 +102,15 @@ namespace Hypersycos.GERogueFrame
                 item.UUID = prefix + item.ItemName;
             }
         }
+        public void Load(List<ObjectiveSO> list, string prefix)
+        {
+            foreach (var item in list)
+            {
+                ObjectiveIDs.Add(prefix + item.ItemName, Objectives.Count);
+                Objectives.Add(item);
+                item.UUID = prefix + item.ItemName;
+            }
+        }
 
         private void Clear()
         {
@@ -105,25 +119,21 @@ namespace Hypersycos.GERogueFrame
             Enemies.Clear();
             NonNetworkedProjectiles.Clear();
             NetworkedProjectiles.Clear();
+            Objectives.Clear();
 
             PlayerCharacterIDs.Clear();
             MapIDs.Clear();
             EnemyIDs.Clear();
             NonNetworkedProjectileIDs.Clear();
             NetworkedProjectileIDs.Clear();
+            ObjectiveIDs.Clear();
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         public static void SetSingletons()
         {
-            LocalDB = new();// Resources.Load<SODatabase>("LocalSODatabase");
-            NetworkedDB = new();// Resources.Load<SODatabase>("NetworkedSODatabase");
-
-/*#if UNITY_EDITOR
-            //CharacterDatabase db = AssetDatabase.LoadAssetAtPath<CharacterDatabase>("Assets/Resources/BaseCharacterDatabase.asset");
-            LocalDB.Clear();
-            NetworkedDB.Clear();
-#endif*/
+            LocalDB = new();
+            NetworkedDB = new();
         }
 
         internal static void Write(FastBufferWriter writer)
@@ -137,11 +147,12 @@ namespace Hypersycos.GERogueFrame
                 }
             }
 
-            Write(LocalDB.PlayerCharacterIDs);
-            Write(LocalDB.MapIDs);
-            Write(LocalDB.EnemyIDs);
-            Write(LocalDB.NonNetworkedProjectileIDs);
-            Write(LocalDB.NetworkedProjectileIDs);
+            Write(NetworkedDB.PlayerCharacterIDs);
+            Write(NetworkedDB.MapIDs);
+            Write(NetworkedDB.EnemyIDs);
+            Write(NetworkedDB.NonNetworkedProjectileIDs);
+            Write(NetworkedDB.NetworkedProjectileIDs);
+            Write(NetworkedDB.ObjectiveIDs);
         }
 
         internal static void Read(FastBufferReader reader)
@@ -173,6 +184,7 @@ namespace Hypersycos.GERogueFrame
             Read(LocalDB.Enemies, NetworkedDB.Enemies, LocalDB.EnemyIDs, NetworkedDB.EnemyIDs);
             Read(LocalDB.NonNetworkedProjectiles, NetworkedDB.NonNetworkedProjectiles, LocalDB.NonNetworkedProjectileIDs, NetworkedDB.NonNetworkedProjectileIDs);
             Read(LocalDB.NetworkedProjectiles, NetworkedDB.NetworkedProjectiles, LocalDB.NetworkedProjectileIDs, NetworkedDB.NetworkedProjectileIDs);
+            Read(LocalDB.Objectives, NetworkedDB.Objectives, LocalDB.ObjectiveIDs, NetworkedDB.ObjectiveIDs);
         }
 
         internal static void Copy()
@@ -193,6 +205,7 @@ namespace Hypersycos.GERogueFrame
             Copy(LocalDB.Enemies, NetworkedDB.Enemies, LocalDB.EnemyIDs, NetworkedDB.EnemyIDs);
             Copy(LocalDB.NonNetworkedProjectiles, NetworkedDB.NonNetworkedProjectiles, LocalDB.NonNetworkedProjectileIDs, NetworkedDB.NonNetworkedProjectileIDs);
             Copy(LocalDB.NetworkedProjectiles, NetworkedDB.NetworkedProjectiles, LocalDB.NetworkedProjectileIDs, NetworkedDB.NetworkedProjectileIDs);
+            Copy(LocalDB.Objectives, NetworkedDB.Objectives, LocalDB.ObjectiveIDs, NetworkedDB.ObjectiveIDs);
         }
     }
 

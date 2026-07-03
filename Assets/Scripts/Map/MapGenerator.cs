@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Sirenix.OdinInspector.Editor.GettingStarted;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,8 @@ namespace Hypersycos.GERogueFrame
     {
         public Task Setup(int seed, int width, int height, GameObject parent, IProgress<float> progress);
         public void GetSpawnPoint(int playerCount, out Vector3[] positions, out Quaternion[] rotations);
-        //public void PlaceObjectives();
+        public float GetArea();
+        public void GetObjectiveLocations(List<ObjectiveSO> objectives, out Vector3[] positions, out Quaternion[] rotations);
         public void ModifyPlayer(GameObject player) { }
         public void ModifyPlayerOnOwner(GameObject player) { }
         public void ModifyEnemy(GameObject enemy) { }
@@ -100,7 +102,8 @@ namespace Hypersycos.GERogueFrame
             await state.so.generator.Setup(state.seed, state.width, state.height, prefab, progress);
             if (IsServer)
             {
-                //state.so.generator.PlaceObjectives();
+                //ObjectiveManager.Singleton.SpawnObjectives(PersistentStateManager.Singleton.difficulty);
+
                 this.progress = 0.8f;
                 var navMeshes = GetComponents<NavMeshSurface>();
                 float inc = 0.2f * (navMeshes.Length + 2);

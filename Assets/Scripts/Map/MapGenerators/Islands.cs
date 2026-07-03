@@ -302,5 +302,61 @@ namespace Hypersycos.GERogueFrame
             mod.lowGravity = 0.1f;
             mod.mask = 1;
         }
+
+        public float GetArea()
+        {
+            return heightMapData.Item2 * heightMapData.Item3 / (resolution * resolution * 2);
+        }
+
+        public void GetObjectiveLocations(List<ObjectiveSO> objectives, out Vector3[] positions, out Quaternion[] rotations)
+        {
+            positions = new Vector3[objectives.Count];
+            rotations = new Quaternion[objectives.Count];
+            float aspect = heightMapData.Item2 / (float)heightMapData.Item3;
+            int cols = Mathf.RoundToInt(Mathf.Sqrt(objectives.Count * aspect));
+            int rows = Mathf.CeilToInt(objectives.Count / cols);
+
+            float dx = heightMapData.Item2 / cols;
+            float dy = heightMapData.Item3 / rows;
+
+            for (int i = 0; i < cols; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    if (i * rows + j >= objectives.Count)
+                        break;
+
+                    bool success = false;
+
+                    int count = 0;
+                    while (!success)
+                    {
+                        float x = i * dx + .5f * dx;
+                        float z = j * dy + .5f * dy;
+
+                        x += UnityEngine.Random.Range(-.25f, .25f) * dx * (count + 4f) / 4;
+                        z += UnityEngine.Random.Range(-.25f, .25f) * dy * (count + 4f) / 4;
+                        x = Mathf.Clamp(x, 1, heightMapData.Item2 - 2);
+                        z = Mathf.Clamp(z, 1, heightMapData.Item3 - 2);
+
+                        int ix = Mathf.FloorToInt(x);
+                        int iz = Mathf.FloorToInt(z);
+                        Func<int, int, float> height = (X, Y) => heightMapData.Item1[X + Y * heightMapData.Item2];
+                        float y = Mathf.Min(height(ix, iz), height(ix + 1, iz), height(ix, iz + 1), height(ix + 1, iz + 1));
+
+                        if (y > 0.52)
+                        {
+                            positions[i * rows + j] = new Vector3(x, y * heightScale, z);
+                            rotations[i * rows + j] = Quaternion.AngleAxis(UnityEngine.Random.Range(0, 360), Vector3.up);
+                            success = true;
+                        }
+                        else
+                        {
+                            count++;
+                        }
+                    }
+                }
+            }
+        }
     }
 }
