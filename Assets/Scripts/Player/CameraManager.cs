@@ -27,13 +27,24 @@ namespace Hypersycos.GERogueFrame
 
         ControlsWrapper controlWrapper;
 
+        bool inMenu = false;
+
         private void Awake()
         {
             offsetWithDist = cameraOffset + new Vector3(0, 0, -cameraDistance);
 
             controlWrapper = ControlsWrapper.Singleton;
-            controlWrapper.MenuOpened += () => enabled = false;
-            controlWrapper.MenuClosed += () => enabled = true;
+            controlWrapper.MenuOpened += disableCam;
+            controlWrapper.MenuClosed += enableCam;
+        }
+
+        void disableCam() => inMenu = true;
+        void enableCam() => inMenu = false;
+
+        private void OnDestroy()
+        {
+            controlWrapper.MenuOpened -= disableCam;
+            controlWrapper.MenuClosed -= enableCam;
         }
 
         public void SetSpectate(PlayerState target, bool locked)
@@ -76,14 +87,17 @@ namespace Hypersycos.GERogueFrame
 
         private void HandleLookInput(Transform target)
         {
-            Vector2 lookValue = controlWrapper.controls.Player.Look.ReadValue<Vector2>();
-            yaw += lookValue.x;
-            pitch += lookValue.y;
+            if (!inMenu)
+            {
+                Vector2 lookValue = controlWrapper.controls.Player.Look.ReadValue<Vector2>();
+                yaw += lookValue.x;
+                pitch += lookValue.y;
 
-            if (pitch > 85)
-                pitch = 85;
-            if (pitch < -85)
-                pitch = -85;
+                if (pitch > 85)
+                    pitch = 85;
+                if (pitch < -85)
+                    pitch = -85;
+            }
 
             transform.rotation = Quaternion.Euler(pitch, yaw, 0);
 

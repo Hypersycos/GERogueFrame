@@ -137,17 +137,9 @@ namespace Hypersycos.GERogueFrame
             for (int i = 0; i < count; i++)
             {
                 rotations[i] = Quaternion.AngleAxis(rotation * i, Vector3.up);
-                positions[i] = rotations[i] * (Vector3.forward * distance);// + Vector3.up * 2;
-                Vector3 heightmapPos = positions[i] * resolution + new Vector3(heightMapData.Item2, 0, heightMapData.Item3) / 2;
-
-                int minX = Mathf.FloorToInt(heightmapPos.x);
-                int minY = Mathf.FloorToInt(heightmapPos.z);
-
-                int index1 = heightMapData.Item2 * minY + minX;
-                int index2 = heightMapData.Item2 * (minY + 1) + minX;
-                float maxHeight = Mathf.Max(heightMapData.Item1[index1], heightMapData.Item1[index1 + 1], heightMapData.Item1[index2], heightMapData.Item1[index2 + 1]);
-
-                positions[i].y = maxHeight * heightScale + 2;
+                positions[i] = rotations[i] * (Vector3.forward * distance);
+                GetHeightLerp(positions[i].x, positions[i].z, out float y);
+                positions[i].y = y + 1;
             }
         }
 
@@ -161,11 +153,11 @@ namespace Hypersycos.GERogueFrame
             positions = new Vector3[objectives.Count];
             rotations = new Quaternion[objectives.Count];
             float aspect = heightMapData.Item2 / (float)heightMapData.Item3;
-            int cols = Mathf.RoundToInt(Mathf.Sqrt(objectives.Count * aspect));
+            int cols = Mathf.CeilToInt(Mathf.Sqrt(objectives.Count * aspect));
             int rows = Mathf.CeilToInt(objectives.Count / cols);
 
-            float dx = heightMapData.Item2 / cols;
-            float dy = heightMapData.Item3 / rows;
+            float dx = (heightMapData.Item2 - 2) / cols;
+            float dy = (heightMapData.Item3 - 2) / rows;
 
             for (int i = 0; i < cols; i++)
             {
@@ -179,15 +171,58 @@ namespace Hypersycos.GERogueFrame
 
                     x += UnityEngine.Random.Range(-.25f, .25f) * dx;
                     z += UnityEngine.Random.Range(-.25f, .25f) * dy;
-                    int ix = Mathf.FloorToInt(x);
-                    int iz = Mathf.FloorToInt(z);
-                    Func<int, int, float> height = (X, Y) => heightMapData.Item1[X + Y * heightMapData.Item2];
-                    float y = Mathf.Min(height(ix, iz), height(ix + 1, iz), height(ix, iz + 1), height(ix + 1, iz + 1));
 
-                    positions[i * rows + j] = new Vector3(x, y * heightScale, z);
+                    x = heightmapXToX(x);
+                    z = heightmapZToZ(z);
+
+                    GetHeightLerp(x, z, out float y);
+
+                    positions[i * rows + j] = new(x, y, z);
                     rotations[i * rows + j] = Quaternion.AngleAxis(UnityEngine.Random.Range(0, 360), Vector3.up);
                 }
             }
+        }
+        float xToHeightmapX(float x) => x * resolution + (heightMapData.Item2 - 2) / 2 + 1;
+        float zToHeightmapZ(float z) => z * resolution + (heightMapData.Item3 - 2) / 2 + 1;
+        float heightmapXToX(float x) => (x - 1 - ((heightMapData.Item2 - 2) / 2)) / resolution;
+        float heightmapZToZ(float z) => (z - 1 - ((heightMapData.Item3 - 2) / 2)) / resolution;
+
+
+        public bool GetHeightMax(float x, float z, out float y)
+        {
+            int ix = Mathf.FloorToInt(xToHeightmapX(x));
+            int iz = Mathf.FloorToInt(zToHeightmapZ(z));
+            Func<int, int, float> height = (X, Y) => heightMapData.Item1[X + Y * heightMapData.Item2];
+            y = Mathf.Max(height(ix, iz), height(ix + 1, iz), height(ix, iz + 1), height(ix + 1, iz + 1)) * heightScale;
+            return true;
+        }
+
+        public bool GetHeightMin(float x, float z, out float y)
+        {
+            int ix = Mathf.FloorToInt(xToHeightmapX(x));
+            int iz = Mathf.FloorToInt(zToHeightmapZ(z));
+            Func<int, int, float> height = (X, Y) => heightMapData.Item1[X + Y * heightMapData.Item2];
+            y = Mathf.Min(height(ix, iz), height(ix + 1, iz), height(ix, iz + 1), height(ix + 1, iz + 1)) * heightScale;
+            return true;
+        }
+
+        public bool GetHeightLerp(float x, float z, out float y)
+        {
+            float t1 = xToHeightmapX(x);
+            float t2 = zToHeightmapZ(z);
+
+            int ix = Mathf.FloorToInt(t1);
+            int iz = Mathf.FloorToInt(t2);
+
+            Func<int, int, float> height = (X, Y) => heightMapData.Item1[X + Y * heightMapData.Item2];
+
+            t1 -= ix;
+            t2 -= iz;
+
+            y = height(ix, iz) * t1 * t2 + height(ix + 1, iz) * (1 - t1) * t2
+                + height(ix, iz + 1) * t1 * (1 - t2) + height(ix + 1, iz + 1) * (1 - t1) * (1 - t2);
+            y *= heightScale;
+            return true;
         }
     }
 }

@@ -19,6 +19,7 @@ namespace Hypersycos.GERogueFrame
             Load(Resources.Load<EnemyDatabase>("BaseEnemyDatabase"), "base.");
             Load(Resources.Load<NonNetworkedProjectileDatabase>("BaseNonNetworkedProjectileDatabase"), "base.");
             Load(Resources.Load<NetworkedProjectileDatabase>("BaseNetworkedProjectileDatabase"), "base.");
+            Load(Resources.Load<ObjectiveDatabase>("BaseObjectiveDatabase"), "base.");
 
             extraPrefabs.AddRange(Resources.Load<NetworkPrefabsList>("BaseNetworkPrefabList").PrefabList);
 

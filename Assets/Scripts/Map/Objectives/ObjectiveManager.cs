@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Events;
 
 namespace Hypersycos.GERogueFrame
@@ -25,11 +26,15 @@ namespace Hypersycos.GERogueFrame
             Completed = false;
             Reward = reward;
         }
-        public abstract void StartObjective();
-        //TODO: UI CreateUI();
-        public UnityEvent<Objective> OnCompleted { get; }
-        public UnityEvent<Objective, float> OnProgressUpdate { get; }
-
+        public virtual void StartObjective()
+        {
+            Active = true;
+        }
+        public abstract void CreateUI(RectTransform parent);
+        public abstract void DestroyUI();
+        public UnityEvent<Objective> OnStarted;
+        public UnityEvent<Objective> OnCompleted;
+        public UnityEvent<Objective, float> OnProgressUpdate;
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
@@ -52,7 +57,7 @@ namespace Hypersycos.GERogueFrame
             MapState map = PersistentStateManager.Singleton.mapState;
             float mapArea = map.so.generator.GetArea();
 
-            float target = mapArea / (200 * 200);
+            float target = mapArea / (100 * 100);
 
             int targetCount = UnityEngine.Random.Range(Mathf.FloorToInt(target * 0.9f), Mathf.CeilToInt(target * 1.1f));
             int easy = targetCount / 4;
@@ -87,7 +92,7 @@ namespace Hypersycos.GERogueFrame
                 var spawned = NetworkManager
                               .Singleton
                               .SpawnManager
-                              .InstantiateAndSpawn(chosenObjectives[i].GetComponent<NetworkObject>(),
+                              .InstantiateAndSpawn(chosenObjectives[i].objective.GetComponent<NetworkObject>(),
                                                    destroyWithScene: true, position: spawnPoints[i],
                                                    rotation: spawnRots[i]);
 
@@ -108,7 +113,22 @@ namespace Hypersycos.GERogueFrame
                 }
 
                 objective.Initialize(chosenDiff, reward);
+                objective.OnStarted.AddListener(OnObjectiveStarted);
+                objective.OnCompleted.AddListener(OnObjectiveCompleted);
             }
+        }
+
+        private void OnObjectiveStarted(Objective obj)
+        {
+            //TODO: obj.CreateUI();
+            //TODO: Rpc
+        }
+
+        private void OnObjectiveCompleted(Objective obj)
+        {
+            PersistentStateManager.Singleton.NextRound();
+            //TODO: obj.DestroyUI();
+            //TODO: Rpc
         }
     }
 }

@@ -16,6 +16,9 @@ namespace Hypersycos.GERogueFrame
     {
         public Task Setup(int seed, int width, int height, GameObject parent, IProgress<float> progress);
         public void GetSpawnPoint(int playerCount, out Vector3[] positions, out Quaternion[] rotations);
+        public bool GetHeightMax(float x, float z, out float y);
+        public bool GetHeightMin(float x, float z, out float y);
+        public bool GetHeightLerp(float x, float z, out float y);
         public float GetArea();
         public void GetObjectiveLocations(List<ObjectiveSO> objectives, out Vector3[] positions, out Quaternion[] rotations);
         public void ModifyPlayer(GameObject player) { }
@@ -102,9 +105,10 @@ namespace Hypersycos.GERogueFrame
             await state.so.generator.Setup(state.seed, state.width, state.height, prefab, progress);
             if (IsServer)
             {
-                //ObjectiveManager.Singleton.SpawnObjectives(PersistentStateManager.Singleton.difficulty);
-
                 this.progress = 0.8f;
+
+                ObjectiveManager.Singleton.SpawnObjectives(PersistentStateManager.Singleton.difficulty);
+
                 var navMeshes = GetComponents<NavMeshSurface>();
                 float inc = 0.2f * (navMeshes.Length + 2);
 
@@ -117,6 +121,8 @@ namespace Hypersycos.GERogueFrame
                     this.progress += inc / colliders.Length;
                 }
                 navMeshBounds.Expand(2.0f);
+
+                NavMesh.RemoveAllNavMeshData();
 
                 List<NavMeshBuildSource> sources = new();
                 List<NavMeshBuildMarkup> markups = new();

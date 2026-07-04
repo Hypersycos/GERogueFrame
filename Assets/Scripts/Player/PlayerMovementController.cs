@@ -83,10 +83,16 @@ namespace Hypersycos.GERogueFrame
             controls.Player.Crouch.canceled += DoCrouch;
             controls.Player.ToggleCrouch.started += DoCrouch;
 
-            //controlWrapper.MenuOpened += () => enabled = false;
-            //controlWrapper.MenuClosed += () => enabled = true;
             move = controls.Player.Move;
             velocityAvgCount = Mathf.CeilToInt(velocityAvgPeriod / Time.fixedDeltaTime);
+        }
+
+        public override void OnDestroy()
+        {
+            controls.Player.Jump.started -= DoJump;
+            controls.Player.Crouch.started -= DoCrouch;
+            controls.Player.Crouch.canceled -= DoCrouch;
+            controls.Player.ToggleCrouch.started -= DoCrouch;
         }
 
         private Vector3 GetHorizontalCameraForward(Transform playerCamera)
@@ -369,6 +375,32 @@ namespace Hypersycos.GERogueFrame
                     transform.rotation = Quaternion.LookRotation(horizontalVelocity, Vector3.up);
                 }
             }
+        }
+
+        [Rpc(SendTo.Owner)]
+        void TeleportRpc(Vector3 position, bool carryMomentum)
+        {
+            characterController.enabled = false;
+            transform.position = position;
+            if (!carryMomentum)
+                velocity = new();
+            characterController.enabled = true;
+        }
+
+        public void Teleport(Vector3 position, bool carryMomentum)
+        {
+            TeleportRpc(position, carryMomentum);
+        }
+
+        [Rpc(SendTo.Owner)]
+        void RotationRpc(Quaternion rotation)
+        {
+            transform.rotation = rotation;
+        }
+
+        public void SetRotation(Quaternion rotation)
+        {
+            RotationRpc(rotation);
         }
     }
 }

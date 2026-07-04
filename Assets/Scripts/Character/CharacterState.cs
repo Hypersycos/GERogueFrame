@@ -209,7 +209,8 @@ namespace Hypersycos.GERogueFrame
                 if (external)
                     OnExternallyDamaged.Invoke(this, damageInstance);
                 damageInstance.OnApply.Invoke(this, damageInstance);
-                damageInstance.owner.OnDamage.Invoke(this, damageInstance);
+                if (damageInstance.owner != null)
+                    damageInstance.owner.OnDamage.Invoke(this, damageInstance);
 
                 if (!HitPoints.IsActive)
                 {

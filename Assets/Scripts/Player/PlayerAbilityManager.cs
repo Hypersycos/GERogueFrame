@@ -74,6 +74,16 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+            foreach(var map in actionMap)
+            {
+                map.Key.started -= map.Value.Item1;
+                map.Key.canceled -= map.Value.Item2;
+            }
+        }
+
         private void Update()
         {
             if (currentlyCasting != null)

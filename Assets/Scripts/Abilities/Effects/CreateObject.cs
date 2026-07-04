@@ -34,7 +34,7 @@ namespace Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects
         public AbilityPayload ServerCast(ITargetPayload targetPayload, AbilityPayload networkPayload, CharacterState myState)
         {
             Vector3 targetPosition = (targetPayload as IVec3Payload).Target;
-            var spawned = NetworkManager.Singleton.SpawnManager.InstantiateAndSpawn(obj.GetComponent<NetworkObject>(), position: targetPosition);
+            var spawned = NetworkManager.Singleton.SpawnManager.InstantiateAndSpawn(obj.GetComponent<NetworkObject>(), position: targetPosition, destroyWithScene: true);
             spawned.GetComponent<AbilityObject>().SpawnedBy = myState;
             return null;
         }

@@ -76,8 +76,11 @@ namespace Hypersycos.GERogueFrame
             if (state == null || state.Team == SpawnedBy.Team) return;
 
             int Index = victims.IndexOf(state);
-            victims.RemoveAt(Index);
-            timers.RemoveAt(Index);
+            if (Index != -1)
+            {
+                victims.RemoveAt(Index);
+                timers.RemoveAt(Index);
+            }
         }
 
         protected override void FixedUpdate()

@@ -1,3 +1,4 @@
+using Hypersycos.Utils;
 using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
@@ -22,6 +23,8 @@ namespace Hypersycos.GERogueFrame
         {
             enabled = false;
             gameObject.SetActive(true);
+            playerLoadHolder.DestroyAllChildren();
+            loadScripts.Clear();
             foreach (var player in stateManager.playerCharacterMap)
             {
                 var playerImg = Instantiate(playerLoadPrefab, playerLoadHolder);

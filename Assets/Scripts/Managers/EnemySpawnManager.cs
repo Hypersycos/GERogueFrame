@@ -20,7 +20,7 @@ namespace Hypersycos.GERogueFrame
         public float difficultyMult => PersistentStateManager.Singleton.difficulty;
 
         public uint targetEnemyCount;
-        public float maxEnemyCount;
+        //public float maxEnemyCount;
 
         public uint targetAmbientCount;
         public float maxAmbientCount;
@@ -57,16 +57,18 @@ namespace Hypersycos.GERogueFrame
                                                  .PlayerObject.GetComponent<CharacterState>();
                 while (ShouldContinueSpawning(spawnCount++))
                 {
-                    SpawnEnemy(chosenPlayer, GetSpawnableEnemy(credits));
+                    SpawnEnemy(chosenPlayer.CentrePos, 15, GetSpawnableEnemy(credits), 5, ref credits);
                 }
             }
 
             if (ShouldStartAmbientSpawn())
             {
                 int spawnCount = 0;
+                var chosenPlayer = NetworkManager.Singleton.ConnectedClientsList.TakeRandomFromReadOnly()
+                                                 .PlayerObject.GetComponent<CharacterState>();
                 while (ShouldContinueAmbientSpawning(spawnCount++))
                 {
-                    SpawnAmbientEnemy();
+                    SpawnAmbientEnemy(GetSpawnableEnemy(ambientCredits), chosenPlayer.CentrePos);
                 }
             }
         }
@@ -124,22 +126,7 @@ namespace Hypersycos.GERogueFrame
             return false;
         }
 
-        private void SpawnAmbientEnemy()
-        {
-            throw new NotImplementedException();
-        }
-
-        private bool ShouldContinueAmbientSpawning(int loopCount)
-        {
-            return false;
-        }
-
-        private bool ShouldStartAmbientSpawn()
-        {
-            return false;
-        }
-
-        private bool SpawnEnemy(CharacterState targetPlayer, EnemySO enemy)
+        private bool SpawnAmbientEnemy(EnemySO enemy, Vector3 centre)
         {
             bool success = false;
             Vector3 resultPos = Vector3.zero;
@@ -148,13 +135,13 @@ namespace Hypersycos.GERogueFrame
 
             while (!success && count++ < 20)
             {
-                Vector3 spawnPoint = UnityEngine.Random.insideUnitSphere * 30f + targetPlayer.CentrePos;
+                Vector3 spawnPoint = UnityEngine.Random.insideUnitSphere * 100 + centre;
 
                 success = GetNavmeshPosition(spawnPoint, enemy, 15, 5, 10, out resultPos);
 
-                foreach(var player in NetworkManager.Singleton.ConnectedClientsList)
+                foreach (var player in NetworkManager.Singleton.ConnectedClientsList)
                 {
-                    if ((player.PlayerObject.GetComponent<CharacterState>().CentrePos - spawnPoint).sqrMagnitude < 5 * 5)
+                    if ((player.PlayerObject.GetComponent<CharacterState>().CentrePos - spawnPoint).sqrMagnitude < 15 * 15)
                     {
                         success = false;
                         break;
@@ -165,7 +152,82 @@ namespace Hypersycos.GERogueFrame
             if (!success)
                 return false;
 
-            SpawnEnemy(resultPos, Quaternion.FromToRotation(Vector3.forward, targetPlayer.CentrePos - resultPos), enemy, false);
+            SpawnEnemy(resultPos, Quaternion.AngleAxis(UnityEngine.Random.Range(0,360), Vector3.up), enemy, true);
+            ambientSpawnCount++;
+            ambientCredits -= enemy.spawnCost;
+            return true;
+        }
+
+        private bool ShouldContinueAmbientSpawning(int loopCount)
+        {
+            if (ambientCredits < enemies[0].spawnCost)
+                return false;
+
+            float spawnPressure = 1;
+            if (targetAmbientCount < ambientSpawnCount)
+                spawnPressure = (maxAmbientCount - ambientSpawnCount) / (float)(maxAmbientCount - targetAmbientCount);
+            else if (ambientSpawnCount < targetAmbientCount)
+                spawnPressure = 1 + (targetAmbientCount - ambientSpawnCount) / (float)(targetAmbientCount);
+
+            float spawnProbability = spawnPressure * credits / (meanEnemyCost * 2 * difficultyMult * loopCount / 5f);
+            return UnityEngine.Random.Range(0f, 1f) < spawnProbability;
+        }
+
+        private bool ShouldStartAmbientSpawn()
+        {
+            if (ambientCredits < enemies[0].spawnCost)
+                return false;
+
+            float spawnPressure = 1;
+            if (targetAmbientCount < ambientSpawnCount)
+                spawnPressure = (maxAmbientCount - ambientSpawnCount) / (float)(maxAmbientCount - targetAmbientCount);
+            else if (ambientSpawnCount < targetAmbientCount)
+                spawnPressure = 1 + (targetAmbientCount - ambientSpawnCount) / (float)(targetAmbientCount);
+
+            float spawnProbability = spawnPressure * ambientCredits / (meanEnemyCost * 3 * 2 * difficultyMult) * Time.fixedDeltaTime;
+            return UnityEngine.Random.Range(0f, 1f) < spawnProbability;
+        }
+
+        public void SpawnCredits(Vector3 centre, float radius, float minimumDistance, float credits)
+        {
+            int spawnCount = 0;
+            while (credits > enemies[0].spawnCost && spawnCount++ < 1000)
+            {
+                SpawnEnemy(centre, radius, GetSpawnableEnemy(credits), minimumDistance, ref credits);
+            }
+            if (spawnCount >= 1000)
+                Debug.LogError($"Failed to spawn {credits} enemies in 1000 attempts");
+
+            this.credits += credits;
+        }
+
+        private bool SpawnEnemy(Vector3 centre, float radius, EnemySO enemy, float minimumDistance, ref float credits)
+        {
+            bool success = false;
+            Vector3 resultPos = Vector3.zero;
+
+            int count = 0;
+
+            while (!success && count++ < 20)
+            {
+                Vector3 spawnPoint = UnityEngine.Random.insideUnitSphere * radius + centre;
+
+                success = GetNavmeshPosition(spawnPoint, enemy, 15, 5, 10, out resultPos);
+
+                foreach(var player in NetworkManager.Singleton.ConnectedClientsList)
+                {
+                    if ((player.PlayerObject.GetComponent<CharacterState>().CentrePos - spawnPoint).sqrMagnitude < minimumDistance * minimumDistance)
+                    {
+                        success = false;
+                        break;
+                    }
+                }
+            }
+
+            if (!success)
+                return false;
+
+            SpawnEnemy(resultPos, Quaternion.FromToRotation(Vector3.forward, centre - resultPos), enemy, false);
             spawnedEnemyCount++;
             credits -= enemy.spawnCost;
             return true;
@@ -178,7 +240,7 @@ namespace Hypersycos.GERogueFrame
 
             float spawnPressure = 1;
             if (targetEnemyCount < spawnedEnemyCount)
-                spawnPressure = (maxEnemyCount - spawnedEnemyCount) / (maxEnemyCount - targetEnemyCount);
+                spawnPressure = targetEnemyCount / spawnedEnemyCount;// (maxEnemyCount - spawnedEnemyCount) / (maxEnemyCount - targetEnemyCount);
             else if (spawnedEnemyCount < targetEnemyCount)
                 spawnPressure = 1 + (targetEnemyCount - spawnedEnemyCount) / (targetEnemyCount);
 
@@ -193,7 +255,7 @@ namespace Hypersycos.GERogueFrame
 
             float spawnPressure = 1;
             if (targetEnemyCount < spawnedEnemyCount)
-                spawnPressure = (maxEnemyCount - spawnedEnemyCount) / (float)(maxEnemyCount - targetEnemyCount);
+                spawnPressure = targetEnemyCount / spawnedEnemyCount;// (maxEnemyCount - spawnedEnemyCount) / (float)(maxEnemyCount - targetEnemyCount);
             else if (spawnedEnemyCount < targetEnemyCount)
                 spawnPressure = 1 + (targetEnemyCount - spawnedEnemyCount) / (float)(targetEnemyCount);
 

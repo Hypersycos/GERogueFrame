@@ -57,6 +57,9 @@ namespace Hypersycos.GERogueFrame
         NetworkVariable<float> _difficulty = new();
         public float difficulty { get => _difficulty.Value; set => _difficulty.Value = value; }
 
+        NetworkVariable<int> _rounds = new();
+        public int rounds { get => _rounds.Value; set => _rounds.Value = value; }
+
         public SODatabase SODB => SODatabase.NetworkedDB;
 
         public int GetCharacterID(BasePCharacterSO so) => SODB.PlayerCharacterIDs[so.UUID];
@@ -142,7 +145,19 @@ namespace Hypersycos.GERogueFrame
             if (gameState != GameState.Lobby)
                 return;
             _gameState.Value = GameState.LoadingGame;
-            difficulty = 1;
+            rounds = 1;
+            difficulty = Mathf.Pow(1.2f, playerCharacterMap.Count - 1);
+
+            StartPreRound();
+        }
+
+        public void NextRound()
+        {
+            if (gameState != GameState.Playing)
+                return;
+            _gameState.Value = GameState.LoadingGame;
+            rounds += 1;
+            difficulty *= 1.2f;
 
             StartPreRound();
         }
@@ -198,8 +213,6 @@ namespace Hypersycos.GERogueFrame
         {
             AllPlayersLoaded.RemoveListener(SpawnPlayers);
 
-            ControlsWrapper.Singleton.CloseMenu(default);
-
             Dictionary<ulong, NetworkObject> spawns = new();
 
             mapState.so.generator.GetSpawnPoint(playerCharacterMap.Count, out Vector3[] positions, out Quaternion[] rotations);
@@ -228,7 +241,7 @@ namespace Hypersycos.GERogueFrame
 
             NetworkObject spawned = NetworkManager.Singleton.SpawnManager
                                     .InstantiateAndSpawn(PlayerPrefab, playerID, true, true,
-                                                         position: pos, rotation: Quaternion.Inverse(rot));
+                                                            position: pos, rotation: Quaternion.Inverse(rot));
 
             spawned.GetComponent<PlayerCharacterManager>().characterID = characterID;
             return spawned;

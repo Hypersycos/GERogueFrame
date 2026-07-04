@@ -477,13 +477,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.EnemySpawnManager
   credits: 0
-  creditsPerSecond: 0.3
+  creditsPerSecond: 0.2
   ambientCredits: 0
-  ambientCreditsPerSecond: 0
+  ambientCreditsPerSecond: 0.2
   targetEnemyCount: 20
-  maxEnemyCount: 30
-  targetAmbientCount: 0
-  maxAmbientCount: 0
+  targetAmbientCount: 30
+  maxAmbientCount: 50
 --- !u!4 &123005511
 Transform:
   m_ObjectHideFlags: 0
