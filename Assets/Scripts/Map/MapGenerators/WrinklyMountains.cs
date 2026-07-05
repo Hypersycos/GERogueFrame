@@ -154,7 +154,7 @@ namespace Hypersycos.GERogueFrame
             rotations = new Quaternion[objectives.Count];
             float aspect = heightMapData.Item2 / (float)heightMapData.Item3;
             int cols = Mathf.CeilToInt(Mathf.Sqrt(objectives.Count * aspect));
-            int rows = Mathf.CeilToInt(objectives.Count / cols);
+            int rows = Mathf.CeilToInt(objectives.Count / (float)cols);
 
             float dx = (heightMapData.Item2 - 2) / cols;
             float dy = (heightMapData.Item3 - 2) / rows;

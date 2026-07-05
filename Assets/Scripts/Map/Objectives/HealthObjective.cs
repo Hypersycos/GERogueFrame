@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -17,11 +18,14 @@ namespace Hypersycos.GERogueFrame
 
         HashSet<PlayerState> draining = new();
 
-        public override void Initialize(float difficulty, float reward)
+        ProgressBar currentUI;
+
+        public override void Initialize(float difficulty, int reward)
         {
             base.Initialize(difficulty, reward);
             required = 40 * difficulty;
             drainRate = difficulty * 5;
+            enabled = false;
         }
 
         private void OnTriggerEnter(Collider other)
@@ -69,11 +73,12 @@ namespace Hypersycos.GERogueFrame
             else
             {
                 timer += Time.fixedDeltaTime;
-                if (timer > 5f && current > 0)
+                if (timer > 5f)
                 {
                     current -= Mathf.Sqrt(timer - 5) * Time.fixedDeltaTime;
+                    OnProgressUpdate?.Invoke(this, current / required);
                     if (current < 0)
-                        current = 0;
+                        Cancelled();
                 }
             }
         }
@@ -87,14 +92,32 @@ namespace Hypersycos.GERogueFrame
             OnCompleted?.Invoke(this);
         }
 
+        private void Cancelled()
+        {
+            Active = false;
+            enabled = false;
+            OnCancelled?.Invoke(this);
+            DestroyUI();
+        }
+
         public override void CreateUI(RectTransform parent)
         {
-            throw new System.NotImplementedException();
+            var spawned = Instantiate(UIPrefab, parent);
+            spawned.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Sacrifice {Mathf.CeilToInt(required)}hp <b>({Reward}pts)</b>";
+            currentUI = spawned.GetComponentInChildren<ProgressBar>();
+            currentUI.SetProgress(0, 0, Mathf.CeilToInt(required));
+            OnProgressUpdate.AddListener(UpdateUI);
+        }
+
+        void UpdateUI(Objective _, float progress)
+        {
+            currentUI.SetProgress(progress, Mathf.FloorToInt(current), Mathf.CeilToInt(required));
         }
 
         public override void DestroyUI()
         {
-            throw new System.NotImplementedException();
+            Destroy(currentUI.transform.parent.gameObject);
+            OnProgressUpdate.RemoveListener(UpdateUI);
         }
 
         public override void StartObjective()

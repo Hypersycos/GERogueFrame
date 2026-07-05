@@ -227,14 +227,14 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
-        private void FixedUpdate()
+        private void Update()
         {
             Vector3 inputForce = Vector3.zero;
             Vector2 moveInput = move.ReadValue<Vector2>();
             if (moveInput.magnitude > 1)
                 moveInput = moveInput.normalized;
 
-            float mult = moveForce * Time.fixedDeltaTime;
+            float mult = moveForce * Time.deltaTime;
             inputForce += moveInput.x * mult * GetHorizontalCameraRight(playerCamera);
             inputForce += moveInput.y * mult * GetHorizontalCameraForward(playerCamera);
 
@@ -243,7 +243,7 @@ namespace Hypersycos.GERogueFrame
             if (horizontalVelocity.magnitude > maxSpeed)
             { //reduce control if over max speed
                 inputForce *= overspeedControl;
-                Vector3 dragForce = -horizontalVelocity * drag * Time.fixedDeltaTime;
+                Vector3 dragForce = -horizontalVelocity * drag * Time.deltaTime;
 
                 float carryComponent = Vector3.Dot(-dragForce.normalized, inputForce);
 
@@ -272,7 +272,7 @@ namespace Hypersycos.GERogueFrame
             {
                 if (inputForce == Vector3.zero)
                 { //If no input, smooth towards 0 velocity
-                    float force = moveForce * Time.fixedDeltaTime;
+                    float force = moveForce * Time.deltaTime;
                     if (force > horizontalVelocity.magnitude)
                     {
                         velocity.x = 0;
@@ -289,7 +289,7 @@ namespace Hypersycos.GERogueFrame
                     targetVelocity += moveInput.x * maxSpeed * GetHorizontalCameraRight(playerCamera);
                     targetVelocity += moveInput.y * maxSpeed * GetHorizontalCameraForward(playerCamera);
                     Vector3 diff = targetVelocity - horizontalVelocity;
-                    Vector3 diffForce = diff.normalized * moveForce * Time.fixedDeltaTime;
+                    Vector3 diffForce = diff.normalized * moveForce * Time.deltaTime;
 
                     if (diff.sqrMagnitude < diffForce.sqrMagnitude)
                     {
@@ -340,20 +340,21 @@ namespace Hypersycos.GERogueFrame
                     Ray ray = new Ray(this.transform.position + Vector3.up * 0.05f, Vector3.down);
                     if (Physics.Raycast(ray, out RaycastHit hit, 0.05f + characterController.stepOffset))
                     { //force player down fast
-                        forcedMove.y = -(hit.distance - 0.05f);
+                        //forcedMove.y = -(hit.distance - 0.05f);
+                        velocity.y -= 2;
                     }
                     else
                     {
-                        velocity.y += gravityForce * Time.fixedDeltaTime;
+                        velocity.y += gravityForce * Time.deltaTime;
                     }
                 }
                 else
                 {
-                    velocity.y += gravityForce * Time.fixedDeltaTime;
+                    velocity.y += gravityForce * Time.deltaTime;
                 }
             }
 
-            characterController.Move(velocity * Time.fixedDeltaTime + forcedMove);
+            characterController.Move(velocity * Time.deltaTime + forcedMove);
             pastVelocities.Enqueue(characterController.velocity);
             networkVelocity.Value += characterController.velocity / velocityAvgCount;
             if (pastVelocities.Count > velocityAvgCount)
@@ -361,7 +362,7 @@ namespace Hypersycos.GERogueFrame
 
             if (lastJump > 0f)
             {
-                lastJump -= Time.fixedDeltaTime;
+                lastJump -= Time.deltaTime;
             }
 
             if (lockedToCamera)

@@ -99,20 +99,15 @@ namespace Hypersycos.GERogueFrame
 
                 Transform AbilityHolder = UICanvas.transform.Find("Abilities");
                 AbilityIcon[] icons = new AbilityIcon[4];
-                icons[0] = Ability1?.CreateIcon();
-                icons[1] = Ability2?.CreateIcon();
-                icons[2] = Ability3?.CreateIcon();
-                icons[3] = Ability4?.CreateIcon();
+                icons[0] = Ability1?.CreateIcon(AbilityHolder);
+                icons[1] = Ability2?.CreateIcon(AbilityHolder);
+                icons[2] = Ability3?.CreateIcon(AbilityHolder);
+                icons[3] = Ability4?.CreateIcon(AbilityHolder);
 
                 icons[0].SetAbility(aManager.ability1, Ability1, state);
                 icons[1].SetAbility(aManager.ability2, Ability2, state);
                 icons[2].SetAbility(aManager.ability3, Ability3, state);
                 icons[3].SetAbility(aManager.ability4, Ability4, state);
-
-                foreach(AbilityIcon icon in icons)
-                {
-                    icon?.transform.SetParent(AbilityHolder);
-                }
             }
         }
 
@@ -121,7 +116,8 @@ namespace Hypersycos.GERogueFrame
         public void RegenerateNetworkPrefab()
         {
             GameObject copy = PrefabUtility.LoadPrefabContents(AssetDatabase.GetAssetPath(Model));
-            Transform cameraTarget = copy.transform.Find("CameraTarget");
+            Transform cameraTarget = cameraTarget = copy.GetComponentsInChildren<Transform>()
+                                                        .FirstOrDefault(c => c.gameObject.name == "CameraTarget");
 
             copy.AddComponent<NetworkObject>();
             var manager = copy.AddComponent<PlayerCharacterManager>();
@@ -151,7 +147,11 @@ namespace Hypersycos.GERogueFrame
             netTransform.AuthorityMode = NetworkTransform.AuthorityModes.Owner;
             netTransform.SyncRotAngleX = false;
             netTransform.SyncRotAngleZ = false;
-            copy.AddComponent<PlayerState>().DamageTickPrefab = AssetDatabase.LoadAssetAtPath<TMPro.TMP_Text>("Assets/UI/DamageNumber.prefab");
+            var state = copy.AddComponent<PlayerState>();
+            state.DamageTickPrefab = AssetDatabase.LoadAssetAtPath<TMPro.TMP_Text>("Assets/UI/DamageNumber.prefab");
+            state.cameraTarget = cameraTarget;
+            state.projectileSource = copy.GetComponentsInChildren<Transform>()
+                                         .FirstOrDefault(c => c.gameObject.name == "ProjectileSource");
             copy.AddComponent<PlayerAbilityManager>();
             var movement = copy.AddComponent<PlayerMovementController>();
             movement.enabled = false;

@@ -10,6 +10,6 @@ namespace Hypersycos.GERogueFrame
     {
         public string Name { get; }
         Ability CreateAbility();
-        AbilityIcon CreateIcon();
+        AbilityIcon CreateIcon(Transform parent);
     }
 }

@@ -20,9 +20,9 @@ namespace Hypersycos.GERogueFrame
             return AbilityData.CreateAbility();
         }
 
-        public AbilityIcon CreateIcon()
+        public AbilityIcon CreateIcon(Transform parent)
         {
-            return AbilityData.CreateIcon();
+            return AbilityData.CreateIcon(parent);
         }
 
         public T As<T>() where T : class, IAbilityData

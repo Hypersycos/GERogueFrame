@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -14,7 +15,10 @@ namespace Hypersycos.GERogueFrame
 
         float credsPerSecond = 0;
         EnemySpawnManager spawnManager;
-        public override void Initialize(float difficulty, float reward)
+
+        ProgressBar currentUI;
+
+        public override void Initialize(float difficulty, int reward)
         {
             base.Initialize(difficulty, reward);
             requiredCredits = 10 * difficulty;
@@ -50,8 +54,10 @@ namespace Hypersycos.GERogueFrame
 
         private void Finished()
         {
-            Completed = true;
+            if (!Active)
+                return;
             Active = false;
+            Completed = true;
             spawnManager.creditsPerSecond -= credsPerSecond;
 
             foreach (var player in NetworkManager.ConnectedClientsList)
@@ -63,12 +69,22 @@ namespace Hypersycos.GERogueFrame
 
         public override void CreateUI(RectTransform parent)
         {
-            throw new System.NotImplementedException();
+            var spawned = Instantiate(UIPrefab, parent);
+            spawned.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Kill {Mathf.CeilToInt(requiredCredits)}¢ of enemies <b>({Reward}pts)</b>";
+            currentUI = spawned.GetComponentInChildren<ProgressBar>();
+            currentUI.SetProgress(0, 0, Mathf.CeilToInt(requiredCredits));
+            OnProgressUpdate.AddListener(UpdateUI);
+        }
+
+        void UpdateUI(Objective _, float progress)
+        {
+            currentUI.SetProgress(progress, Mathf.FloorToInt(currentCredits), Mathf.CeilToInt(requiredCredits));
         }
 
         public override void DestroyUI()
         {
-            throw new System.NotImplementedException();
+            Destroy(currentUI.transform.parent.gameObject);
+            OnProgressUpdate.RemoveListener(UpdateUI);
         }
 
         public override void StartObjective()

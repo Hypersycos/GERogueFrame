@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Hypersycos.Utils;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Hypersycos.Utils;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -29,10 +30,29 @@ namespace Hypersycos.GERogueFrame
 
         PlayerState myState;
         ControlsWrapper controlWrapper;
+        Animator animator;
         Controls controls => controlWrapper.controls;
         GameObject playerCamera;
 
-        Ability currentlyCasting = null;
+        Ability _currentlyCasting;
+        Ability currentlyCasting
+        {
+            get
+            {
+                return _currentlyCasting;
+            }
+            set
+            {
+                _currentlyCasting = value;
+                if (IsOwner)
+                {
+                    if (value == null)
+                        animator.SetInteger("Ability", -1);
+                    else
+                        animator.SetInteger("Ability", (int)abilityMap[value]);
+                }
+            }
+        }
 
         TwoWayDictionary<Ability, uint> abilityMap = new();
 
@@ -47,6 +67,8 @@ namespace Hypersycos.GERogueFrame
                 playerCamera = transform.Find("CameraPos").gameObject;
 
             controlWrapper = ControlsWrapper.Singleton;
+            animator = GetComponent<Animator>();
+            animator.SetInteger("Ability", -1);
         }
 
         private void AssignAbility(Ability ability, InputAction action, uint id)

@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Unity.Burst.CompilerServices;
+using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem.HID;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -31,6 +33,10 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] LayerMask losMask;
 
         CharacterState currentTarget;
+
+        Animator anim;
+        NetworkAnimator netAnim;
+        string lastAnim = "";
 
         new void Awake()
         {
@@ -79,6 +85,18 @@ namespace Hypersycos.GERogueFrame
             });
 
             state.entryState = "Wander";
+            animator = GetComponent<Animator>();
+            netAnim = GetComponent<NetworkAnimator>();
+        }
+
+        void SetAnim(string state)
+        {
+            if (state != lastAnim)
+            {
+                lastAnim = state;
+                animator.SetTrigger(state);
+                netAnim.SetTrigger(state);
+            }
         }
 
         private bool NoTargets(CharacterState state)
@@ -95,10 +113,24 @@ namespace Hypersycos.GERogueFrame
                 {
                     if (targetState.Team != state.Team)
                     {
-                        if (!Physics.Raycast(state.CentrePos, targetState.CentrePos - state.CentrePos, 1, losMask, QueryTriggerInteraction.Ignore))
+                        var targetDir = targetState.CentrePos - state.CentrePos;
+                        if (!Physics.Raycast(state.CentrePos, targetDir, 1, losMask, QueryTriggerInteraction.Ignore))
                         {
-                            //TODO: apply arc and damage range
-                            float amount = maxDamage;
+                            Vector3 local = Quaternion.Inverse(transform.rotation) * targetDir;
+
+                            if (local.z <= 0)
+                                continue;
+
+                            float horizontal = Mathf.Atan2(local.x, local.z) * Mathf.Rad2Deg;
+                            float vertical = Mathf.Atan2(local.y, local.z) * Mathf.Rad2Deg;
+
+                            if (Mathf.Abs(horizontal) > horizontalArc * 0.5f)
+                                continue;
+
+                            if (Mathf.Abs(vertical) > verticalArc * 0.5f)
+                                continue;
+
+                            float amount = Mathf.Lerp(maxDamage, minDamage, targetDir.magnitude / attackRange);
                             targetState.ApplyDamageInstance(new(true, amount, state, AllValidStatTarget.AllValid));
                         }
                     }
@@ -108,13 +140,13 @@ namespace Hypersycos.GERogueFrame
 
         private void PlayWindup(CharacterState state, float dt)
         {
-            //TODO: Play animation
+            SetAnim("Attack");
             agent.destination = transform.position;
         }
 
         private bool CanAttack(CharacterState state)
         {
-            return sqrTargetDistance < attackDistance;
+            return sqrTargetDistance < attackDistance * attackDistance;
         }
 
         float reacquisitionTimer = 0;
@@ -122,6 +154,7 @@ namespace Hypersycos.GERogueFrame
 
         private void Hunt(CharacterState state, float dt)
         {
+            SetAnim("Run");
             agent.destination = currentTarget.CentrePos;
 
             reacquisitionTimer += dt;
@@ -163,6 +196,7 @@ namespace Hypersycos.GERogueFrame
 
         void Wander(CharacterState s, float dt)
         {
+            SetAnim("Walk");
             if (agent.remainingDistance < 0.1f)
                 wanderTimer += dt;
             bool loop = wanderTimer > wanderWait;

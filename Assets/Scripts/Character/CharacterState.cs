@@ -41,6 +41,7 @@ namespace Hypersycos.GERogueFrame
         public CharacterStateStatusEvent AfterStatusRemoved = new();
 
         public abstract Vector3 CentrePos { get; }
+        public Transform projectileSource;
 
         public void StartSyncingValues(List<ISyncStat> stats)
         {

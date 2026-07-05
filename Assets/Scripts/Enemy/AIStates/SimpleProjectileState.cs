@@ -135,11 +135,15 @@ namespace Hypersycos.GERogueFrame
 
             Vector3 intercept = currentTarget.CentrePos + targetVelocity * t - source;
             ProjectileManager.Singleton.SpawnAIDumbProjectile(myProj, myChar, source, Quaternion.FromToRotation(Vector3.forward, intercept.normalized), projVelocity, lifetime);
+
+            animator.SetBool("attack", false);
+            agent.destination = transform.position;
         }
 
         private void PlayWindup(CharacterState state, float dt)
         {
-            agent.destination = transform.position;
+            agent.destination = currentTarget.transform.position;
+            animator.SetBool("attack", true);
         }
 
         private bool CanAttack(CharacterState state)

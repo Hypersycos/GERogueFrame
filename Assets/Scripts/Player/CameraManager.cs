@@ -80,7 +80,7 @@ namespace Hypersycos.GERogueFrame
 
         public void SetMyCamera(PlayerState target)
         {
-            myPlayer = target.transform.Find("CameraTarget");
+            myPlayer = target.cameraTarget;
             myCamera = target.transform.Find("CameraPos");
             enabled = true;
         }
@@ -147,7 +147,7 @@ namespace Hypersycos.GERogueFrame
                 transform.position = targetPos;
                 lastPos = targetPos;
             }
-            float t = 1;// Mathf.Clamp01(Time.deltaTime * 10f);
+            float t = 1;// Mathf.Clamp01(Time.deltaTime * 20f);
             transform.position = targetPos * t + lastPos * (1 - t);
             lastPos = transform.position;
         }

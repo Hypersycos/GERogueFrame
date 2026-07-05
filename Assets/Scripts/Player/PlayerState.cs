@@ -39,7 +39,7 @@ namespace Hypersycos.GERogueFrame
         public DefenseStatInstance Shields;
         public DefenseStatInstance OverHealth;
 
-        Transform cameraTarget;
+        public Transform cameraTarget;
         public override Vector3 CentrePos => cameraTarget.position;
 
         void Start()
@@ -59,7 +59,6 @@ namespace Hypersycos.GERogueFrame
                     }
                 };
             }
-            cameraTarget = transform.Find("CameraTarget");
         }
 
         public void ApplyDefensePool(List<DefenseStatInstance> stats)

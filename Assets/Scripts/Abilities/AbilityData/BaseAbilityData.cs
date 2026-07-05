@@ -21,9 +21,9 @@ namespace Hypersycos.GERogueFrame
 
         public abstract Ability CreateAbility();
 
-        public AbilityIcon CreateIcon()
+        public AbilityIcon CreateIcon(Transform parent)
         {
-            return GameObject.Instantiate(IconPrefab);
+            return GameObject.Instantiate(IconPrefab, parent);
         }
     }
 }

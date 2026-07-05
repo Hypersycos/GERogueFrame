@@ -18,9 +18,10 @@ namespace Hypersycos.GERogueFrame
         NetworkVariable<bool> _Active = new();
         public bool Active { get => _Active.Value; protected set => _Active.Value = value; }
 
-        NetworkVariable<float> _Reward = new();
-        public float Reward { get => _Reward.Value; protected set => _Reward.Value = value; }
-        public virtual void Initialize(float difficulty, float reward)
+        NetworkVariable<int> _Reward = new();
+        public int Reward { get => _Reward.Value; protected set => _Reward.Value = value; }
+        [SerializeField] protected GameObject UIPrefab;
+        public virtual void Initialize(float difficulty, int reward)
         {
             Active = false;
             Completed = false;
@@ -33,6 +34,7 @@ namespace Hypersycos.GERogueFrame
         public abstract void CreateUI(RectTransform parent);
         public abstract void DestroyUI();
         public UnityEvent<Objective> OnStarted;
+        public UnityEvent<Objective> OnCancelled;
         public UnityEvent<Objective> OnCompleted;
         public UnityEvent<Objective, float> OnProgressUpdate;
         public override void OnNetworkSpawn()
@@ -42,14 +44,57 @@ namespace Hypersycos.GERogueFrame
         }
     }
 
-    public class ObjectiveManager : MonoBehaviour
+    public class ObjectiveManager : NetworkBehaviour
     {
         public List<Objective> spawnedObjectives;
         public static ObjectiveManager Singleton;
+        public NetworkVariable<int> currentPoints;
+        public NetworkVariable<int> requiredPoints;
+
+        NetworkList<NetworkBehaviourReference> activeObjectives = new();
+
+        [SerializeField] RectTransform objectiveHolder;
+        [SerializeField] ProgressBar objectiveProgress;
 
         public void Awake()
         {
             Singleton = this;
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            if (IsClient || IsHost)
+            {
+                currentPoints.OnValueChanged += (_, n) => objectiveProgress.SetProgress(n / (float)requiredPoints.Value, n, requiredPoints.Value);
+                requiredPoints.OnValueChanged += (_, n) => objectiveProgress.SetProgress(0, 0, n);
+                activeObjectives.OnListChanged += OnObjectiveListChange;
+            }
+        }
+
+        private void OnObjectiveListChange(NetworkListEvent<NetworkBehaviourReference> changeEvent)
+        {
+            if (changeEvent.Value.TryGet(out Objective obj))
+            {
+                switch (changeEvent.Type)
+                {
+                    case NetworkListEvent<NetworkBehaviourReference>.EventType.Add:
+                    case NetworkListEvent<NetworkBehaviourReference>.EventType.Insert:
+                        obj.CreateUI(objectiveHolder);
+                        break;
+                    case NetworkListEvent<NetworkBehaviourReference>.EventType.Remove:
+                    case NetworkListEvent<NetworkBehaviourReference>.EventType.RemoveAt:
+                        obj.DestroyUI();
+                        break;
+                    case NetworkListEvent<NetworkBehaviourReference>.EventType.Value:
+                        break;
+                    case NetworkListEvent<NetworkBehaviourReference>.EventType.Clear:
+                        break;
+                    case NetworkListEvent<NetworkBehaviourReference>.EventType.Full:
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         public void SpawnObjectives(float difficulty)
@@ -87,6 +132,8 @@ namespace Hypersycos.GERogueFrame
 
             map.so.generator.GetObjectiveLocations(chosenObjectives, out Vector3[] spawnPoints, out Quaternion[] spawnRots);
 
+            requiredPoints.Value = 8 * Mathf.RoundToInt(difficulty);
+
             for (int i = 0; i < targetCount; i++)
             {
                 var spawned = NetworkManager
@@ -99,36 +146,44 @@ namespace Hypersycos.GERogueFrame
                 var objective = spawned.GetComponent<Objective>();
 
                 float chosenDiff = UnityEngine.Random.Range(difficulty * 0.85f, difficulty * 1.15f);
-                float reward = 2 * Mathf.RoundToInt(difficulty);
+                int reward = 2 * Mathf.RoundToInt(difficulty);
                 if (chosenEasy.Contains(i))
                 {
                     chosenDiff *= 0.7f;
-                    reward *= 0.5f;
+                    reward /= 2;
                 }
 
                 if (chosenHard.Contains(i))
                 {
                     chosenDiff *= 1.5f;
-                    reward *= 2f;
+                    reward *= 2;
                 }
 
                 objective.Initialize(chosenDiff, reward);
                 objective.OnStarted.AddListener(OnObjectiveStarted);
                 objective.OnCompleted.AddListener(OnObjectiveCompleted);
+                objective.OnCancelled.AddListener(OnObjectiveCancelled);
             }
+        }
+
+        private void OnObjectiveCancelled(Objective obj)
+        {
+            activeObjectives.Remove(obj);
         }
 
         private void OnObjectiveStarted(Objective obj)
         {
+            activeObjectives.Add(obj);
             //TODO: obj.CreateUI();
             //TODO: Rpc
         }
 
         private void OnObjectiveCompleted(Objective obj)
         {
-            PersistentStateManager.Singleton.NextRound();
-            //TODO: obj.DestroyUI();
-            //TODO: Rpc
+            activeObjectives.Remove(obj);
+            currentPoints.Value += obj.Reward;
+            if (currentPoints.Value >= requiredPoints.Value)
+                PersistentStateManager.Singleton.NextRound();
         }
     }
 }

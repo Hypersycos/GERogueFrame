@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.ProjectileDatabase
   List:
   - {fileID: 11400000, guid: 26ccba738a326934ba11d7dfb9e99495, type: 2}
+  - {fileID: 11400000, guid: 50792930560defa478f5110c2be01cfc, type: 2}

@@ -38,13 +38,13 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-  UUID: 
+  UUID: base.Simple Projectile
   ItemName: Simple Projectile
   Description: 
   Icon: {fileID: 0}
   Color: {r: 0, g: 0, b: 0, a: 0}
   Model: {fileID: 0}
-  NetworkPrefab: {fileID: 39828721480881588, guid: 09892d1c1846f0d4181ecf6a99fe355d, type: 3}
+  NetworkPrefab: {fileID: 7225891673131138541, guid: 38b8214803e2ca74297d8e520f3b5cbc, type: 3}
   defenses:
   - Max: 100
     HasResist: 0

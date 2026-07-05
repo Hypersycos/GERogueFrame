@@ -2309,6 +2309,7 @@ MonoBehaviour:
   AfterStatusRemoved:
     m_PersistentCalls:
       m_Calls: []
+  projectileSource: {fileID: 0}
   id:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -2351,14 +2352,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d30f5ceb95fff9c43a89c56eab46fc6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.SimpleProjectileAI
-  attackWindup: 0.2
+  attackWindup: 1
   attackLockout: 0.5
   attackInterval: 5
   attackDistance: 30
   minimumAttackDistance: 10
   attackSource: {fileID: 7447941128830472924}
   attackOffset: {x: 0, y: 1.5, z: 1}
-  myProj: {fileID: 11400000, guid: 26ccba738a326934ba11d7dfb9e99495, type: 2}
+  myProj: {fileID: 11400000, guid: 50792930560defa478f5110c2be01cfc, type: 2}
   projVelocity: 15
   lifetime: 5
   wanderDistance: 10

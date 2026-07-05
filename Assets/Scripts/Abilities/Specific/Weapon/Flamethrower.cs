@@ -73,7 +73,7 @@ namespace Hypersycos.GERogueFrame
 
         void DoParticles()
         {
-            vfxInstance = GameObject.Instantiate(vfx, myState.transform.Find("CameraTarget"));
+            vfxInstance = GameObject.Instantiate(vfx, myState.projectileSource);
             var particles = vfxInstance.GetComponent<ParticleSystem>();
             var main = particles.main;
             main.startLifetime = range / speed;
@@ -108,7 +108,7 @@ namespace Hypersycos.GERogueFrame
             {
                 while (timeCount <= 0)
                 {
-                    Vector3 spawnPos = myState.transform.Find("CameraTarget").position;
+                    Vector3 spawnPos = myState.projectileSource.position;
                     var inst = GameObject.Instantiate(projectile, spawnPos, myCamera.rotation);
                     var statusInst = dot.CloneInstance() as DotStatusInstance;
                     statusInst.Amount /= tickrate;

@@ -30,7 +30,11 @@ namespace Hypersycos.GERogueFrame
             List<BoundedStatInstance> defenses = new();
             so.Apply(GetComponent<PlayerState>(), ref defenses);
 
-            GameObject cameraTarget = transform.Find("CameraTarget").gameObject;
+            GameObject cameraTarget = GetComponentsInChildren<Transform>()
+                                      .FirstOrDefault(c => c.gameObject.name == "CameraTarget")?.gameObject;
+
+            if (GetComponent<PlayerState>().cameraTarget == null)
+                GetComponent<PlayerState>().cameraTarget = cameraTarget.transform;
 
             if (IsOwner)
             {

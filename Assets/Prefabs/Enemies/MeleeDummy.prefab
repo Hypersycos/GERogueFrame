@@ -2156,7 +2156,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7447941128830472924}
-  - component: {fileID: 3583820949583792294}
   - component: {fileID: 39828721480881588}
   - component: {fileID: 1307592876211563076}
   - component: {fileID: 9174404814534057885}
@@ -2190,28 +2189,6 @@ Transform:
   - {fileID: 4626060983231779873}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &3583820949583792294
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7788894545764550758}
-  m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
-  m_Controller: {fileID: 9100000, guid: 40db3173a05ae3242b1c182a09b0a183, type: 2}
-  m_CullingMode: 1
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &39828721480881588
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2224,7 +2201,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2800686592
+  GlobalObjectIdHash: 933775860
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -2309,6 +2286,7 @@ MonoBehaviour:
   AfterStatusRemoved:
     m_PersistentCalls:
       m_Calls: []
+  projectileSource: {fileID: 0}
   id:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -2329,12 +2307,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ab5705a99deb6f448cc3666e39877ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.SimpleMeleeAI
-  attackWindup: 0.5
+  attackWindup: 2
   attackLockout: 1
   attackDistance: 1
   attackRange: 2
-  horizontalArc: 60
-  verticalArc: 30
+  horizontalArc: 120
+  verticalArc: 60
   maxDamage: 15
   minDamage: 10
   wanderDistance: 10

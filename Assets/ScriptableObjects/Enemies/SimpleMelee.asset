@@ -30,7 +30,7 @@ MonoBehaviour:
   Icon: {fileID: 0}
   Color: {r: 0, g: 0, b: 0, a: 0}
   Model: {fileID: 0}
-  NetworkPrefab: {fileID: 39828721480881588, guid: 8787f2947508a16429aa043ea5b1f3f8, type: 3}
+  NetworkPrefab: {fileID: 5725640017274150872, guid: a3363aca6b4f49f4fba645a5cbe82dc2, type: 3}
   defenses:
   - Max: 100
     HasResist: 0
