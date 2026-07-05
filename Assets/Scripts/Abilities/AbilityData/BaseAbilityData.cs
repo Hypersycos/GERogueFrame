@@ -15,9 +15,15 @@ namespace Hypersycos.GERogueFrame
         public Sprite AbilityIcon;
         public float endlag;
         public float queueFor;
+        public AbilityIcon IconPrefab;
 
         public string Name => AbilityName;
 
         public abstract Ability CreateAbility();
+
+        public AbilityIcon CreateIcon()
+        {
+            return GameObject.Instantiate(IconPrefab);
+        }
     }
 }

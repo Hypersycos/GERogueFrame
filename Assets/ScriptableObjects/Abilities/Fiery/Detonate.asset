@@ -16,6 +16,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
+    - {fileID: 732674372557605872, guid: b033b66049208f54c8c5b4d4a8a21473, type: 3}
     - {fileID: -6786609212178123391, guid: ab4f8a18aa8a3464bb97405471478fcc, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
@@ -35,6 +36,15 @@ MonoBehaviour:
     - Name: AbilityIcon
       Entry: 6
       Data: 
+    - Name: endlag
+      Entry: 4
+      Data: 0
+    - Name: queueFor
+      Entry: 4
+      Data: 0
+    - Name: IconPrefab
+      Entry: 10
+      Data: 0
     - Name: Cooldown
       Entry: 4
       Data: 5
@@ -56,6 +66,12 @@ MonoBehaviour:
     - Name: MaxRange
       Entry: 4
       Data: 15
+    - Name: StartEpsilon
+      Entry: 4
+      Data: 0
+    - Name: EndEpsilon
+      Entry: 4
+      Data: 0
     - Name: HitLayerMask
       Entry: 7
       Data: UnityEngine.LayerMask, UnityEngine.CoreModule
@@ -155,7 +171,7 @@ MonoBehaviour:
       Data: 
     - Name: detonateVisual
       Entry: 10
-      Data: 0
+      Data: 1
     - Name: 
       Entry: 8
       Data: 

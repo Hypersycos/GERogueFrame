@@ -16,6 +16,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
+    - {fileID: 732674372557605872, guid: b033b66049208f54c8c5b4d4a8a21473, type: 3}
     - {fileID: 11400000, guid: d82f0da314caebf408f4915d464c0e7e, type: 2}
     - {fileID: 11400000, guid: 408a6fd48e8a0784da3cecc525b4ff3b, type: 2}
     SerializedBytesString: 
@@ -35,6 +36,15 @@ MonoBehaviour:
     - Name: AbilityIcon
       Entry: 6
       Data: 
+    - Name: endlag
+      Entry: 4
+      Data: 0
+    - Name: queueFor
+      Entry: 4
+      Data: 0
+    - Name: IconPrefab
+      Entry: 10
+      Data: 0
     - Name: Cooldown
       Entry: 4
       Data: 3
@@ -56,6 +66,12 @@ MonoBehaviour:
     - Name: MaxRange
       Entry: 4
       Data: 50
+    - Name: StartEpsilon
+      Entry: 4
+      Data: 0
+    - Name: EndEpsilon
+      Entry: 4
+      Data: 0
     - Name: HitLayerMask
       Entry: 7
       Data: UnityEngine.LayerMask, UnityEngine.CoreModule
@@ -133,7 +149,7 @@ MonoBehaviour:
         Assembly-CSharp
     - Name: <StatusEffect>k__BackingField
       Entry: 10
-      Data: 0
+      Data: 1
     - Name: Amount
       Entry: 4
       Data: 1
@@ -166,7 +182,7 @@ MonoBehaviour:
       Data: 11|Hypersycos.GERogueFrame.HeatStatusInstance, Assembly-CSharp
     - Name: <StatusEffect>k__BackingField
       Entry: 10
-      Data: 1
+      Data: 2
     - Name: Amount
       Entry: 4
       Data: 5

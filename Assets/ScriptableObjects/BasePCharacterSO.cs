@@ -71,19 +71,6 @@ namespace Hypersycos.GERogueFrame
             state.StartSyncingValues(new List<ISyncStat>() { state.Health, state.Shields, state.OverHealth, state.Energy });
 
             defenses = new List<BoundedStatInstance>() { state.Health, state.Shields, state.OverHealth };
-            if (state.IsOwner)
-            {
-                GameObject UICanvas = GameObject.FindWithTag("PlayerUI");
-                Transform HealthBar = UICanvas.transform.Find("HealthBar");
-                HealthBar.gameObject.SetActive(true);
-                HealthBar.GetComponentInChildren<StatBarScript>().SetStats(defenses);
-                if (Energy.Max > 0)
-                {
-                    Transform EnergyBar = UICanvas.transform.Find("EnergyBar");
-                    EnergyBar.gameObject.SetActive(true);
-                    EnergyBar.GetComponentInChildren<StatBarScript>().SetStats(new List<BoundedStatInstance>() { state.Energy });
-                }
-            }
 
             PlayerAbilityManager aManager = state.GetComponent<PlayerAbilityManager>();
 
@@ -96,6 +83,37 @@ namespace Hypersycos.GERogueFrame
             aManager.ability4 = Ability4?.CreateAbility();
 
             aManager.ultimate = Ultimate?.CreateAbility();
+
+            if (state.IsOwner)
+            {
+                GameObject UICanvas = GameObject.FindWithTag("PlayerUI");
+                Transform HealthBar = UICanvas.transform.Find("HealthBar");
+                HealthBar.gameObject.SetActive(true);
+                HealthBar.GetComponentInChildren<StatBarScript>().SetStats(defenses);
+                if (Energy.Max > 0)
+                {
+                    Transform EnergyBar = UICanvas.transform.Find("EnergyBar");
+                    EnergyBar.gameObject.SetActive(true);
+                    EnergyBar.GetComponentInChildren<StatBarScript>().SetStats(new List<BoundedStatInstance>() { state.Energy });
+                }
+
+                Transform AbilityHolder = UICanvas.transform.Find("Abilities");
+                AbilityIcon[] icons = new AbilityIcon[4];
+                icons[0] = Ability1?.CreateIcon();
+                icons[1] = Ability2?.CreateIcon();
+                icons[2] = Ability3?.CreateIcon();
+                icons[3] = Ability4?.CreateIcon();
+
+                icons[0].SetAbility(aManager.ability1, Ability1, state);
+                icons[1].SetAbility(aManager.ability2, Ability2, state);
+                icons[2].SetAbility(aManager.ability3, Ability3, state);
+                icons[3].SetAbility(aManager.ability4, Ability4, state);
+
+                foreach(AbilityIcon icon in icons)
+                {
+                    icon?.transform.SetParent(AbilityHolder);
+                }
+            }
         }
 
 #if UNITY_EDITOR

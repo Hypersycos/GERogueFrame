@@ -16,6 +16,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
+    - {fileID: 732674372557605872, guid: b033b66049208f54c8c5b4d4a8a21473, type: 3}
     - {fileID: 11400000, guid: 26ccba738a326934ba11d7dfb9e99495, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
@@ -39,6 +40,9 @@ MonoBehaviour:
       Data: 0
     - Name: queueFor
       Entry: 4
+      Data: 0
+    - Name: IconPrefab
+      Entry: 10
       Data: 0
     - Name: Cooldown
       Entry: 4
@@ -82,7 +86,7 @@ MonoBehaviour:
         Assembly-CSharp
     - Name: obj
       Entry: 10
-      Data: 0
+      Data: 1
     - Name: mask
       Entry: 7
       Data: UnityEngine.LayerMask, UnityEngine.CoreModule

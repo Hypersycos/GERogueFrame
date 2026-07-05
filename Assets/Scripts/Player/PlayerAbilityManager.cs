@@ -13,19 +13,19 @@ namespace Hypersycos.GERogueFrame
         protected Ability _weapon;
         public Ability weapon { get => _weapon; set { _weapon = value; AssignAbility(value, controls.Player.Fire, 0); } }
         protected Ability _weaponAlt;
-        public Ability weaponAlt { get => _weapon; set { _weaponAlt = value; AssignAbility(value, controls.Player.Altfire, 1); } }
+        public Ability weaponAlt { get => _weaponAlt; set { _weaponAlt = value; AssignAbility(value, controls.Player.Altfire, 1); } }
 
-        public Ability ability1 { get => _weapon; set { _ability1 = value; AssignAbility(value, controls.Player.Ability1, 2); } }
+        public Ability ability1 { get => _ability1; set { _ability1 = value; AssignAbility(value, controls.Player.Ability1, 2); } }
         protected Ability _ability1;
-        public Ability ability2 { get => _weapon; set { _ability2 = value; AssignAbility(value, controls.Player.Ability2, 3); } }
+        public Ability ability2 { get => _ability2; set { _ability2 = value; AssignAbility(value, controls.Player.Ability2, 3); } }
         protected Ability _ability2;
-        public Ability ability3 { get => _weapon; set { _ability3 = value; AssignAbility(value, controls.Player.Ability3, 4); } }
+        public Ability ability3 { get => _ability3; set { _ability3 = value; AssignAbility(value, controls.Player.Ability3, 4); } }
         protected Ability _ability3;
-        public Ability ability4 { get => _weapon; set { _ability4 = value; AssignAbility(value, controls.Player.Ability4, 5); } }
+        public Ability ability4 { get => _ability4; set { _ability4 = value; AssignAbility(value, controls.Player.Ability4, 5); } }
         protected Ability _ability4;
 
         protected Ability _ultimate;
-        public Ability ultimate { get => _weapon; set { _ultimate = value; AssignAbility(value, controls.Player.Ultimate, 6); } }
+        public Ability ultimate { get => _ultimate; set { _ultimate = value; AssignAbility(value, controls.Player.Ultimate, 6); } }
 
         PlayerState myState;
         ControlsWrapper controlWrapper;
