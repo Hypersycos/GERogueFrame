@@ -16,6 +16,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
+    - {fileID: 21300000, guid: aaa63402fcb97ef43bbd618d934584df, type: 3}
     - {fileID: 732674372557605872, guid: b033b66049208f54c8c5b4d4a8a21473, type: 3}
     - {fileID: -6786609212178123391, guid: ab4f8a18aa8a3464bb97405471478fcc, type: 3}
     SerializedBytesString: 
@@ -34,8 +35,8 @@ MonoBehaviour:
       Data: Detonates all {{S|Heat}} procs on targets in an area, causing smaller
         explosions dealing the remaining damage
     - Name: AbilityIcon
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 0
     - Name: endlag
       Entry: 4
       Data: 1
@@ -44,7 +45,7 @@ MonoBehaviour:
       Data: 0
     - Name: IconPrefab
       Entry: 10
-      Data: 0
+      Data: 1
     - Name: Cooldown
       Entry: 4
       Data: 5
@@ -171,7 +172,7 @@ MonoBehaviour:
       Data: 
     - Name: detonateVisual
       Entry: 10
-      Data: 1
+      Data: 2
     - Name: 
       Entry: 8
       Data: 

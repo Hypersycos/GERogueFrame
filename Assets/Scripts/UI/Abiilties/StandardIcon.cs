@@ -28,6 +28,15 @@ namespace Hypersycos.GERogueFrame
             myState = state;
             icon.sprite = baseData?.AbilityIcon;
             background.color = state.GetComponent<PlayerCharacterManager>().so.Color;
+            
+            if (idata is StandardAbilityData sData && sData.EnergyCost > 0)
+            {
+                manaText.text = sData.EnergyCost.ToString();
+            }
+            else
+            {
+                manaText.text = "";
+            }
         }
 
         private void Update()

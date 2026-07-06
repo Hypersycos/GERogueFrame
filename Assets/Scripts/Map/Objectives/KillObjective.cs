@@ -18,6 +18,15 @@ namespace Hypersycos.GERogueFrame
 
         ProgressBar currentUI;
 
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+            if (!IsServer)
+            {
+                _currentCredits.OnValueChanged += (_, n) => OnProgressUpdate?.Invoke(this, n / requiredCredits);
+            }
+        }
+
         public override void Initialize(float difficulty, int reward)
         {
             base.Initialize(difficulty, reward);
@@ -28,10 +37,13 @@ namespace Hypersycos.GERogueFrame
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.TryGetComponent<PlayerState>(out _))
+            if (IsServer)
             {
-                if (!Active)
-                    StartObjective();
+                if (other.TryGetComponent<PlayerState>(out _))
+                {
+                    if (!Active && !Completed)
+                        StartObjective();
+                }
             }
         }
 

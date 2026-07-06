@@ -98,7 +98,7 @@ namespace Hypersycos.GERogueFrame
         {
             this.cameraPos = cameraPos;
             this.targetPos = targetPos;
-            if (obj.TryGetComponent(out NetworkObject netObj))
+            if (obj != null && obj.TryGetComponent(out NetworkObject netObj))
                 hit = netObj;
         }
 
@@ -114,8 +114,10 @@ namespace Hypersycos.GERogueFrame
             reader.ReadValueSafe(out Vector3 cameraPos);
             reader.ReadValueSafe(out Vector3 targetPos);
             reader.ReadValueSafe(out NetworkObjectReference hitRef);
-            hitRef.TryGet(out NetworkObject netObj);
-            return new HitscanNetworkPayload(cameraPos, targetPos, netObj.gameObject);
+            if (hitRef.TryGet(out NetworkObject netObj))
+                return new HitscanNetworkPayload(cameraPos, targetPos, netObj.gameObject);
+            else
+                return new HitscanNetworkPayload(cameraPos, targetPos, null);
         }
     }
 

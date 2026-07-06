@@ -16,7 +16,7 @@ namespace Hypersycos.SaveSystem
     {
         [SerializeField] internal bool _IsEphemeral;
         public bool IsEphemeral => _IsEphemeral;
-        [SerializeField] [SerializeReference] protected internal List<SerializerSO> RegisteredSerializers;
+        [SerializeField] protected internal List<SerializerSO> RegisteredSerializers;
         protected IEnumerable<Serializer> MappedSerializers => RegisteredSerializers.Where(v => v is not null && v.serializer.SupportedTypes is not null).Select(x => x.serializer);
 
         public abstract T MyObject { get; }

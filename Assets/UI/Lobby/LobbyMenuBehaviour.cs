@@ -1,9 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
+using UnityEngine.UI;
 using UnityEngine;
-using UnityEngine.UIElements;
+using Unity.VisualScripting;
+using Hypersycos.Utils;
+//using UnityEngine.UIElements;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -51,14 +55,29 @@ namespace Hypersycos.GERogueFrame
         }
 
         NetworkManager networkManager;
-        [SerializeField] UIDocument document;
-        [SerializeField] VisualTreeAsset playerIcon;
-        [SerializeField] VisualTreeAsset characterSelectButton;
         [SerializeField] Transform spawnTransform;
-        private void Reset()
-        {
-            document = GetComponent<UIDocument>();
-        }
+
+        [SerializeField] Button readyButton;
+        [SerializeField] TextMeshProUGUI readyText;
+        [SerializeField] Color readyColour;
+        [SerializeField] Color notReadyColour;
+
+        [SerializeField] Transform playerHolder;
+        [SerializeField] GameObject playerPrefab;
+        [SerializeField] Sprite readyCheck;
+        [SerializeField] Sprite notReadyCheck;
+
+        List<GameObject> playerIcons = new();
+
+        [SerializeField] Transform characterHolder;
+        [SerializeField] GameObject characterPrefab;
+
+        [SerializeField] TextMeshProUGUI characterNameText;
+        [SerializeField] Transform descriptionHolder;
+        [SerializeField] GameObject descriptionPrefab;
+
+        [SerializeField] Button backButton;
+        [SerializeField] TextMeshProUGUI countdown;
 
         BetterNetworkList<KeyIndexPair<ulong>> readyKeys = new();
         BetterNetworkList<LobbyPlayerState> readyValues = new();
@@ -66,26 +85,11 @@ namespace Hypersycos.GERogueFrame
         int readyCount = 0;
         bool countdownCanStop = true;
 
-        Button readyButton;
-        ListView playerList;
-        ScrollView characterList;
-        Label countdown;
-        Button backButton;
-
         GameObject myCharacterObj;
         Dictionary<LobbyPlayerState, GameObject> characterObjs;
 
         private void OnEnable()
         {
-            VisualElement root = document.rootVisualElement;
-
-            readyButton = root.Q<Button>("ReadyButton");
-            playerList = root.Q<ListView>("PlayerList");
-            characterList = root.Q<ScrollView>("CharacterList");
-            countdown = root.Q<Label>("Countdown");
-            backButton = root.Q<Button>("BackButton");
-
-            readyButton.clicked += ReadyClicked;
             readyValues.OnListChanged += OnReadyDataChanged;
         }
 
@@ -97,29 +101,72 @@ namespace Hypersycos.GERogueFrame
                 {
                     if (changeEvent.Value.isReady)
                     {
-                        readyButton.RemoveFromClassList("notReadyButton");
-                        readyButton.AddToClassList("readyButton");
-                        readyButton.text = "Ready";
+                        readyButton.image.color = readyColour;
+                        readyText.text = "Ready";
                     }
                     else
                     {
-                        readyButton.AddToClassList("notReadyButton");
-                        readyButton.RemoveFromClassList("readyButton");
-                        readyButton.text = "Not Ready";
+                        readyButton.image.color = notReadyColour;
+                        readyText.text = "Not Ready";
                     }
                 }
             }
         }
 
-        private void ReadyClicked()
+        public void ReadyClicked()
         {
             SetReadyServerRpc(!readyData[networkManager.LocalClientId].isReady);
         }
 
         private void RefreshList(NetworkListEvent<LobbyPlayerState> changeEvent)
         {
-            //playerList.Clear();
-            playerList.RefreshItems();
+            switch (changeEvent.Type)
+            {
+                case NetworkListEvent<LobbyPlayerState>.EventType.Add:
+                    var inst = Instantiate(playerPrefab, playerHolder);
+                    inst.transform.GetChild(2).GetComponent<Image>().color = notReadyColour;
+                    inst.transform.GetChild(2).GetChild(0).GetComponent<Image>().sprite = notReadyCheck;
+                    playerIcons.Add(inst);
+                    break;
+                case NetworkListEvent<LobbyPlayerState>.EventType.Insert:
+                    inst = Instantiate(playerPrefab, playerHolder);
+                    playerIcons.Insert(changeEvent.Index, inst);
+                    break;
+                case NetworkListEvent<LobbyPlayerState>.EventType.Remove:
+                case NetworkListEvent<LobbyPlayerState>.EventType.RemoveAt:
+                    playerIcons.RemoveAt(changeEvent.Index);
+                    break;
+                case NetworkListEvent<LobbyPlayerState>.EventType.Value:
+                    if (changeEvent.Value.isReady)
+                    {
+                        playerIcons[changeEvent.Index].transform.GetChild(2).GetComponent<Image>().color = readyColour;
+                        playerIcons[changeEvent.Index].transform.GetChild(2).GetChild(0).GetComponent<Image>().sprite = readyCheck;
+                    }
+                    else
+                    {
+                        playerIcons[changeEvent.Index].transform.GetChild(2).GetComponent<Image>().color = notReadyColour;
+                        playerIcons[changeEvent.Index].transform.GetChild(2).GetChild(0).GetComponent<Image>().sprite = notReadyCheck;
+                    }
+                    if (changeEvent.Value.characterID > 0)
+                    {
+                        playerIcons[changeEvent.Index].transform.GetChild(1).GetComponent<Image>().sprite = SODatabase.NetworkedDB.PlayerCharacters[changeEvent.Value.characterID].Icon;
+                        playerIcons[changeEvent.Index].transform.GetChild(1).GetComponent<Image>().enabled = true;
+                    }
+                    else
+                        playerIcons[changeEvent.Index].transform.GetChild(1).GetComponent<Image>().enabled = false;
+                    break;
+                case NetworkListEvent<LobbyPlayerState>.EventType.Clear:
+                    foreach(GameObject obj in playerIcons)
+                    {
+                        Destroy(obj);
+                    }
+                    playerIcons.Clear();
+                    break;
+                case NetworkListEvent<LobbyPlayerState>.EventType.Full:
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override void OnNetworkSpawn()
@@ -138,28 +185,16 @@ namespace Hypersycos.GERogueFrame
                 }
             }
 
-            playerList.itemsSource = readyValues;
-            playerList.makeItem = () => playerIcon.Instantiate();
-            playerList.bindItem = (element, index) =>
+            int i = 0;
+            foreach(var pair in readyData.Keys)
             {
-                LobbyPlayerState state = readyValues[index];
-                VisualElement readyIcon = element.Q<VisualElement>("ReadyStatus");
-                if (state.isReady)
-                {
-                    readyIcon.AddToClassList("playerReady");
-                    readyIcon.RemoveFromClassList("playerNotReady");
-                }
-                else
-                {
-                    readyIcon.RemoveFromClassList("playerReady");
-                    readyIcon.AddToClassList("playerNotReady");
-                }
-            };
+                RefreshList(new() { Type = NetworkListEvent<LobbyPlayerState>.EventType.Add });
+                RefreshList(new() { Type = NetworkListEvent<LobbyPlayerState>.EventType.Value, Index = i++ });
+            }
+
             readyValues.OnListChanged += RefreshList;
-            playerList.RefreshItems();
 
             StartCoroutine(CreateCharacterIcons());
-            backButton.clicked += PersistentStateManager.SingletonQuitToMenu;
         }
 
         public IEnumerator CreateCharacterIcons()
@@ -168,16 +203,15 @@ namespace Hypersycos.GERogueFrame
             {
                 yield return null;
             }
-            characterList.Clear();
             foreach (BasePCharacterSO so in SODatabase.NetworkedDB.PlayerCharacters)
             {
-                var template = characterSelectButton.Instantiate();
-                Button btn = template.Q<Button>();
-                btn.style.backgroundImage = so.Icon.texture;
-                //element.style.backgroundColor;
+                var template = Instantiate(characterPrefab, characterHolder);
+                template.GetComponent<Image>().color = so.Color;
+                template.transform.GetChild(0).GetComponent<Image>().sprite = so.Icon;
 
-                btn.clicked += () => SelectCharacter(so, btn);
-                characterList.Add(template);
+                var btn = template.GetComponent<Button>();
+
+                btn.onClick.AddListener(() => SelectCharacter(so, btn));
             }
         }
 
@@ -206,7 +240,7 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
-        private void SelectCharacter(BasePCharacterSO character, VisualElement visualElement)
+        private void SelectCharacter(BasePCharacterSO character, Button button)
         {
             if (myCharacterObj)
                 Destroy(myCharacterObj);
@@ -214,7 +248,33 @@ namespace Hypersycos.GERogueFrame
                                          spawnTransform.position + character.Model.transform.position,
                                          spawnTransform.rotation * character.Model.transform.rotation);
             SetCharacterRpc(SODatabase.NetworkedDB.PlayerCharacterIDs[character.UUID]);
-            readyButton.enabledSelf = true;
+
+            characterNameText.text = character.ItemName;
+
+            descriptionHolder.transform.DestroyAllChildren();
+
+            IAbilityData[] datas = new IAbilityData[6] { character.Weapon, character.WeaponAlt, character.Ability1, character.Ability2, character.Ability3, character.Ability4 };
+
+            foreach (var data in datas)
+            {
+                if (data == null)
+                    continue;
+
+                BaseAbilityData baseData = null;
+                if (data is BaseAbilityData bd)
+                    baseData = bd;
+                else if (data is AbilitySO so)
+                    baseData = so.As<BaseAbilityData>();
+
+                if (baseData != null)
+                {
+                    var inst = Instantiate(descriptionPrefab, descriptionHolder);
+                    inst.GetComponentInChildren<Image>().sprite = baseData.AbilityIcon;
+                    inst.GetComponentInChildren<TextMeshProUGUI>().text = $"<b>{baseData.AbilityName}: </b>{baseData.AbilityDescription}";
+                }
+            }
+
+            readyButton.interactable = true;
         }
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]

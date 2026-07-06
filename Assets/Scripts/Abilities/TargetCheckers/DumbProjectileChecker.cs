@@ -77,7 +77,7 @@ namespace Hypersycos.GERogueFrame
         public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out ITargetPayload hit, out AbilityPayload verifyData)
         {
             if (spawnObj == null)
-                spawnObj = myState.transform.Find(spawnObjectPath);
+                spawnObj = myState.projectileSource;
 
             if (spawnObj == null)
             {
@@ -94,7 +94,7 @@ namespace Hypersycos.GERogueFrame
         public bool VerifyTarget(AbilityPayload target, CharacterState myState, out ITargetPayload hit)
         {
             if (spawnObj == null)
-                spawnObj = myState.transform.Find(spawnObjectPath);
+                spawnObj = myState.projectileSource;
 
             if (spawnObj == null)
             {

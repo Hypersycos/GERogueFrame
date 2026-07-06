@@ -71,25 +71,21 @@ namespace Hypersycos.GERogueFrame
             HitPoints.Tick(Time.fixedDeltaTime);
 
             //TODO: Move to tick/inheritance-based system
-            List<StatusInstance> ToRemove = new();
             foreach(List<StatusInstance> instances in statusInstances.Values)
             {
-                foreach(StatusInstance inst in instances)
+                for (int i = instances.Count - 1; i >= 0; i--)
                 {
+                    StatusInstance inst = instances[i];
                     if (inst is DurationStatusInstance)
                     {
                         DurationStatusInstance dInst = (DurationStatusInstance)inst;
                         dInst.duration -= Time.fixedDeltaTime;
                         if (dInst.duration < 0)
                         {
-                            ToRemove.Add(inst);
+                            RemoveStatus(inst);
                         }
                     }
                 }
-            }
-            foreach(StatusInstance inst in ToRemove)
-            {
-                RemoveStatus(inst);
             }
         }
 
@@ -176,10 +172,10 @@ namespace Hypersycos.GERogueFrame
             BeforeStatusRemoved.Invoke(this, instance);
             List<StatusInstance> insts = statusInstances[instance.StatusEffect];
             insts.Remove(instance);
-            if (insts.Count == 0)
+/*          if (insts.Count == 0)
             {
                 statusInstances.Remove(instance.StatusEffect);
-            }
+            }*/
             //All stack methods either have individual apply/unapply, or only one instance
             UnapplyStatus(instance);
             AfterStatusRemoved.Invoke(this, instance);

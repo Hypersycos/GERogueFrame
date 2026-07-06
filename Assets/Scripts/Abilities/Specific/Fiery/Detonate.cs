@@ -141,6 +141,12 @@ namespace Hypersycos.GERogueFrame
 
         public bool HasValidTarget(ITargetPayload target, CharacterState myState, out ITargetPayload hit)
         {
+            if (!myState.IsServer)
+            {
+                hit = null;
+                return true;
+            }
+
             var payload = target as AreaPayload;
 
             Collider[] colliders = payload.colliders;

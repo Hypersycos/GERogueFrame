@@ -16,6 +16,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
+    - {fileID: 21300000, guid: d295faed927aba044b0cb94a9913c909, type: 3}
     - {fileID: 732674372557605872, guid: b033b66049208f54c8c5b4d4a8a21473, type: 3}
     - {fileID: 11400000, guid: 26ccba738a326934ba11d7dfb9e99495, type: 2}
     SerializedBytesString: 
@@ -33,8 +34,8 @@ MonoBehaviour:
       Entry: 6
       Data: 
     - Name: AbilityIcon
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 0
     - Name: endlag
       Entry: 4
       Data: 1
@@ -43,7 +44,7 @@ MonoBehaviour:
       Data: 0
     - Name: IconPrefab
       Entry: 10
-      Data: 0
+      Data: 1
     - Name: Cooldown
       Entry: 4
       Data: 5
@@ -73,7 +74,7 @@ MonoBehaviour:
       Data: 0
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0
     - Name: 
       Entry: 8
       Data: 
@@ -86,7 +87,7 @@ MonoBehaviour:
         Assembly-CSharp
     - Name: obj
       Entry: 10
-      Data: 1
+      Data: 2
     - Name: mask
       Entry: 7
       Data: UnityEngine.LayerMask, UnityEngine.CoreModule

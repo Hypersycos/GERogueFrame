@@ -1,3 +1,4 @@
+using Hypersycos.SaveSystem;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -29,6 +30,7 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] float superJumpHeight = 4f;
         [SerializeField] float airSuperJumpHeight = 3f;
         [SerializeField] int maxJumps = 2;
+
         [field: SerializeField] public bool canSuperJump { get; private set; }
 
         [Header("Live Values")]
@@ -231,6 +233,7 @@ namespace Hypersycos.GERogueFrame
         {
             Vector3 inputForce = Vector3.zero;
             Vector2 moveInput = move.ReadValue<Vector2>();
+
             if (moveInput.magnitude > 1)
                 moveInput = moveInput.normalized;
 

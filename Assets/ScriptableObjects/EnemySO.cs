@@ -4,6 +4,7 @@ using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -15,6 +16,9 @@ namespace Hypersycos.GERogueFrame
         public List<IAbilityData> abilities;
         public float spawnCost;
         public int navmeshID;
+        public float damageScalingCoeff;
+        public float healthScalingCoeff;
+        public float moveSpeedCoeff;
 
         public void Apply(EnemyState state)
         {
@@ -33,8 +37,18 @@ namespace Hypersycos.GERogueFrame
             }
 
             state.ApplyDefensePool();
+            state.HitPoints.AddModifier(new BoundedStatModifier(StatModifier.StackType.Multiplicative, null,
+                                                                healthScalingCoeff * (PersistentStateManager.Singleton.difficulty - 1) + 1,
+                                                                state, BoundedStatModifier.ChangeBehaviour.Fill,
+                                                                BoundedStatModifier.ChangeBehaviour.Proportional),
+                                        AllValidStatTarget.AllValid);
+
             state.StartSyncingValues(state.Defenses.ToList<ISyncStat>());
             state.StartSyncingValues(state.Resources.ToList<ISyncStat>());
+
+            state.GetComponent<NavMeshAgent>().speed *= moveSpeedCoeff * (PersistentStateManager.Singleton.difficulty - 1) + 1;
+
+            state.BeforeDamage.AddListener((_, inst) => inst.ActualAmount *= damageScalingCoeff * (PersistentStateManager.Singleton.difficulty - 1) + 1);
 
             EnemyAbilityManager aManager = state.GetComponent<EnemyAbilityManager>();
 

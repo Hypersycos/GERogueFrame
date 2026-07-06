@@ -26,7 +26,7 @@ namespace Hypersycos.GERogueFrame
             LoadMods();
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        //[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         public static void RegisterPrefabs()
         {
             foreach (var item in SODatabase.LocalDB.Enemies)

@@ -10,10 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 40b48d31c0ae9084883b14be147f4230, type: 3}
-  m_Name: Registered Category
+  m_Name: Keyboard
   m_EditorClassIdentifier: SaveSystem::Hypersycos.SaveSystem.RegisteredCategorySO
   _IsEphemeral: 0
   RegisteredSerializers: []
-  _Values:
-  - {fileID: 0}
+  _Values: []
   _SubCategories: []

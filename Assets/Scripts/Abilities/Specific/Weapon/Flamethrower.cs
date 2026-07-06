@@ -50,6 +50,8 @@ namespace Hypersycos.GERogueFrame
         private Transform myCamera;
         private GameObject vfxInstance;
 
+        const float statusChance = 0.1f;
+
         public override bool IsDirty { get => false; protected set { } }
 
         public override bool HasOwnerSync => false;
@@ -110,8 +112,6 @@ namespace Hypersycos.GERogueFrame
                 {
                     Vector3 spawnPos = myState.projectileSource.position;
                     var inst = GameObject.Instantiate(projectile, spawnPos, myCamera.rotation);
-                    var statusInst = dot.CloneInstance() as DotStatusInstance;
-                    statusInst.Amount /= tickrate;
                     HashSet<CharacterState> preDebounce = new();
                     float offsetAmount = Vector3.Dot(spawnPos - cameraPosition, direction) + fakeRadius - .5f;
                     Vector3 offsetCameraStart = cameraPosition + direction * offsetAmount;
@@ -122,7 +122,14 @@ namespace Hypersycos.GERogueFrame
                             preDebounce.Add(state);
                         }
                     }
-                    inst.GetComponent<FlamethrowerDamage>().Setup(dps / tickrate, range, Mathf.Deg2Rad * angle, speed, statusInst, myState, falloff, preDebounce);
+                    if (UnityEngine.Random.Range(0f, 1f) < statusChance)
+                    {
+                        var statusInst = dot.CloneInstance() as DotStatusInstance;
+                        statusInst.Amount /= (tickrate * statusChance);
+                        inst.GetComponent<FlamethrowerDamage>().Setup(dps / tickrate, range, Mathf.Deg2Rad * angle, speed, statusInst, myState, falloff, preDebounce);
+                    }
+                    else
+                        inst.GetComponent<FlamethrowerDamage>().Setup(dps / tickrate, range, Mathf.Deg2Rad * angle, speed, null, myState, falloff, preDebounce);
                     timeCount += 1 / tickrate;
                 }
                 timeCount -= Time.fixedDeltaTime;

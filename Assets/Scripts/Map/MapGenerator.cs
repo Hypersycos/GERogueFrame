@@ -1,5 +1,4 @@
-using NUnit.Framework;
-using Sirenix.OdinInspector.Editor.GettingStarted;
+using Hypersycos.SaveSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,17 +7,17 @@ using Unity.AI.Navigation;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements;
 
 namespace Hypersycos.GERogueFrame
 {
     public interface IMapGenerator
     {
-        public Task Setup(int seed, int width, int height, GameObject parent, IProgress<float> progress);
+        public Task Setup(int seed, int width, int height, GameObject parent, IProgress<float> progress, float resolutionMult);
         public void GetSpawnPoint(int playerCount, out Vector3[] positions, out Quaternion[] rotations);
         public bool GetHeightMax(float x, float z, out float y);
         public bool GetHeightMin(float x, float z, out float y);
         public bool GetHeightLerp(float x, float z, out float y);
+        public Vector3 GetNormal(float x, float z);
         public float GetArea();
         public void GetObjectiveLocations(List<ObjectiveSO> objectives, out Vector3[] positions, out Quaternion[] rotations);
         public void ModifyPlayer(GameObject player) { }
@@ -56,6 +55,10 @@ namespace Hypersycos.GERogueFrame
 
     public class MapGenerator : NetworkBehaviour
     {
+        [SerializeField] BoxCollider killPlane;
+        [SerializeField] Transform sphereTransform;
+        [SerializeField] TypedRegisteredValueSO<float> resolutionMult;
+
         MapState mapState => PersistentStateManager.Singleton.mapState;
 
         float timeSinceLastUpdate;
@@ -102,7 +105,12 @@ namespace Hypersycos.GERogueFrame
                 progress.ProgressChanged += (_, x) => this.progress = x * 0.8f;
             else
                 progress.ProgressChanged += (_, x) => this.progress = x;
-            await state.so.generator.Setup(state.seed, state.width, state.height, prefab, progress);
+            await state.so.generator.Setup(state.seed, state.width, state.height, prefab, progress, resolutionMult.Value);
+
+            killPlane.size = new(state.width * 1.2f, 30f, state.height * 1.2f);
+            killPlane.center = new(0, -30f, 0);
+            sphereTransform.localScale = new(state.width - 5f, 200, state.height - 5f);
+
             if (IsServer)
             {
                 this.progress = 0.8f;

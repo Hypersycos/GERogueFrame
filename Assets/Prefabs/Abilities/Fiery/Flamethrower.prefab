@@ -69,12 +69,10 @@ MonoBehaviour:
   damageInst:
     IsDamage: 1
     Amount: 0
-    ValidStatTypes:
-      IsExclusive: 0
-      Types: []
   ticks: 0
   movePerTick: {x: 0, y: 0, z: 0}
   scalePerTick: 0
   terrainHitMask:
     serializedVersion: 2
     m_Bits: 23
+  myCollider: {fileID: 5519054728445811239}

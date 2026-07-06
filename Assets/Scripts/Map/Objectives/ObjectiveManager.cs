@@ -2,6 +2,7 @@ using Hypersycos.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -20,6 +21,7 @@ namespace Hypersycos.GERogueFrame
 
         NetworkVariable<int> _Reward = new();
         public int Reward { get => _Reward.Value; protected set => _Reward.Value = value; }
+
         [SerializeField] protected GameObject UIPrefab;
         public virtual void Initialize(float difficulty, int reward)
         {
@@ -56,9 +58,18 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] RectTransform objectiveHolder;
         [SerializeField] ProgressBar objectiveProgress;
 
+
+        public NetworkVariable<float> roundEndTime = new(0);
+        [SerializeField] TextMeshProUGUI timer;
+
         public void Awake()
         {
             Singleton = this;
+            if (roundEndTime.Value == 0)
+            {
+                enabled = false;
+                roundEndTime.OnValueChanged += (_, _) => this.enabled = true;
+            }
         }
 
         public override void OnNetworkSpawn()
@@ -69,6 +80,19 @@ namespace Hypersycos.GERogueFrame
                 requiredPoints.OnValueChanged += (_, n) => objectiveProgress.SetProgress(0, 0, n);
                 activeObjectives.OnListChanged += OnObjectiveListChange;
             }
+        }
+
+        private void Update()
+        {
+            float rem = (float)(roundEndTime.Value - NetworkManager.ServerTime.Time);
+            TimeSpan time = TimeSpan.FromSeconds(rem);
+            timer.text = time.ToString(@"mm\:ss");
+        }
+
+        private void FixedUpdate()
+        {
+            if (IsServer && roundEndTime.Value - NetworkManager.ServerTime.Time <= 0)
+                PersistentStateManager.Singleton.EndGame(GameEndReason.Time);
         }
 
         private void OnObjectiveListChange(NetworkListEvent<NetworkBehaviourReference> changeEvent)

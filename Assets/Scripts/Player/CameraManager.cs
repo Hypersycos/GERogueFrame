@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Hypersycos.SaveSystem;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using static UnityEngine.GraphicsBuffer;
 
 namespace Hypersycos.GERogueFrame
@@ -18,6 +20,7 @@ namespace Hypersycos.GERogueFrame
 
         [SerializeField] float cameraDistance = 3;
         [SerializeField] Vector3 cameraOffset = new(1, 0.5f, 0);
+        private InputAction lookAction;
         Vector3 offsetWithDist;
 
         float yaw = 0;
@@ -25,9 +28,29 @@ namespace Hypersycos.GERogueFrame
         Vector3 lastPos = new();
         Vector3 targetPos = new();
 
+        [SerializeField] TypedRegisteredValueSO<float> kbmSens;
+        [SerializeField] TypedRegisteredValueSO<float> controllerXSens;
+        [SerializeField] TypedRegisteredValueSO<float> controllerYSens;
         ControlsWrapper controlWrapper;
 
         bool inMenu = false;
+
+        private InputDevice lastLookDevice;
+
+        void OnEnable()
+        {
+            lookAction.performed += OnLook;
+        }
+
+        void OnDisable()
+        {
+            lookAction.performed -= OnLook;
+        }
+
+        void OnLook(InputAction.CallbackContext ctx)
+        {
+            lastLookDevice = ctx.control.device;
+        }
 
         private void Awake()
         {
@@ -36,6 +59,8 @@ namespace Hypersycos.GERogueFrame
             controlWrapper = ControlsWrapper.Singleton;
             controlWrapper.MenuOpened += disableCam;
             controlWrapper.MenuClosed += enableCam;
+
+            lookAction = controlWrapper.controls.Player.Look;
         }
 
         void disableCam() => inMenu = true;
@@ -89,7 +114,13 @@ namespace Hypersycos.GERogueFrame
         {
             if (!inMenu)
             {
-                Vector2 lookValue = controlWrapper.controls.Player.Look.ReadValue<Vector2>();
+                Vector2 lookValue = lookAction.ReadValue<Vector2>();
+
+                if (lastLookDevice is Gamepad)
+                    lookValue = new Vector2(lookValue.x * controllerXSens.Value, lookValue.y * controllerYSens.Value);
+                else
+                    lookValue *= kbmSens.Value;
+
                 yaw += lookValue.x;
                 pitch += lookValue.y;
 

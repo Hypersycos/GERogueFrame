@@ -1,4 +1,6 @@
 using Hypersycos.Utils;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
@@ -12,8 +14,10 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] PersistentStateManager stateManager;
         [SerializeField] PlayerLoadScript playerLoadPrefab;
         [SerializeField] RawImage mapBackground;
+        [SerializeField] Image fadeTransition;
         [SerializeField] TextMeshProUGUI mapName;
         [SerializeField] RectTransform playerLoadHolder;
+        [SerializeField] CanvasGroup group;
 
         MapGenerator mapGen;
 
@@ -30,6 +34,22 @@ namespace Hypersycos.GERogueFrame
                 var playerImg = Instantiate(playerLoadPrefab, playerLoadHolder);
                 playerImg.Setup(player.Key.ToString(), stateManager.SODB.PlayerCharacters[player.Value.characterID]);
                 loadScripts.Add(player.Key, playerImg);
+            }
+
+            if (PersistentStateManager.Singleton.rounds > 1)
+            {
+                IEnumerator inner()
+                {
+                    float start = Time.time;
+                    float end = start + 2;
+                    while (Time.time < end)
+                    {
+                        group.alpha = Mathf.Lerp(1, 0, (end - Time.time)/2);
+                        yield return new WaitForEndOfFrame();
+                    }
+                }
+
+                StartCoroutine(inner());
             }
         }
 
@@ -59,8 +79,42 @@ namespace Hypersycos.GERogueFrame
 
         public void Hide()
         {
-            gameObject.SetActive(false);
-            enabled = false;
+            IEnumerator inner()
+            {
+                float start = Time.time;
+                float end = start + 1;
+                while (Time.time < end)
+                {
+                    group.alpha = Mathf.Lerp(0, 1, end - Time.time);
+                    yield return new WaitForEndOfFrame();
+                }
+                gameObject.SetActive(false);
+                enabled = false;
+            }
+            StartCoroutine(inner());
+        }
+
+        internal void BackToLobby()
+        {
+            IEnumerator inner()
+            {
+                float start = Time.time;
+                float end = start + 2;
+                while (Time.time < end)
+                {
+                    group.alpha = Mathf.Lerp(1, 0, end - Time.time);
+                    yield return new WaitForEndOfFrame();
+                }
+            }
+
+            mapName.text = "Lobby";
+            mapBackground.texture = null;
+
+            playerLoadHolder.DestroyAllChildren();
+            loadScripts.Clear();
+
+            gameObject.SetActive(true);
+            StartCoroutine(inner());
         }
     }
 }

@@ -92,7 +92,7 @@ namespace Hypersycos.GERogueFrame
 
         private bool NoTargets(CharacterState state)
         {
-            return currentTarget == null || !currentTarget.HitPoints.IsActive || !AcquireTarget(state);
+            return (currentTarget == null || !currentTarget.HitPoints.IsActive) && !AcquireTarget(state);
         }
 
         Vector3 source => attackSource.position + attackSource.rotation * attackOffset;

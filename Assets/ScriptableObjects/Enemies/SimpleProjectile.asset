@@ -66,3 +66,6 @@ MonoBehaviour:
   resources: []
   spawnCost: 2
   navmeshID: 0
+  damageScalingCoeff: 0.4
+  healthScalingCoeff: 0.1
+  moveSpeedCoeff: 0

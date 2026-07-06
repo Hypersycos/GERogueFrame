@@ -96,8 +96,7 @@ namespace Hypersycos.GERogueFrame
 
         public override void FixedUpdate(CharacterState myState)
         {
-            if (myState.IsServer)
-                _currentCooldown = Mathf.Max(0, _currentCooldown - Time.fixedDeltaTime);
+            _currentCooldown = Mathf.Max(0, _currentCooldown - Time.fixedDeltaTime);
         }
 
         public override AbilityPayload Sync()

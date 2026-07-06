@@ -13,7 +13,12 @@ MonoBehaviour:
   m_Name: Settings
   m_EditorClassIdentifier: SaveSystem::Hypersycos.SaveSystem.RegisteredFileSO
   _IsEphemeral: 0
-  RegisteredSerializers: []
+  RegisteredSerializers:
+  - {fileID: 11400000, guid: 46fd723febf8cff4ea43aef83b3f9f40, type: 2}
+  - {fileID: 11400000, guid: e37cb0ee49803ca49a8f332e3e7f4dfe, type: 2}
+  - {fileID: 11400000, guid: 7fb19e0fdda0c5d4eb470a458144d8c4, type: 2}
   Path: Settings
-  _Categories: []
+  _Categories:
+  - {fileID: 11400000, guid: 4fdc53eeb3c452c4f990c5055f1c69c3, type: 2}
+  - {fileID: 11400000, guid: a29186c4582b1604297565f6bb8b0429, type: 2}
   AllowUnregisteredValues: 0

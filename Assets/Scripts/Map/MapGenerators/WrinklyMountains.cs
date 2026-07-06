@@ -71,10 +71,10 @@ namespace Hypersycos.GERogueFrame
             return result;
         }
 
-        public async Task Setup(int seed, int width, int height, GameObject parent, IProgress<float> progress)
+        public async Task Setup(int seed, int width, int height, GameObject parent, IProgress<float> progress, float resolutionMult)
         {
-            resolution = resolutionScalar;
-            perlinScale = _perlinScale / (generationScalar * resolutionScalar);
+            resolution = resolutionScalar * resolutionMult;
+            perlinScale = _perlinScale / (generationScalar * resolutionScalar * resolutionMult);
             heightScale = heightScalar * 80;
 
             octaveOffsets = new Vector2[octaves];
@@ -178,7 +178,7 @@ namespace Hypersycos.GERogueFrame
                     GetHeightLerp(x, z, out float y);
 
                     positions[i * rows + j] = new(x, y, z);
-                    rotations[i * rows + j] = Quaternion.AngleAxis(UnityEngine.Random.Range(0, 360), Vector3.up);
+                    rotations[i * rows + j] = Quaternion.FromToRotation(Vector3.up, GetNormal(x, z)) * Quaternion.AngleAxis(UnityEngine.Random.Range(0, 360), Vector3.up);
                 }
             }
         }
@@ -223,6 +223,36 @@ namespace Hypersycos.GERogueFrame
                 + height(ix, iz + 1) * t1 * (1 - t2) + height(ix + 1, iz + 1) * (1 - t1) * (1 - t2);
             y *= heightScale;
             return true;
+        }
+
+        public Vector3 GetNormal(float x, float z)
+        {
+            float t1 = xToHeightmapX(x);
+            float t2 = zToHeightmapZ(z);
+
+            int ix = Mathf.FloorToInt(t1);
+            int iz = Mathf.FloorToInt(t2);
+
+            Func<int, int, float> height = (X, Y) => heightMapData.Item1[X + Y * heightMapData.Item2] * heightScale;
+
+            t1 -= ix;
+            t2 -= iz;
+
+            float h00 = height(ix, iz);
+            float h01 = height(ix, iz + 1);
+            float h10 = height(ix + 1, iz);
+            float h11 = height(ix + 1, iz + 1);
+
+            float hLeft = Mathf.Lerp(h00, h01, t2);
+            float hRight = Mathf.Lerp(h10, h11, t2);
+
+            float hTop = Mathf.Lerp(h00, h10, t1);
+            float hBottom = Mathf.Lerp(h01, h11, t1);
+
+            float dx = hRight - hLeft;
+            float dz = hBottom - hTop;
+
+            return new Vector3(-dx, 1f / resolution, -dz).normalized;
         }
     }
 }

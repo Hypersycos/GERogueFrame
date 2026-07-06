@@ -25,6 +25,6 @@ namespace Hypersycos.GERogueFrame
         {
             owner = projScript.owner;
             Cast();
-        }    
+        }
     }
 }

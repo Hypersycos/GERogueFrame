@@ -18,7 +18,7 @@ namespace Hypersycos.GERogueFrame
         float dotFalloffPerTick;
         public LayerMask terrainHitMask;
         Vector3 origin;
-        SphereCollider myCollider;
+        [SerializeField] SphereCollider myCollider;
 
         private void Apply(Collider other)
         {
@@ -61,7 +61,8 @@ namespace Hypersycos.GERogueFrame
             myCollider.radius += scalePerTick;
             transform.position += movePerTick;
             damageInst.Amount += falloffPerTick;
-            dot.Amount += dotFalloffPerTick;
+            if (dot != null)
+                dot.Amount += dotFalloffPerTick;
         }
 
         public void Setup(float damage, float range, float angle, float speed, DotStatusInstance dot, CharacterState owner, float falloff, HashSet<CharacterState> preDebounce)
@@ -73,9 +74,8 @@ namespace Hypersycos.GERogueFrame
             scalePerTick = Mathf.Sin(angle) * distPerTick / 2;
             this.dot = dot;
 
-            dotFalloffPerTick = this.dot.Amount * (falloff - 1) / ticks;
+            dotFalloffPerTick = this.dot?.Amount * (falloff - 1) / ticks ?? 0;
 
-            myCollider = GetComponent<SphereCollider>();
             origin = transform.position;
 
             damageInst = new DamageInstance(true, damage, owner, StatTypeTarget.AllValid);

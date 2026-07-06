@@ -23,18 +23,19 @@ namespace Hypersycos.GERogueFrame
             controls.Player.OpenMenu.performed += OpenMenu;
         }
 
-        [RuntimeInitializeOnLoadMethod]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void CreatePlayer1()
         {
             Singleton = new ControlsWrapper();
 #if UNITY_EDITOR
             Application.quitting += () => Singleton = null;
 #endif
+            Singleton.controls.LoadBindingOverridesFromJson(SaveSystem.SaveSystem.Get<string>("Overrides"));
         }
 
         public void OpenMenu(InputAction.CallbackContext context)
         {
-            if (PersistentStateManager.Singleton != null && PersistentStateManager.Singleton.gameState == GameState.Playing)
+            if (PersistentStateManager.Singleton != null)
             {
                 Cursor.lockState = CursorLockMode.None;
                 controls.Player.Disable();
@@ -52,6 +53,16 @@ namespace Hypersycos.GERogueFrame
                 controls.Menu.Disable();
                 MenuClosed?.Invoke();
             }
+        }
+
+        public void ApplyOverrides(string overrides)
+        {
+            controls.LoadBindingOverridesFromJson(overrides);
+        }
+
+        public string SerializeOverrides()
+        {
+            return controls.SaveBindingOverridesAsJson();
         }
     }
 }

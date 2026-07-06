@@ -16,6 +16,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
+    - {fileID: 21300000, guid: d972d1b16bf61a74eb1055c2a3a1a14e, type: 3}
     - {fileID: 732674372557605872, guid: b033b66049208f54c8c5b4d4a8a21473, type: 3}
     - {fileID: 2325073028489156595, guid: a1ff330a5ebdb314599b2cb28d2603c4, type: 3}
     SerializedBytesString: 
@@ -34,8 +35,8 @@ MonoBehaviour:
       Data: Creates a fire hazard which shares {{S|Heat}} procs between enemies,
         or teleports to the target patch
     - Name: AbilityIcon
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 0
     - Name: endlag
       Entry: 4
       Data: 1
@@ -44,7 +45,7 @@ MonoBehaviour:
       Data: 0
     - Name: IconPrefab
       Entry: 10
-      Data: 0
+      Data: 1
     - Name: Cooldown
       Entry: 4
       Data: 6
@@ -259,7 +260,7 @@ MonoBehaviour:
         Assembly-CSharp
     - Name: obj
       Entry: 10
-      Data: 1
+      Data: 2
     - Name: 
       Entry: 8
       Data: 

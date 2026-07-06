@@ -217,8 +217,7 @@ namespace Hypersycos.GERogueFrame
 
         public override void Teleport(Vector3 NewPosition)
         {
-            base.Teleport(NewPosition);
-            Physics.SyncTransforms();
+            GetComponent<PlayerMovementController>().Teleport(NewPosition, false);
         }
     }
 }

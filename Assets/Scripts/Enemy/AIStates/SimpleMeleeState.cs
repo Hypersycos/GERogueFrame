@@ -101,7 +101,7 @@ namespace Hypersycos.GERogueFrame
 
         private bool NoTargets(CharacterState state)
         {
-            return currentTarget == null || !currentTarget.HitPoints.IsActive || !AcquireTarget(state);
+            return (currentTarget == null || !currentTarget.HitPoints.IsActive) && !AcquireTarget(state);
         }
 
         private void Attack(CharacterState state, float dt)

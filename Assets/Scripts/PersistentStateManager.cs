@@ -38,6 +38,13 @@ namespace Hypersycos.GERogueFrame
         }
     }
 
+    public enum GameEndReason
+    {
+        Time,
+        Death,
+        Quit
+    }
+
     public class PersistentStateManager : NetworkBehaviour
     {
         [SerializeField] LoadingScreenManager loadingScreen;
@@ -86,7 +93,23 @@ namespace Hypersycos.GERogueFrame
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Awake()
         {
+            ControlsWrapper.Singleton.OpenMenu(default);
+            if (Singleton != null)
+            {
+                Singleton.FadeOut();
+            }
             Singleton = this;
+        }
+
+        private void FadeOut()
+        {
+            loadingScreen.Hide();
+            Invoke(nameof(DestroyThis), 1f);
+        }
+
+        void DestroyThis()
+        {
+            GameObject.Destroy(gameObject);
         }
 
         protected override void OnNetworkPreSpawn(ref NetworkManager networkManager)
@@ -125,7 +148,7 @@ namespace Hypersycos.GERogueFrame
 
         void SceneChangeStarted(ulong clientId, string sceneName, LoadSceneMode loadSceneMode, AsyncOperation asyncOperation)
         {
-            if (clientId == NetworkManager.LocalClientId && sceneName == "GameScene")
+            if (clientId == NetworkManager.LocalClientId && sceneName == "GameScene" && rounds == 1)
                 loadingScreen.ShowMapLoad();
         }
 
@@ -148,6 +171,7 @@ namespace Hypersycos.GERogueFrame
             rounds = 1;
             difficulty = Mathf.Pow(1.2f, playerCharacterMap.Count - 1);
 
+            RandomiseMap();
             StartPreRound();
         }
 
@@ -156,20 +180,71 @@ namespace Hypersycos.GERogueFrame
             if (gameState != GameState.Playing)
                 return;
             _gameState.Value = GameState.LoadingGame;
+
+            GameObject.FindWithTag("Managers").GetComponent<EnemySpawnManager>().enabled = false;
+            GameObject.FindWithTag("Managers").GetComponent<ObjectiveManager>().enabled = false;
+
             rounds += 1;
             difficulty *= 1.2f;
 
-            StartPreRound();
+            foreach (var client in NetworkManager.ConnectedClientsList)
+            {
+                if (client.PlayerObject.GetComponent<PlayerState>().HitPoints.IsActive)
+                {
+                    client.PlayerObject.GetComponent<PlayerState>().BeforeDamaged.AddListener((x, i) => i.ActualAmount = 0);
+                }
+            }
+
+            RandomiseMap();
+            Invoke(nameof(StartPreRound), 2);
         }
 
-        public void StartPreRound()
+
+        public void PlayerDied(CharacterState player, DamageInstance _)
+        {
+            bool alive = false;
+            foreach(var client in NetworkManager.ConnectedClientsList)
+            {
+                if (client.PlayerObject.GetComponent<PlayerState>().HitPoints.IsActive)
+                {
+                    alive = true;
+                    break;
+                }
+            }
+
+            if (!alive)
+                EndGame(GameEndReason.Death);
+        }
+
+        public void EndGame(GameEndReason reason)
+        {
+            BackToLobbyRpc();
+
+            Invoke(nameof(BackToLobby), 2f);
+        }
+
+        private void BackToLobby()
+        {
+            _gameState.Value = GameState.Lobby;
+            NetworkManager.SceneManager.LoadScene("LobbyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        }
+
+        public void BackToLobbyRpc()
+        {
+            loadingScreen.BackToLobby();
+        }
+
+        void RandomiseMap()
         {
             MapState newMap = new() { width = 1000, height = 1000, seed = UnityEngine.Random.Range(0, 10000) };
             newMap.so = SODB.Maps.TakeRandom();
             mapState = newMap;
             isLatestMap = true;
             SyncMapRpc(newMap);
+        }
 
+        public void StartPreRound()
+        {
             AllPlayersLoaded.AddListener(StartRound);
             NetworkManager.SceneManager.OnLoadEventCompleted += OnGameSceneLoaded;
             NetworkManager.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
@@ -181,6 +256,8 @@ namespace Hypersycos.GERogueFrame
             mapState = newMap;
             loadingScreen.UpdateMapLoad();
             isLatestMap = true;
+            if (rounds > 1)
+                loadingScreen.ShowMapLoad();
             MapUpdated?.Invoke();
         }
 
@@ -207,6 +284,7 @@ namespace Hypersycos.GERogueFrame
             AllPlayersLoaded.RemoveListener(StartRound);
             SpawnPlayers();
             GameObject.FindWithTag("Managers").GetComponent<EnemySpawnManager>().enabled = true;
+            GameObject.FindWithTag("Managers").GetComponent<ObjectiveManager>().roundEndTime.Value = (float)(NetworkManager.ServerTime.Time + 250f - 10 * rounds);
         }
 
         private void SpawnPlayers()
@@ -229,6 +307,7 @@ namespace Hypersycos.GERogueFrame
             {
                 var copy = playerCharacterMap[spawn.Key];
                 copy.playerObj = spawn.Value;
+                spawn.Value.GetComponent<PlayerState>().OnKilled.AddListener(PlayerDied);
                 playerCharacterMap[spawn.Key] = copy;
             }
 
