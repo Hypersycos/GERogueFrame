@@ -39,10 +39,13 @@ namespace Hypersycos.GERogueFrame
         public UnityEvent<Objective> OnCancelled;
         public UnityEvent<Objective> OnCompleted;
         public UnityEvent<Objective, float> OnProgressUpdate;
+        public UnityEvent OnCompletedClient;
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
             ObjectiveManager.Singleton.spawnedObjectives.Add(this);
+            if (IsClient)
+                _Completed.OnValueChanged += (_, v) => { if (v == true) OnCompletedClient?.Invoke(); };
         }
     }
 
@@ -57,7 +60,8 @@ namespace Hypersycos.GERogueFrame
 
         [SerializeField] RectTransform objectiveHolder;
         [SerializeField] ProgressBar objectiveProgress;
-
+        [SerializeField] AudioClip objectiveComplete;
+        [SerializeField] AudioClip allObjectivesComplete;
 
         public NetworkVariable<float> roundEndTime = new(0);
         [SerializeField] TextMeshProUGUI timer;
@@ -108,6 +112,10 @@ namespace Hypersycos.GERogueFrame
                     case NetworkListEvent<NetworkBehaviourReference>.EventType.Remove:
                     case NetworkListEvent<NetworkBehaviourReference>.EventType.RemoveAt:
                         obj.DestroyUI();
+                        if (obj.Completed && currentPoints.Value < requiredPoints.Value)
+                            PersistentAudioManager.PlayInteract(objectiveComplete);
+                        else
+                            PersistentAudioManager.PlayInteract(allObjectivesComplete);
                         break;
                     case NetworkListEvent<NetworkBehaviourReference>.EventType.Value:
                         break;
@@ -204,8 +212,8 @@ namespace Hypersycos.GERogueFrame
 
         private void OnObjectiveCompleted(Objective obj)
         {
-            activeObjectives.Remove(obj);
             currentPoints.Value += obj.Reward;
+            activeObjectives.Remove(obj);
             if (currentPoints.Value >= requiredPoints.Value)
                 PersistentStateManager.Singleton.NextRound();
         }

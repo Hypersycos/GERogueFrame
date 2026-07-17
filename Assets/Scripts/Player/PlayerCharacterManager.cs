@@ -17,6 +17,7 @@ namespace Hypersycos.GERogueFrame
         public CharacterController controller;
         public Collider nonOwnerCollider;
         public Transform bar;
+        [SerializeField] AudioClip killSound;
 
         private void Reset()
         {
@@ -42,6 +43,7 @@ namespace Hypersycos.GERogueFrame
                 controller.enabled = true;
                 gameObject.GetComponent<PlayerMovementController>().enabled = true;
                 gameObject.AddComponent<PlayerAnimatorScript>();
+                GetComponent<PlayerState>().OnKill.AddListener((_,_) => PersistentAudioManager.PlayInteract(killSound, .1f));
                 Destroy(bar.gameObject);
 
                 GameObject.FindWithTag("MainCamera").GetComponent<CameraManager>().SetMyCamera(GetComponent<PlayerState>());

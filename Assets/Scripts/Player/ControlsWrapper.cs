@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -18,9 +19,10 @@ namespace Hypersycos.GERogueFrame
         public ControlsWrapper()
         {
             controls = new();
-            controls.Menu.Enable();
-            controls.Menu.CloseMenu.performed += CloseMenu;
+            controls.MenuScreen.Enable();
+            controls.PauseMenu.CloseMenu.performed += CloseMenu;
             controls.Player.OpenMenu.performed += OpenMenu;
+            controls.MenuScreen.OpenMenu.performed += OpenMenu;
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -33,26 +35,45 @@ namespace Hypersycos.GERogueFrame
             Singleton.controls.LoadBindingOverridesFromJson(SaveSystem.SaveSystem.Get<string>("Overrides"));
         }
 
-        public void OpenMenu(InputAction.CallbackContext context)
+        public void SetUIState(bool state)
         {
-            if (PersistentStateManager.Singleton != null)
+            if (state)
             {
                 Cursor.lockState = CursorLockMode.None;
                 controls.Player.Disable();
-                controls.Menu.Enable();
-                MenuOpened?.Invoke();
+                if (PersistentStateManager.Singleton == null || PersistentStateManager.Singleton.gameState == GameState.Lobby)
+                {
+                    controls.MenuScreen.Enable();
+                    controls.PauseMenu.Disable();
+                }
+                else
+                {
+                    controls.MenuScreen.Disable();
+                    controls.PauseMenu.Enable();
+                }
             }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                controls.Player.Enable();
+                controls.PauseMenu.Disable();
+                controls.MenuScreen.Disable();
+            }
+        }
+
+        public void OpenMenu(InputAction.CallbackContext context)
+        {
+            SetUIState(true);
+            MenuOpened?.Invoke();
         }
 
         public void CloseMenu(InputAction.CallbackContext context)
         {
             if (PersistentStateManager.Singleton != null && PersistentStateManager.Singleton.gameState == GameState.Playing)
             {
-                Cursor.lockState = CursorLockMode.Locked;
-                controls.Player.Enable();
-                controls.Menu.Disable();
-                MenuClosed?.Invoke();
+                SetUIState(false);
             }
+            MenuClosed?.Invoke();
         }
 
         public void ApplyOverrides(string overrides)

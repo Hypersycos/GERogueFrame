@@ -8,6 +8,9 @@ namespace Hypersycos.GERogueFrame
     public class EscMenuScript : MonoBehaviour
     {
         [SerializeField] TypedRegisteredValueSO<string> overrides;
+        [SerializeField] GameObject settings;
+        [SerializeField] GameObject gameMenu;
+        [SerializeField] GameObject quitToLobby;
 
         static EscMenuScript singleton;
 
@@ -18,8 +21,8 @@ namespace Hypersycos.GERogueFrame
                 Destroy(gameObject);
                 return;
             }
-            ControlsWrapper.Singleton.MenuOpened += () => gameObject.SetActive(true);
-            ControlsWrapper.Singleton.MenuClosed += () => gameObject.SetActive(false);
+            ControlsWrapper.Singleton.MenuOpened += MenuOpened;
+            ControlsWrapper.Singleton.MenuClosed += MenuClosed;
             singleton = this;
             gameObject.SetActive(false);
             if (transform.parent.GetChild(1).gameObject.activeSelf)
@@ -29,11 +32,36 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
+        public void MenuOpened()
+        {
+            gameObject.SetActive(true);
+            if (PersistentStateManager.Singleton != null)
+            {
+                if (PersistentStateManager.Singleton.gameState == GameState.Lobby || !PersistentStateManager.Singleton.IsServer)
+                    quitToLobby.SetActive(false);
+                else
+                    quitToLobby.SetActive(true);
+                gameMenu.SetActive(true);
+                settings.SetActive(false);
+            }
+            else
+            {
+                gameMenu.SetActive(false);
+                settings.SetActive(true);
+            }
+        }
+
+        public void MenuClosed()
+        {
+            gameObject.SetActive(false);
+        }
+
         public void QuitToLobby()
         {
             if (PersistentStateManager.Singleton != null && PersistentStateManager.Singleton.gameState == GameState.Playing && PersistentStateManager.Singleton.IsServer)
             {
                 PersistentStateManager.Singleton.EndGame(GameEndReason.Quit);
+                ControlsWrapper.Singleton.CloseMenu(default);
             }
         }
 

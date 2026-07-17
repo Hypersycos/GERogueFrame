@@ -31,8 +31,9 @@ MonoBehaviour:
       Entry: 1
       Data: Flamethrower
     - Name: AbilityDescription
-      Entry: 6
-      Data: 
+      Entry: 1
+      Data: Deals 15dps within 10m in a 30 degree cone. Applies 30dps over 3s as
+        a {{S|Heat}} status effect. Damage falls off to 30% at maximum range.
     - Name: AbilityIcon
       Entry: 6
       Data: 
@@ -42,6 +43,9 @@ MonoBehaviour:
     - Name: queueFor
       Entry: 4
       Data: 0
+    - Name: IconPrefab
+      Entry: 6
+      Data: 
     - Name: dps
       Entry: 4
       Data: 15

@@ -43,6 +43,8 @@ namespace Hypersycos.GERogueFrame
         public abstract Vector3 CentrePos { get; }
         public Transform projectileSource;
 
+        public AudioSource audioSource;
+
         public void StartSyncingValues(List<ISyncStat> stats)
         {
             for (int i = 0; i < stats.Count; i++)

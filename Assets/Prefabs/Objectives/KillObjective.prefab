@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 873723015
+  GlobalObjectIdHash: 1063391686
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -84,6 +84,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnProgressUpdate:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCompletedClient:
     m_PersistentCalls:
       m_Calls: []
 --- !u!135 &6888823962007637775

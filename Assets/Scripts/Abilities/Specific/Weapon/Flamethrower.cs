@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
@@ -73,7 +75,7 @@ namespace Hypersycos.GERogueFrame
             this.fakeMask = fakeMask;
         }
 
-        void DoParticles()
+        void StartFX(bool isOwner)
         {
             vfxInstance = GameObject.Instantiate(vfx, myState.projectileSource);
             var particles = vfxInstance.GetComponent<ParticleSystem>();
@@ -90,6 +92,18 @@ namespace Hypersycos.GERogueFrame
             var sShape = sparks.shape;
             sShape.angle = angle;
             particles.Play();
+
+            AudioSource source = vfxInstance.GetComponent<AudioSource>();
+            source.volume = 1;
+            source.Play();
+            if (!isOwner)
+                source.outputAudioMixerGroup = source.outputAudioMixerGroup.audioMixer.FindMatchingGroups("AllySFX").First();
+        }
+
+        void EndFX()
+        {
+            vfxInstance.GetComponent<ParticleSystem>().Stop();
+            vfxInstance.GetComponent<AudioSource>().Stop();
         }
 
         void UpdateParticles()
@@ -145,7 +159,7 @@ namespace Hypersycos.GERogueFrame
             myCamera = myState.transform.Find("CameraPos");
             myState.GetComponent<PlayerMovementController>().lockedToCamera = true;
 
-            DoParticles();
+            StartFX(true);
             chosenEffect = 0;
             verifyData = null;
             abilityPayload = null;
@@ -173,13 +187,13 @@ namespace Hypersycos.GERogueFrame
                 myCamera = myState.transform.Find("CameraPos");
                 this.myState = myState;
 
-                DoParticles();
+                StartFX(false);
             }
         }
 
         public override bool OwnerCastEnd(Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState, out AbilityPayload verifyData, out AbilityPayload abilityPayload)
         {
-            vfxInstance.GetComponent<ParticleSystem>().Stop();
+            EndFX();
             myState.GetComponent<PlayerMovementController>().lockedToCamera = false;
             verifyData = null;
             abilityPayload = null;
@@ -195,7 +209,7 @@ namespace Hypersycos.GERogueFrame
         public override void ClientCastEnd(AbilityPayload payload, CharacterState myState)
         {
             if (!myState.IsOwner)
-                vfxInstance.GetComponent<ParticleSystem>().Stop();
+                EndFX();
         }
 
         public override void Update(CharacterState myState) { }

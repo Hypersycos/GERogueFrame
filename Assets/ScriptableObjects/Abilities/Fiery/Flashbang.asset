@@ -29,10 +29,10 @@ MonoBehaviour:
       Data: 0|Hypersycos.GERogueFrame.StandardAbilityData, Assembly-CSharp
     - Name: AbilityName
       Entry: 1
-      Data: Flashbang
+      Data: Airburst
     - Name: AbilityDescription
-      Entry: 6
-      Data: 
+      Entry: 1
+      Data: Applies a 30 damage {{S|Heat}} status effect over 6 seconds
     - Name: AbilityIcon
       Entry: 10
       Data: 0

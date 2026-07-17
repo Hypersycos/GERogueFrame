@@ -89,7 +89,7 @@ namespace Hypersycos.GERogueFrame
 
         private void SettingsClicked()
         {
-
+            ControlsWrapper.Singleton.OpenMenu(default);
         }
 
         private void BackClicked()

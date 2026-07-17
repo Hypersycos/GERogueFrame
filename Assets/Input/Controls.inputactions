@@ -3,7 +3,7 @@
     "name": "Controls",
     "maps": [
         {
-            "name": "Menu",
+            "name": "PauseMenu",
             "id": "75e461fc-b752-40a3-8849-55bafefc1d31",
             "actions": [
                 {
@@ -173,7 +173,7 @@
                     "name": "Open Menu",
                     "type": "Button",
                     "id": "94329034-3291-46b0-9a26-68f6f566dc4b",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -541,6 +541,34 @@
                     "processors": "",
                     "groups": "",
                     "action": "Use Ability",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "MenuScreen",
+            "id": "e6c8c243-f081-4b47-b5e2-0ab5ef45ad97",
+            "actions": [
+                {
+                    "name": "Open Menu",
+                    "type": "Button",
+                    "id": "0eb34aa7-b001-41a1-a399-4a7d74132cca",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "e81c4ff7-a6a4-43ea-8ff5-725d1f01d965",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Open Menu",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

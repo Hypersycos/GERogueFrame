@@ -5467,6 +5467,7 @@ GameObject:
   m_Component:
   - component: {fileID: 591597653}
   - component: {fileID: 591597654}
+  - component: {fileID: 591597655}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -5537,6 +5538,20 @@ MonoBehaviour:
   m_Spacing: {x: 5, y: 15}
   m_Constraint: 1
   m_ConstraintCount: 2
+--- !u!114 &591597655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 591597652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &610825896
 GameObject:
   m_ObjectHideFlags: 0
@@ -11925,6 +11940,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1295356670}
   - component: {fileID: 1295356671}
+  - component: {fileID: 1295356672}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -11977,6 +11993,20 @@ MonoBehaviour:
   m_Spacing: {x: 5, y: 15}
   m_Constraint: 1
   m_ConstraintCount: 2
+--- !u!114 &1295356672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1295356669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 0
+  m_VerticalFit: 0
 --- !u!1 &1337738640
 GameObject:
   m_ObjectHideFlags: 0
@@ -14662,6 +14692,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   overrides: {fileID: 11400000, guid: a047eda54a121c44ba8196f4caafe8b0, type: 2}
+  settings: {fileID: 1057548305}
+  gameMenu: {fileID: 1778942777}
+  quitToLobby: {fileID: 2128328190}
 --- !u!1 &1826472027
 GameObject:
   m_ObjectHideFlags: 0
@@ -17629,6 +17662,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2092248966}
   - component: {fileID: 2092248967}
+  - component: {fileID: 2092248968}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -17705,6 +17739,20 @@ MonoBehaviour:
   m_Spacing: {x: 5, y: 15}
   m_Constraint: 1
   m_ConstraintCount: 2
+--- !u!114 &2092248968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2092248965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &2128328190
 GameObject:
   m_ObjectHideFlags: 0

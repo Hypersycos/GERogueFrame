@@ -27,6 +27,7 @@ namespace Hypersycos.GERogueFrame
             {
                 _currentHealth.OnValueChanged += (_, n) => OnProgressUpdate?.Invoke(this, n / required);
             }
+            OnCompletedClient.AddListener(() => transform.GetChild(1).gameObject.SetActive(false));
         }
 
         public override void Initialize(float difficulty, int reward)
@@ -131,8 +132,11 @@ namespace Hypersycos.GERogueFrame
 
         public override void DestroyUI()
         {
-            Destroy(currentUI.transform.parent.gameObject);
-            OnProgressUpdate.RemoveListener(UpdateUI);
+            if (currentUI != null)
+            {
+                Destroy(currentUI.transform.parent.gameObject);
+                OnProgressUpdate.RemoveListener(UpdateUI);
+            }
         }
 
         public override void StartObjective()

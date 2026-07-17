@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
@@ -25,6 +26,24 @@ namespace Hypersycos.GERogueFrame
             {
                 _currentCredits.OnValueChanged += (_, n) => OnProgressUpdate?.Invoke(this, n / requiredCredits);
             }
+            OnCompletedClient.AddListener(MoveDown);
+        }
+
+        public void MoveDown()
+        {
+            IEnumerator MoveDownCoroutine()
+            {
+                float startTime = Time.time;
+                float duration = 2;
+                Vector3 startPos = transform.GetChild(0).transform.localPosition;
+                while (Time.time < startTime + duration)
+                {
+                    transform.GetChild(0).transform.localPosition = startPos - new Vector3(0, Mathf.SmoothStep(0, 10, (Time.time - startTime) / duration), 0);
+                    yield return null;
+                }
+            }
+
+            StartCoroutine(MoveDownCoroutine());
         }
 
         public override void Initialize(float difficulty, int reward)
@@ -95,8 +114,11 @@ namespace Hypersycos.GERogueFrame
 
         public override void DestroyUI()
         {
-            Destroy(currentUI.transform.parent.gameObject);
-            OnProgressUpdate.RemoveListener(UpdateUI);
+            if (currentUI != null)
+            {
+                Destroy(currentUI.transform.parent.gameObject);
+                OnProgressUpdate.RemoveListener(UpdateUI);
+            }
         }
 
         public override void StartObjective()

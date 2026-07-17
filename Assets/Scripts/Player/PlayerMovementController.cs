@@ -63,7 +63,7 @@ namespace Hypersycos.GERogueFrame
             get
             {
                 Ray ray = new Ray(transform.position + Vector3.up * 0.25f, Vector3.down);
-                if (Physics.Raycast(ray, 0.35f, 0xFFFF ^ (1 << 6 | 1 << 7)))
+                if (Physics.Raycast(ray, 0.35f, 0xFFFF ^ (1 << 6 | 1 << 7), QueryTriggerInteraction.Ignore))
                     return true;
                 else
                     return characterController.isGrounded;

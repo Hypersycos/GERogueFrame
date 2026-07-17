@@ -93,7 +93,7 @@ namespace Hypersycos.GERogueFrame
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Awake()
         {
-            ControlsWrapper.Singleton.OpenMenu(default);
+            ControlsWrapper.Singleton.SetUIState(true);
             if (Singleton != null)
             {
                 Singleton.FadeOut();
@@ -138,6 +138,10 @@ namespace Hypersycos.GERogueFrame
         {
             if (previousValue == GameState.LoadingGame && newValue != GameState.LoadingGame)
                 loadingScreen.Hide();
+            if (newValue == GameState.Playing)
+                ControlsWrapper.Singleton.SetUIState(false);
+            else
+                ControlsWrapper.Singleton.SetUIState(true);
         }
 
         public override void OnNetworkDespawn()
@@ -269,6 +273,7 @@ namespace Hypersycos.GERogueFrame
             UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
             Destroy(NetworkManager.Singleton.gameObject);
             DestroySingleton();
+            ControlsWrapper.Singleton.CloseMenu(default);
         }
 
         public static void DestroySingleton()

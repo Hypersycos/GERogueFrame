@@ -33,7 +33,9 @@ MonoBehaviour:
       Data: Ignite
     - Name: AbilityDescription
       Entry: 1
-      Data: Applies {{S|Accelerant}} to the enemy
+      Data: Applies {{S|Accelerant}} to the enemy, causing all incoming damage to
+        apply a {{S|Heat}} status effect. Also applies a 5 dps {{S|Heat}} proc for
+        6 seconds
     - Name: AbilityIcon
       Entry: 10
       Data: 0

@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityEngine;
 using Unity.VisualScripting;
 using Hypersycos.Utils;
+using System.Linq;
 //using UnityEngine.UIElements;
 
 namespace Hypersycos.GERogueFrame
@@ -23,7 +24,7 @@ namespace Hypersycos.GERogueFrame
             {
                 this.id = id;
                 isReady = false;
-                characterID = int.MaxValue;
+                characterID = int.MinValue;
             }
 
             public override bool Equals(object obj)
@@ -147,7 +148,7 @@ namespace Hypersycos.GERogueFrame
                         playerIcons[changeEvent.Index].transform.GetChild(2).GetComponent<Image>().color = notReadyColour;
                         playerIcons[changeEvent.Index].transform.GetChild(2).GetChild(0).GetComponent<Image>().sprite = notReadyCheck;
                     }
-                    if (changeEvent.Value.characterID > 0)
+                    if (changeEvent.Value.characterID >= 0)
                     {
                         playerIcons[changeEvent.Index].transform.GetChild(1).GetComponent<Image>().sprite = SODatabase.NetworkedDB.PlayerCharacters[changeEvent.Value.characterID].Icon;
                         playerIcons[changeEvent.Index].transform.GetChild(1).GetComponent<Image>().enabled = true;
@@ -186,10 +187,10 @@ namespace Hypersycos.GERogueFrame
             }
 
             int i = 0;
-            foreach(var pair in readyData.Keys)
+            foreach(var id in readyData.Keys)
             {
                 RefreshList(new() { Type = NetworkListEvent<LobbyPlayerState>.EventType.Add });
-                RefreshList(new() { Type = NetworkListEvent<LobbyPlayerState>.EventType.Value, Index = i++ });
+                RefreshList(new() { Type = NetworkListEvent<LobbyPlayerState>.EventType.Value, Index = i++, Value = readyData[id] });
             }
 
             readyValues.OnListChanged += RefreshList;
@@ -254,9 +255,12 @@ namespace Hypersycos.GERogueFrame
             descriptionHolder.transform.DestroyAllChildren();
 
             IAbilityData[] datas = new IAbilityData[6] { character.Weapon, character.WeaponAlt, character.Ability1, character.Ability2, character.Ability3, character.Ability4 };
+            string[] typeNames = new string[6] { "Primary Fire", "Alternative Fire", "Ability 1", "Ability 2", "Ability 3", "Ability 4" };
 
-            foreach (var data in datas)
+            for (int i = 0; i < datas.Length; i++)
             {
+                var data = datas[i];
+
                 if (data == null)
                     continue;
 
@@ -270,7 +274,7 @@ namespace Hypersycos.GERogueFrame
                 {
                     var inst = Instantiate(descriptionPrefab, descriptionHolder);
                     inst.GetComponentInChildren<Image>().sprite = baseData.AbilityIcon;
-                    inst.GetComponentInChildren<TextMeshProUGUI>().text = $"<b>{baseData.AbilityName}: </b>{baseData.AbilityDescription}";
+                    inst.GetComponentInChildren<TextMeshProUGUI>().text = $"<b>{baseData.AbilityName} ({typeNames[i]}): </b>{baseData.AbilityDescription}";
                 }
             }
 
