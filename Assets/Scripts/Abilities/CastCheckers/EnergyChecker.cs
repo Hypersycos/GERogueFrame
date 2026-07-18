@@ -11,20 +11,15 @@ namespace Hypersycos.GERogueFrame
     [Serializable]
     class EnergyChecker : ICastCostChecker
     {
-        [ShowInInspector]
-        [OdinSerialize] protected ITargetChecker TargetChecker;
-
         protected int _priority;
         public int Priority => Priority;
 
-        public ICastEffect Effect { get => TargetChecker.Effect; set => TargetChecker.Effect = value; }
-        ITargetChecker ICastCostChecker.TargetChecker { get => TargetChecker; set => TargetChecker = value; }
-
         public float Cost;
 
-        public EnergyChecker(float energyCost)
+        public EnergyChecker(float energyCost, int priority)
         {
             Cost = energyCost;
+            _priority = priority;
         }
 
         public EnergyChecker()
@@ -32,30 +27,14 @@ namespace Hypersycos.GERogueFrame
 
         }
 
-        public bool CanCast(CharacterState state, Ability ability, out ITargetChecker checker)
-        {
-            if ((state as PlayerState).CanUseEnergy(Cost))
-            {
-                checker = TargetChecker;
-                return true;
-            }
-            else
-            {
-                checker = null;
-                return false;
-            }
-        }
-
         public bool CanCast(CharacterState state, Ability ability)
         {
-            return (ability as CooldownAbility).CurrentCooldown <= 0;
+            return (state as PlayerState)?.CanUseEnergy(Cost) ?? false;
         }
 
         public ICastCostChecker Clone()
         {
-            EnergyChecker clone = new(Cost);
-            clone._priority = _priority;
-            clone.TargetChecker = TargetChecker.Clone();
+            EnergyChecker clone = new(Cost, _priority);
             return clone;
         }
 

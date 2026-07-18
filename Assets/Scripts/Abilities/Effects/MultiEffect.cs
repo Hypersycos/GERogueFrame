@@ -21,123 +21,61 @@ namespace Hypersycos.GERogueFrame
             Effects = effects;
         }
 
-        void ICastEffect.ClientCastEnd(AbilityPayload payload)
-		{
-			foreach(ICastEffect effect in Effects)
-			{
-				effect.ClientCastEnd(payload);
-			}
-		}
+        public bool HasClientCast => Effects.Count > 0 && Effects.Aggregate(true, (acc, x) => acc && x.HasClientCast);
 
-        void ICastEffect.ClientCastFixedUpdate()
-		{
-			foreach(ICastEffect effect in Effects)
-			{
-				effect.ClientCastFixedUpdate();
-			}
-		}
+        public bool HasOwnerClientCast => Effects.Count > 0 && Effects.Aggregate(true, (acc, x) => acc && x.HasOwnerClientCast);
 
-        void ICastEffect.ClientCastStart(AbilityPayload payload)
-		{
-			foreach(ICastEffect effect in Effects)
-			{
-				effect.ClientCastStart(payload);
-			}
-		}
-
-        void ICastEffect.ClientCastUpdate()
-		{
-			foreach(ICastEffect effect in Effects)
-			{
-				effect.ClientCastUpdate();
-			}
-		}
-
-        void ICastEffect.ClientNetworkUpdate(AbilityPayload payload)
-		{
-			foreach(ICastEffect effect in Effects)
-			{
-				effect.ClientNetworkUpdate(payload);
-			}
-		}
-
-        ICastEffect ICastEffect.Clone()
-		{
-			List<ICastEffect> effects = Effects.Select((x) => x.Clone()).ToList();
-			return new MultiEffect(effects);
-		}
-
-        AbilityPayload ICastEffect.OwnerCastEnd(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
-		{
-			return new MultiPayload(Effects.Select((x) => x.OwnerCastEnd(target, position, cameraPosition, direction, myState)).ToList());
-		}
-
-        void ICastEffect.OwnerCastFixedUpdate()
-		{
-			foreach(ICastEffect effect in Effects)
-			{
-				effect.OwnerCastFixedUpdate();
-			}
-		}
-
-        AbilityPayload ICastEffect.OwnerCastStart(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
-		{
-            return new MultiPayload(Effects.Select((x) => x.OwnerCastStart(target, position, cameraPosition, direction, myState)).ToList());
-		}
-
-        void ICastEffect.OwnerCastUpdate()
-		{
-			foreach(ICastEffect effect in Effects)
-			{
-				effect.OwnerCastUpdate();
-			}
-		}
-
-        AbilityPayload ICastEffect.ServerCastEnd(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
-		{
-			List<AbilityPayload> payloads = new();
-			MultiPayload payloadIn = payload as MultiPayload;
-			for (int i = 0; i < Effects.Count; i++)
-			{
-				Effects[i].ServerCastEnd(payloadIn.Payloads[i], target, position, cameraPosition, direction, myState);
-            }
-            return new MultiPayload(payloads);
-		}
-
-        void ICastEffect.ServerCastFixedUpdate()
-		{
-			foreach(ICastEffect effect in Effects)
-			{
-				effect.ServerCastFixedUpdate();
-			}
-		}
-
-        AbilityPayload ICastEffect.ServerCastStart(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
-		{
-            List<AbilityPayload> payloads = new();
-            MultiPayload payloadIn = payload as MultiPayload;
+        public void ClientCast(AbilityPayload networkPayload)
+        {
+            var multi = networkPayload as MultiPayload;
             for (int i = 0; i < Effects.Count; i++)
             {
-                Effects[i].ServerCastStart(payloadIn.Payloads[i], target, position, cameraPosition, direction, myState);
-            }
-            return new MultiPayload(payloads);
+                Effects[i].ClientCast(multi?.Payloads[i]);
+            } 
         }
 
-        void ICastEffect.ServerCastUpdate()
-		{
-			foreach(ICastEffect effect in Effects)
-			{
-				effect.ServerCastUpdate();
-			}
-		}
+        public ICastEffect Clone()
+        {
+            return new MultiEffect(Effects.Select(x => x.Clone()).ToList());
+        }
 
-        void ICastEffect.ServerNetworkUpdate(AbilityPayload payload)
-		{
-			foreach(ICastEffect effect in Effects)
-			{
-				effect.ServerNetworkUpdate(payload);
-			}
-		}
+        public AbilityPayload OwnerCast(ITargetPayload targetPayload, CharacterState myState)
+        {
+            List<AbilityPayload> payloads = new();
+            bool hasNonNull = false;
+            for (int i = 0; i < Effects.Count; i++)
+            {
+                AbilityPayload result = Effects[i].OwnerCast(targetPayload, myState);
+                if (result != null)
+                    hasNonNull = true;
+                payloads.Add(result);
+            }
+            return hasNonNull ? new MultiPayload(payloads) : null;
+        }
+
+        public void OwnerClientCast(AbilityPayload networkPayload)
+        {
+            var multi = networkPayload as MultiPayload;
+            for (int i = 0; i < Effects.Count; i++)
+            {
+                Effects[i].OwnerClientCast(multi?.Payloads[i]);
+            }
+        }
+
+        public AbilityPayload ServerCast(ITargetPayload targetPayload, AbilityPayload networkPayload, CharacterState myState)
+        {
+            var multi = networkPayload as MultiPayload;
+            List<AbilityPayload> payloads = new();
+            bool hasNonNull = false;
+            for (int i = 0; i < Effects.Count; i++)
+            {
+                AbilityPayload result = Effects[i].ServerCast(targetPayload, multi?.Payloads[i], myState);
+                if (result != null)
+                    hasNonNull = true;
+                payloads.Add(result);
+            }
+            return hasNonNull ? new MultiPayload(payloads) : null;
+        }
     }
 
     [PayloadId("MultiPayload", nameof(Deserialize))]

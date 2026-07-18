@@ -11,6 +11,7 @@ namespace Hypersycos.GERogueFrame
         private Animator animator;
         private NetworkAnimator netAnimator;
         private PlayerMovementController controllerScript;
+        private PlayerState myState;
         private CharacterController characterController;
         //What speed is 1x speed
         [SerializeField] float runSpeedNormal = 5f;
@@ -26,11 +27,15 @@ namespace Hypersycos.GERogueFrame
             controllerScript.OnCrouch += SetCrouching;
             controllerScript.CanSuperJumpChanged += SetCanSuperJump;
             SetCanSuperJump(controllerScript.canSuperJump);
+
+            myState = GetComponent<PlayerState>();
         }
 
         // Update is called once per frame
         void Update()
         {
+            animator.SetBool("Dead", !myState.HitPoints.IsActive);
+
             Vector3 horizontalVelocity = controllerScript.horizontalVelocity;
 
             float speed = horizontalVelocity.magnitude / controllerScript.maxSpeed;

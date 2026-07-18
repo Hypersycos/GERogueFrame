@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40b48d31c0ae9084883b14be147f4230, type: 3}
+  m_Name: Audio
+  m_EditorClassIdentifier: SaveSystem::Hypersycos.SaveSystem.RegisteredCategorySO
+  _IsEphemeral: 0
+  RegisteredSerializers: []
+  _Values:
+  - {fileID: 11400000, guid: 19be9577f672a6045a57a26da230423e, type: 2}
+  - {fileID: 11400000, guid: 2e96755da91f99c498475c22b3394e7f, type: 2}
+  - {fileID: 11400000, guid: 97779b2019e9d674d9b0f01cd52e5329, type: 2}
+  - {fileID: 11400000, guid: 3df49f4cd3e34c44da9b5ffd171b9be4, type: 2}
+  - {fileID: 11400000, guid: 939aa97942aaf8c409853ddc2e566d3a, type: 2}
+  - {fileID: 11400000, guid: a1f0e97e9a3019744be6f0e149e80271, type: 2}
+  - {fileID: 11400000, guid: 1732f14194eb45e49bef8aeee719f82c, type: 2}
+  _SubCategories: []

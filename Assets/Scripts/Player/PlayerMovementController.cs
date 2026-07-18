@@ -1,3 +1,4 @@
+using Hypersycos.SaveSystem;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -6,13 +7,14 @@ using UnityEngine.InputSystem;
 
 namespace Hypersycos.GERogueFrame
 {
-    public class PlayerMovementController : MonoBehaviour
+    public class PlayerMovementController : NetworkBehaviour
     {
         CharacterController characterController;
         Transform playerCamera;
         InputAction move;
         ControlsWrapper controlWrapper;
         Controls controls => controlWrapper.controls;
+        PlayerState myState;
 
         [Header("Stats")]
         [SerializeField] public float movementSpeed = 4f;
@@ -29,6 +31,7 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] float superJumpHeight = 4f;
         [SerializeField] float airSuperJumpHeight = 3f;
         [SerializeField] int maxJumps = 2;
+
         [field: SerializeField] public bool canSuperJump { get; private set; }
 
         [Header("Live Values")]
@@ -40,6 +43,11 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] int jumpsAvailable = 0;
         [SerializeField] float lastJump = 0f;
         public bool lockedToCamera;
+
+        public NetworkVariable<Vector3> networkVelocity = new(writePerm: NetworkVariableWritePermission.Owner);
+        Queue<Vector3> pastVelocities = new();
+        [SerializeField] float velocityAvgPeriod = 0.5f;
+        int velocityAvgCount;
 
         Dictionary<string, float> movementModifierTracker = new Dictionary<string, float>();
         Dictionary<string, float> gravityModifierTracker = new Dictionary<string, float>();
@@ -56,7 +64,7 @@ namespace Hypersycos.GERogueFrame
             get
             {
                 Ray ray = new Ray(transform.position + Vector3.up * 0.25f, Vector3.down);
-                if (Physics.Raycast(ray, 0.35f, 0xFFFF ^ (1 << 6 | 1 << 7)))
+                if (Physics.Raycast(ray, 0.35f, 0xFFFF ^ (1 << 6 | 1 << 7), QueryTriggerInteraction.Ignore))
                     return true;
                 else
                     return characterController.isGrounded;
@@ -70,7 +78,7 @@ namespace Hypersycos.GERogueFrame
         void Awake()
         {
             characterController = GetComponent<CharacterController>();
-            playerCamera = transform.Find("CameraPos");
+            playerCamera = GameObject.FindWithTag("MainCamera").transform;
             controlWrapper = ControlsWrapper.Singleton;
 
             controls.Player.Jump.started += DoJump;
@@ -78,9 +86,17 @@ namespace Hypersycos.GERogueFrame
             controls.Player.Crouch.canceled += DoCrouch;
             controls.Player.ToggleCrouch.started += DoCrouch;
 
-            controlWrapper.MenuOpened += () => enabled = false;
-            controlWrapper.MenuClosed += () => enabled = true;
             move = controls.Player.Move;
+            velocityAvgCount = Mathf.CeilToInt(velocityAvgPeriod / Time.fixedDeltaTime);
+            myState = GetComponent<PlayerState>();
+        }
+
+        public override void OnDestroy()
+        {
+            controls.Player.Jump.started -= DoJump;
+            controls.Player.Crouch.started -= DoCrouch;
+            controls.Player.Crouch.canceled -= DoCrouch;
+            controls.Player.ToggleCrouch.started -= DoCrouch;
         }
 
         private Vector3 GetHorizontalCameraForward(Transform playerCamera)
@@ -133,6 +149,9 @@ namespace Hypersycos.GERogueFrame
             if (jumpsAvailable == 0)
                 return;
 
+            jumpsAvailable--;
+            lastJump = 0.5f;
+
             if (canSuperJump && superJumpAvailable && crouching)
             {
                 Vector3 direction = playerCamera.transform.forward;
@@ -154,6 +173,8 @@ namespace Hypersycos.GERogueFrame
 
                 velocity = direction * jumpMagnitude;
                 superJumpAvailable = false;
+
+                OnJump?.Invoke();
                 CanSuperJumpChanged?.Invoke(superJumpAvailable);
             }
             else
@@ -170,11 +191,9 @@ namespace Hypersycos.GERogueFrame
                 float magnitude = horizontalVelocity.magnitude;
                 velocity.x = inputForce.x * component * magnitude;
                 velocity.z = inputForce.z * component * magnitude;
-            }
 
-            jumpsAvailable--;
-            lastJump = 0.5f;
-            OnJump?.Invoke();
+                OnJump?.Invoke();
+            }
         }
 
         public void AddMovementModifier(float modifier, string name)
@@ -212,14 +231,18 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
-        private void FixedUpdate()
+        private void Update()
         {
             Vector3 inputForce = Vector3.zero;
             Vector2 moveInput = move.ReadValue<Vector2>();
+
+            if (!myState.HitPoints.IsActive)
+                moveInput = Vector2.zero;
+
             if (moveInput.magnitude > 1)
                 moveInput = moveInput.normalized;
 
-            float mult = moveForce * Time.fixedDeltaTime;
+            float mult = moveForce * Time.deltaTime;
             inputForce += moveInput.x * mult * GetHorizontalCameraRight(playerCamera);
             inputForce += moveInput.y * mult * GetHorizontalCameraForward(playerCamera);
 
@@ -228,7 +251,7 @@ namespace Hypersycos.GERogueFrame
             if (horizontalVelocity.magnitude > maxSpeed)
             { //reduce control if over max speed
                 inputForce *= overspeedControl;
-                Vector3 dragForce = -horizontalVelocity * drag * Time.fixedDeltaTime;
+                Vector3 dragForce = -horizontalVelocity * drag * Time.deltaTime;
 
                 float carryComponent = Vector3.Dot(-dragForce.normalized, inputForce);
 
@@ -257,7 +280,7 @@ namespace Hypersycos.GERogueFrame
             {
                 if (inputForce == Vector3.zero)
                 { //If no input, smooth towards 0 velocity
-                    float force = moveForce * Time.fixedDeltaTime;
+                    float force = moveForce * Time.deltaTime;
                     if (force > horizontalVelocity.magnitude)
                     {
                         velocity.x = 0;
@@ -274,7 +297,7 @@ namespace Hypersycos.GERogueFrame
                     targetVelocity += moveInput.x * maxSpeed * GetHorizontalCameraRight(playerCamera);
                     targetVelocity += moveInput.y * maxSpeed * GetHorizontalCameraForward(playerCamera);
                     Vector3 diff = targetVelocity - horizontalVelocity;
-                    Vector3 diffForce = diff.normalized * moveForce * Time.fixedDeltaTime;
+                    Vector3 diffForce = diff.normalized * moveForce * Time.deltaTime;
 
                     if (diff.sqrMagnitude < diffForce.sqrMagnitude)
                     {
@@ -310,39 +333,44 @@ namespace Hypersycos.GERogueFrame
                             superJumpAvailable = true;
                             CanSuperJumpChanged?.Invoke(superJumpAvailable);
                         }
-                        Ray ray = new Ray(transform.position + Vector3.up * 0.25f, Vector3.down);
-                        if (Physics.Raycast(ray, out RaycastHit hit, 0.3f, 0xFFFF ^ (1 << 6 | 1 << 7)))
+                        Ray ray = new Ray(transform.position + Vector3.up * 0.05f, Vector3.down);
+                        if (Physics.Raycast(ray, out RaycastHit hit, 0.05f + characterController.stepOffset, 0xFFFF ^ (1 << 6 | 1 << 7)))
                         {
-                            forcedMove.y = 0.25f - hit.distance;
+                            forcedMove.y = -(hit.distance - .05f);
                         }
                     }
                 }
             }
             else
             {
-                if (velocity.y <= 0f)
+                if (velocity.y == 0f)
                 { //check if stairs
-                    Ray ray = new Ray(this.transform.position + Vector3.up * 0.25f, Vector3.down);
-                    if (Physics.Raycast(ray, out RaycastHit hit, 0.3f + characterController.stepOffset))
+                    Ray ray = new Ray(this.transform.position + Vector3.up * 0.05f, Vector3.down);
+                    if (Physics.Raycast(ray, out RaycastHit hit, 0.05f + characterController.stepOffset))
                     { //force player down fast
-                        velocity.y = -1;
+                        //forcedMove.y = -(hit.distance - 0.05f);
+                        velocity.y -= 2;
                     }
                     else
                     {
-                        velocity.y += gravityForce * Time.fixedDeltaTime;
+                        velocity.y += gravityForce * Time.deltaTime;
                     }
                 }
                 else
                 {
-                    velocity.y += gravityForce * Time.fixedDeltaTime;
+                    velocity.y += gravityForce * Time.deltaTime;
                 }
             }
 
-            characterController.Move(velocity * Time.fixedDeltaTime + forcedMove);
+            characterController.Move(velocity * Time.deltaTime + forcedMove);
+            pastVelocities.Enqueue(characterController.velocity);
+            networkVelocity.Value += characterController.velocity / velocityAvgCount;
+            if (pastVelocities.Count > velocityAvgCount)
+                networkVelocity.Value -= pastVelocities.Dequeue() / velocityAvgCount;
 
             if (lastJump > 0f)
             {
-                lastJump -= Time.fixedDeltaTime;
+                lastJump -= Time.deltaTime;
             }
 
             if (lockedToCamera)
@@ -356,6 +384,32 @@ namespace Hypersycos.GERogueFrame
                     transform.rotation = Quaternion.LookRotation(horizontalVelocity, Vector3.up);
                 }
             }
+        }
+
+        [Rpc(SendTo.Owner)]
+        void TeleportRpc(Vector3 position, bool carryMomentum)
+        {
+            characterController.enabled = false;
+            transform.position = position;
+            if (!carryMomentum)
+                velocity = new();
+            characterController.enabled = true;
+        }
+
+        public void Teleport(Vector3 position, bool carryMomentum)
+        {
+            TeleportRpc(position, carryMomentum);
+        }
+
+        [Rpc(SendTo.Owner)]
+        void RotationRpc(Quaternion rotation)
+        {
+            transform.rotation = rotation;
+        }
+
+        public void SetRotation(Quaternion rotation)
+        {
+            RotationRpc(rotation);
         }
     }
 }

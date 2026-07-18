@@ -68,7 +68,7 @@ namespace Hypersycos.GERogueFrame
         }
     }
 
-    public class CooldownAbility : Ability, ICooldownAbility
+    public class CooldownAbility : GenericAbility, ICooldownAbility
     {
         float _maxCooldown;
         float _currentCooldown;
@@ -86,15 +86,17 @@ namespace Hypersycos.GERogueFrame
 
         public override bool IsDirty { get => lastUpdate == NetworkManager.Singleton.ServerTime.Tick; }
 
-        public CooldownAbility(IEnumerable<ICastCostChecker> targets, float cooldown, bool targetOnStart) : base(targets, targetOnStart)
+        public CooldownAbility(float cooldown, int priority, bool chargeAtStart, float endlag, float queueFor,
+                               Dictionary<int, ICastCostChecker> costCheckers, Dictionary<int, ITargetChecker> targetCheckers, Dictionary<int, ICastEffect> effects,
+                               Dictionary<int, int> costToTarget, Dictionary<int, int> targetToEffect,
+                               List<int> startCheckers, Dictionary<int, int> endCheckers, Dictionary<int, int> updateCheckers, Dictionary<int, int> fixedUpdateCheckers) : base(priority, chargeAtStart, endlag, queueFor, costCheckers, targetCheckers, effects, costToTarget, targetToEffect, startCheckers, endCheckers, updateCheckers, fixedUpdateCheckers)
         {
             _maxCooldown = cooldown;
         }
 
         public override void FixedUpdate(CharacterState myState)
         {
-            if (myState.IsServer)
-                _currentCooldown = Mathf.Max(0, _currentCooldown - Time.fixedDeltaTime);
+            _currentCooldown = Mathf.Max(0, _currentCooldown - Time.fixedDeltaTime);
         }
 
         public override AbilityPayload Sync()

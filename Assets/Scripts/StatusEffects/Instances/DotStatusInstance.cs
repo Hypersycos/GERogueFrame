@@ -1,3 +1,5 @@
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,22 +11,22 @@ namespace Hypersycos.GERogueFrame
     public class DotStatusInstance : DurationStatusInstance
     {
         [SerializeField] float TickDelay;
-        [SerializeField] StatTypeTarget ValidStatTypes;
+        [ShowInInspector] [OdinSerialize] IStatTypeTarget ValidStatTypes;
         StatRegenerationModifier DoT;
-        public DotStatusInstance(float amount, CharacterState owner, StatusEffect statusEffect, float duration, float tickDelay, StatTypeTarget validTargets)
+        public DotStatusInstance(float amount, CharacterState owner, StatusEffect statusEffect, float duration, float tickDelay, IStatTypeTarget validTargets)
             : base(amount, owner, statusEffect, duration)
         {
             TickDelay = tickDelay;
             ValidStatTypes = validTargets;
         }
-        public DotStatusInstance(float amount, StatusEffect statusEffect, float duration, float tickDelay, StatTypeTarget validTargets)
+        public DotStatusInstance(float amount, StatusEffect statusEffect, float duration, float tickDelay, IStatTypeTarget validTargets)
             : base(amount, statusEffect, duration)
         {
             TickDelay = tickDelay;
             ValidStatTypes = validTargets;
         }
 
-        public DotStatusInstance(float tickDelay, StatusEffect statusEffect, StatTypeTarget validTargets) : base(statusEffect)
+        public DotStatusInstance(float tickDelay, StatusEffect statusEffect, IStatTypeTarget validTargets) : base(statusEffect)
         {
             TickDelay = tickDelay;
             ValidStatTypes = validTargets;

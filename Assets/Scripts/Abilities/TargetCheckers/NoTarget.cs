@@ -8,28 +8,25 @@ namespace Hypersycos.GERogueFrame
 {
     class NoTarget : ITargetChecker
     {
-        [OdinSerialize] ICastEffect _effect;
-
         public NoTarget()
         {
         }
 
-        public NoTarget(ICastEffect effect)
-        {
-            _effect = effect;
-        }
-
-        public ICastEffect Effect { get => _effect; set => _effect = value; }
-
         public ITargetChecker Clone()
         {
-            return new NoTarget(_effect.Clone());
+            return this;
         }
 
-        public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out TargetPayload hit, out ICastEffect castEffect)
+        public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out ITargetPayload hit, out AbilityPayload verifyData)
         {
             hit = null;
-            castEffect = _effect;
+            verifyData = null;
+            return true;
+        }
+
+        public bool VerifyTarget(AbilityPayload target, CharacterState myState, out ITargetPayload hit)
+        {
+            hit = null;
             return true;
         }
     }

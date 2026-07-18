@@ -3,7 +3,7 @@
     "name": "Controls",
     "maps": [
         {
-            "name": "Menu",
+            "name": "PauseMenu",
             "id": "75e461fc-b752-40a3-8849-55bafefc1d31",
             "actions": [
                 {
@@ -47,7 +47,7 @@
                     "name": "Jump",
                     "type": "Button",
                     "id": "f4f33198-d00f-4839-8166-94699c69a600",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -173,7 +173,7 @@
                     "name": "Open Menu",
                     "type": "Button",
                     "id": "94329034-3291-46b0-9a26-68f6f566dc4b",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -238,7 +238,7 @@
                 },
                 {
                     "name": "WASD",
-                    "id": "d46dda0c-a1b9-4406-9569-8b28b8a15009",
+                    "id": "8f01acbc-4438-4b14-811b-33bed39ce7c2",
                     "path": "2DVector",
                     "interactions": "",
                     "processors": "",
@@ -249,99 +249,44 @@
                 },
                 {
                     "name": "up",
-                    "id": "bc5140cc-24d8-49f6-8f41-f128af971fa6",
+                    "id": "b97681e5-576c-4eed-b549-017a342f2faf",
                     "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": ";Keyboard",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
                 {
                     "name": "down",
-                    "id": "973ae341-56ce-4fd6-8579-d6768da81b62",
+                    "id": "d4acf678-8bd9-4816-b4a3-a71c4e8e0c55",
                     "path": "<Keyboard>/s",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": ";Keyboard",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
                 {
                     "name": "left",
-                    "id": "6be31477-c746-40f8-84bb-28ec04a2724f",
+                    "id": "78210c82-3849-4f8b-a001-6154941d39ff",
                     "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": ";Keyboard",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
                 {
                     "name": "right",
-                    "id": "60b2bfcb-476f-40f6-b11a-c75ea46d3fbd",
+                    "id": "c58ad1a9-d08d-4ad2-b3c6-70f108c8ae7c",
                     "path": "<Keyboard>/d",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "Arrows",
-                    "id": "96282fbd-8a34-4f77-bb2a-666955414bf5",
-                    "path": "2DVector",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Move",
-                    "isComposite": true,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "up",
-                    "id": "348f186c-b167-49df-a5aa-4ef2321eb912",
-                    "path": "<Keyboard>/upArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "down",
-                    "id": "3e8f8b7d-a855-4b5d-8d2b-6cfea9709589",
-                    "path": "<Keyboard>/downArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "left",
-                    "id": "d1d305c9-1454-4551-871f-6f95c962fddf",
-                    "path": "<Keyboard>/leftArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "right",
-                    "id": "0bf40f37-cd91-4525-a0b7-ff7a38474a4d",
-                    "path": "<Keyboard>/rightArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard",
+                    "groups": ";Keyboard",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -596,6 +541,34 @@
                     "processors": "",
                     "groups": "",
                     "action": "Use Ability",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "MenuScreen",
+            "id": "e6c8c243-f081-4b47-b5e2-0ab5ef45ad97",
+            "actions": [
+                {
+                    "name": "Open Menu",
+                    "type": "Button",
+                    "id": "0eb34aa7-b001-41a1-a399-4a7d74132cca",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "e81c4ff7-a6a4-43ea-8ff5-725d1f01d965",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Open Menu",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

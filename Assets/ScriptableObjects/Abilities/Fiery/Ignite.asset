@@ -16,6 +16,8 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
+    - {fileID: 21300000, guid: c449c663fab3a0343bbf2bb41d273e82, type: 3}
+    - {fileID: 732674372557605872, guid: b033b66049208f54c8c5b4d4a8a21473, type: 3}
     - {fileID: 11400000, guid: d82f0da314caebf408f4915d464c0e7e, type: 2}
     - {fileID: 11400000, guid: 408a6fd48e8a0784da3cecc525b4ff3b, type: 2}
     SerializedBytesString: 
@@ -31,13 +33,21 @@ MonoBehaviour:
       Data: Ignite
     - Name: AbilityDescription
       Entry: 1
-      Data: Applies {{S|Accelerant}} to the enemy
+      Data: Applies {{S|Accelerant}} to the enemy, causing all incoming damage to
+        apply a {{S|Heat}} status effect. Also applies a 5 dps {{S|Heat}} proc for
+        6 seconds
     - Name: AbilityIcon
-      Entry: 6
-      Data: 
-    - Name: TargetOnStart
-      Entry: 5
-      Data: false
+      Entry: 10
+      Data: 0
+    - Name: endlag
+      Entry: 4
+      Data: 1
+    - Name: queueFor
+      Entry: 4
+      Data: 0
+    - Name: IconPrefab
+      Entry: 10
+      Data: 1
     - Name: Cooldown
       Entry: 4
       Data: 3
@@ -52,33 +62,103 @@ MonoBehaviour:
       Data: 
     - Name: TargetChecker
       Entry: 7
-      Data: 1|Hypersycos.GERogueFrame.HitscanChecker, Assembly-CSharp
+      Data: 1|Hypersycos.GERogueFrame.TargetCheckerChain, Assembly-CSharp
+    - Name: BaseChecker
+      Entry: 7
+      Data: 2|Hypersycos.GERogueFrame.HitscanChecker, Assembly-CSharp
+    - Name: MaxRange
+      Entry: 4
+      Data: 50
+    - Name: StartEpsilon
+      Entry: 4
+      Data: 0
+    - Name: EndEpsilon
+      Entry: 4
+      Data: 0
+    - Name: HitLayerMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 129
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: VerifyLayerMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TargetLayerMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 128
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TriggerInteraction
+      Entry: 3
+      Data: 0
+    - Name: NoHitIsSuccess
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TargetCheckerList
+      Entry: 7
+      Data: 3|System.Collections.Generic.List`1[[Hypersycos.GERogueFrame.ISecondaryTargetChecker,
+        Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 4|Hypersycos.GERogueFrame.TargetGetState, Assembly-CSharp
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: CastEffect
       Entry: 7
-      Data: 2|Hypersycos.GERogueFrame.MultiEffect, Assembly-CSharp
+      Data: 5|Hypersycos.GERogueFrame.MultiEffect, Assembly-CSharp
     - Name: Effects
       Entry: 7
-      Data: 3|System.Collections.Generic.List`1[[Hypersycos.GERogueFrame.ICastEffect,
+      Data: 6|System.Collections.Generic.List`1[[Hypersycos.GERogueFrame.ICastEffect,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 4|Hypersycos.GERogueFrame.ApplyStatus, Assembly-CSharp
+      Data: 7|Hypersycos.GERogueFrame.ApplyStatus, Assembly-CSharp
     - Name: statusEffect
       Entry: 7
-      Data: 5|Hypersycos.GERogueFrame.Assets.Scripts.StatusEffects.Instances.AccelerantStatusInstance,
+      Data: 8|Hypersycos.GERogueFrame.Assets.Scripts.StatusEffects.Instances.AccelerantStatusInstance,
         Assembly-CSharp
     - Name: <StatusEffect>k__BackingField
       Entry: 10
-      Data: 0
+      Data: 2
     - Name: Amount
       Entry: 4
       Data: 1
     - Name: OneTimeEffects
       Entry: 7
-      Data: 6|System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core
+      Data: 9|System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core
     - Name: 
       Entry: 12
       Data: 0
@@ -99,19 +179,19 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 7|Hypersycos.GERogueFrame.ApplyStatus, Assembly-CSharp
+      Data: 10|Hypersycos.GERogueFrame.ApplyStatus, Assembly-CSharp
     - Name: statusEffect
       Entry: 7
-      Data: 8|Hypersycos.GERogueFrame.HeatStatusInstance, Assembly-CSharp
+      Data: 11|Hypersycos.GERogueFrame.HeatStatusInstance, Assembly-CSharp
     - Name: <StatusEffect>k__BackingField
       Entry: 10
-      Data: 1
+      Data: 3
     - Name: Amount
       Entry: 4
       Data: 5
     - Name: OneTimeEffects
       Entry: 7
-      Data: 9|System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core
+      Data: 12|System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core
     - Name: 
       Entry: 12
       Data: 0
@@ -129,7 +209,7 @@ MonoBehaviour:
       Data: 1
     - Name: ValidStatTypes
       Entry: 7
-      Data: 10|Hypersycos.GERogueFrame.StatTypeTarget, Assembly-CSharp
+      Data: 13|Hypersycos.GERogueFrame.StatTypeTarget, Assembly-CSharp
     - Name: IsExclusive
       Entry: 5
       Data: false
@@ -151,33 +231,6 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: MaxRange
-      Entry: 4
-      Data: 50
-    - Name: HitLayerMask
-      Entry: 7
-      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
-    - Name: 
-      Entry: 3
-      Data: 128
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: TargetLayerMask
-      Entry: 7
-      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
-    - Name: 
-      Entry: 3
-      Data: 183
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: TriggerInteraction
-      Entry: 3
-      Data: 1
     - Name: 
       Entry: 8
       Data: 

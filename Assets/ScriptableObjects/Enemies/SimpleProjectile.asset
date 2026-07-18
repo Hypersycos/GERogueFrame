@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2878728b2e9f8ef4eb39b167639237cc, type: 3}
+  m_Name: SimpleProjectile
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.EnemySO
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 11400000, guid: 3f90f08cd458dd14ab8b85854ccd8da8, type: 2}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: abilities
+      Entry: 7
+      Data: 0|System.Collections.Generic.List`1[[Hypersycos.GERogueFrame.IAbilityData,
+        Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 10
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+  UUID: base.Simple Projectile
+  ItemName: Simple Projectile
+  Description: 
+  Icon: {fileID: 0}
+  Color: {r: 0, g: 0, b: 0, a: 0}
+  Model: {fileID: 0}
+  NetworkPrefab: {fileID: 7225891673131138541, guid: 38b8214803e2ca74297d8e520f3b5cbc, type: 3}
+  defenses:
+  - Max: 100
+    HasResist: 0
+    Resist: 50
+    FlatRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    MaxRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    CurrentRegen:
+      Value: 0
+      Delay: 0
+      ReducedRate: 0
+    StatType: {fileID: 11400000, guid: 4d08cedfe6dbc144e873a312b724f912, type: 2}
+    ResistStatType: {fileID: 0}
+  resources: []
+  spawnCost: 2
+  navmeshID: 0
+  damageScalingCoeff: 0.4
+  healthScalingCoeff: 0.1
+  moveSpeedCoeff: 0
+  deathTimer: 1

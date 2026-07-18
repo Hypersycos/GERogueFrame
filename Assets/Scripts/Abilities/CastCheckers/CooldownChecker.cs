@@ -11,47 +11,37 @@ namespace Hypersycos.GERogueFrame
     [Serializable]
     class CooldownChecker : ICastCostChecker
     {
-        [ShowInInspector]
-        [OdinSerialize] protected ITargetChecker TargetChecker;
-
-        public float cooldownRefund = 0;
+        public float cooldownCost = 1;
 
         protected int _priority;
-        public int Priority => Priority;
 
-        public ICastEffect Effect { get => TargetChecker.Effect; set => TargetChecker.Effect = value; }
-        ITargetChecker ICastCostChecker.TargetChecker { get => TargetChecker; set => TargetChecker = value; }
-
-        public bool CanCast(CharacterState state, Ability ability, out ITargetChecker checker)
+        public CooldownChecker(float cooldownCost, int priority)
         {
-            if ((ability as ICooldownAbility).CurrentCooldown <= 0)
-            {
-                checker = TargetChecker;
-                return true;
-            }
-            else
-            {
-                checker = null;
-                return false;
-            }
+            this.cooldownCost = cooldownCost;
+            _priority = priority;
         }
+
+        public CooldownChecker(int priority)
+        {
+            _priority = priority;
+        }
+
+        public int Priority => _priority;
 
         public bool CanCast(CharacterState state, Ability ability)
         {
-            return (ability as CooldownAbility).CurrentCooldown <= 0;
+            return (ability as ICooldownAbility).CurrentCooldown <= 0;
         }
 
         public void Charge(CharacterState state, Ability ability)
         {
-            CooldownAbility bAbility = (ability as CooldownAbility);
-            bAbility.SetCooldown(1 - cooldownRefund);
+            var bAbility = (ability as ICooldownAbility);
+            bAbility.SetCooldown(cooldownCost);
         }
 
         public ICastCostChecker Clone()
         {
-            CooldownChecker clone = new();
-            clone._priority = _priority;
-            clone.TargetChecker = TargetChecker.Clone();
+            CooldownChecker clone = new(cooldownCost, _priority);
             return clone;
         }
     }

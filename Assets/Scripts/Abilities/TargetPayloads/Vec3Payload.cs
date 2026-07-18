@@ -11,7 +11,7 @@ namespace Hypersycos.GERogueFrame
         public Vector3 Target { get; }
     }
 
-    public record Vec3Payload : TargetPayload, IVec3Payload
+    public record Vec3Payload : ITargetPayload, IVec3Payload
     {
 
         protected Vector3 _target;

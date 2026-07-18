@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 4314035031300602450}
   - component: {fileID: 5828096178231509550}
   - component: {fileID: 5814769486152117106}
+  - component: {fileID: -7231008785624498361}
   m_Layer: 8
   m_Name: Flashbang
   m_TagString: Untagged
@@ -70,7 +71,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: ede318e6abee5c344ad59606488708bf, type: 2}
+  - {fileID: 2100000, guid: 7b844156e04dfdc4faa0732bb1340be3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -107,7 +108,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startR: 0.125
-  endR: 15
+  endR: 6
   rTime: 0.2
   startAlpha: 0.7
   endAlpha: 0
@@ -124,7 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9a64d199173c084385b9f64f7a806a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.ProjectileScript
-  lifetime: 1
+  lifetime: 0.5
   hitAlly:
     m_PersistentCalls:
       m_Calls: []
@@ -161,6 +162,18 @@ MonoBehaviour:
   onDespawnServer:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: -7231008785624498361}
+        m_TargetAssemblyTypeName: Hypersycos.GERogueFrame.MonoEffect, Assembly-CSharp
+        m_MethodName: ProjectileCast
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 4314035031300602450}
         m_TargetAssemblyTypeName: Hypersycos.GERogueFrame.ProjectileScript, Assembly-CSharp
         m_MethodName: DestroyThis
@@ -210,7 +223,7 @@ Rigidbody:
   serializedVersion: 5
   m_Mass: 1
   m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_AngularDamping: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -223,10 +236,10 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!135 &5814769486152117106
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -248,3 +261,134 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-7231008785624498361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433497647348325309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26e7e162f3704424eb134d8d00eb88fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.MonoEffect
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 11400000, guid: 408a6fd48e8a0784da3cecc525b4ff3b, type: 2}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: checker
+      Entry: 7
+      Data: 0|Hypersycos.GERogueFrame.TargetCheckerChain, Assembly-CSharp
+    - Name: BaseChecker
+      Entry: 7
+      Data: 1|Hypersycos.GERogueFrame.SelfChecker, Assembly-CSharp
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TargetCheckerList
+      Entry: 7
+      Data: 2|System.Collections.Generic.List`1[[Hypersycos.GERogueFrame.ISecondaryTargetChecker,
+        Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 3|Hypersycos.GERogueFrame.FilteredPayloadAreaChecker, Assembly-CSharp
+    - Name: Filter
+      Entry: 7
+      Data: 4|Hypersycos.GERogueFrame.TargetGetState, Assembly-CSharp
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: Radius
+      Entry: 4
+      Data: 6
+    - Name: Mask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 128
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: TriggerInteraction
+      Entry: 3
+      Data: 1
+    - Name: EmptyIsSuccess
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: effect
+      Entry: 7
+      Data: 5|Hypersycos.GERogueFrame.ListEffect, Assembly-CSharp
+    - Name: effect
+      Entry: 7
+      Data: 6|Hypersycos.GERogueFrame.ApplyStatus, Assembly-CSharp
+    - Name: statusEffect
+      Entry: 7
+      Data: 7|Hypersycos.GERogueFrame.HeatStatusInstance, Assembly-CSharp
+    - Name: <StatusEffect>k__BackingField
+      Entry: 10
+      Data: 0
+    - Name: Amount
+      Entry: 4
+      Data: 5
+    - Name: OneTimeEffects
+      Entry: 7
+      Data: 8|System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: duration
+      Entry: 4
+      Data: 6
+    - Name: TickDelay
+      Entry: 4
+      Data: 1
+    - Name: ValidStatTypes
+      Entry: 7
+      Data: 9|Hypersycos.GERogueFrame.StatTypeTarget, Assembly-CSharp
+    - Name: IsExclusive
+      Entry: 5
+      Data: false
+    - Name: Types
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 

@@ -13,11 +13,13 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] float Strength;
         [SerializeField] float Duration;
 
+        [SerializeField] Collider serverCollider;
+
         StatusEffect Heat => HeatStatusInstance.Heat;
 
         List<CharacterState> victims = new();
         List<float> timers = new();
-        StatTypeTarget ValidStatTypes = StatTypeTarget.AllValid;
+        IStatTypeTarget ValidStatTypes = StatTypeTarget.AllValid;
 
         private void Start()
         {
@@ -26,7 +28,7 @@ namespace Hypersycos.GERogueFrame
 
             if (IsServer)
             {
-                GetComponent<Collider>().enabled = true;
+                serverCollider.enabled = true;
             }
         }
 
@@ -74,8 +76,11 @@ namespace Hypersycos.GERogueFrame
             if (state == null || state.Team == SpawnedBy.Team) return;
 
             int Index = victims.IndexOf(state);
-            victims.RemoveAt(Index);
-            timers.RemoveAt(Index);
+            if (Index != -1)
+            {
+                victims.RemoveAt(Index);
+                timers.RemoveAt(Index);
+            }
         }
 
         protected override void FixedUpdate()

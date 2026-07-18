@@ -13,14 +13,21 @@ namespace Hypersycos.GERogueFrame
         [ShowInInspector]
         [OdinSerialize] IAbilityData AbilityData;
 
+        public string Name => AbilityData.Name;
+
         public Ability CreateAbility()
         {
             return AbilityData.CreateAbility();
         }
 
-        public IEnumerable<ICastCostChecker> GetCheckers()
+        public AbilityIcon CreateIcon(Transform parent)
         {
-            return AbilityData.GetCheckers();
+            return AbilityData.CreateIcon(parent);
+        }
+
+        public T As<T>() where T : class, IAbilityData
+        {
+            return AbilityData as T;
         }
     }
 }

@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Wrinkly Mountains
+  m_Shader: {fileID: -6465566751694194690, guid: 6536abc518009694bad873840234563f, type: 3}
+  m_Parent: {fileID: -876546973899608171, guid: 6536abc518009694bad873840234563f, type: 3}
+  m_ModifiedSerializedProperties: 2
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 2
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _Mountain_Blend_Range: 0.3
+    - _Mountain_Height: 0.2
+    - _Mountain_Steepness_Blend: 0.4
+    - _Mountain_Steepness_Start: 0
+    - _QueueControl: 0
+    - _Rock_Steepness_Blend_Range: 0.3
+    - _Rock_Steepness_Height_Coeff: 5
+    - _Rock_Steepness_Start: -0.1
+    m_Colors:
+    - _Flat_Mountain_Colour: {r: 0.7056604, g: 0.25962967, b: 0.42153007, a: 1}
+    - _Float_Mountain_PBR: {r: 1, g: 0.3, b: 0, a: 0}
+    - _Mountain_Colour: {r: 0.56433505, g: 0.3973584, b: 0.5999999, a: 1}
+    - _Rock_Colour: {r: 0.39200002, g: 0.39200002, b: 0.39200002, a: 1}
+    - _Rock_PBR: {r: 0, g: 0.3, b: 0, a: 0}
+    - _Steep_Mountain_Colour: {r: 0.54429084, g: 0.35439652, b: 0.6830188, a: 1}
+    - _Steep_Mountain_PBR: {r: 0, g: 0.6, b: 0, a: 0}
+    - _Terrain_Colour: {r: 0.78650445, g: 0.79, b: 0.6536726, a: 1}
+    - _Terrain_PBR: {r: 0, g: 0.05, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
+--- !u!114 &6111893136158979959
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
+  version: 10

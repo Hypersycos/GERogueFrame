@@ -13,51 +13,82 @@ namespace Hypersycos.GERogueFrame
         protected struct CheckerCostTuple
         {
             public int priority;
-            public float Cooldown;
+            public float CooldownConsumption;
             public float EnergyCost;
             public List<ICastCostChecker> ExtraCostCheckers;
-            public ITargetChecker TargetChecker;
+
+            public CheckerCostTuple(int priority = 0, float cooldownConsumption = 1, float energyCost = 1, List<ICastCostChecker> extraCostCheckers = null)
+            {
+                this.priority = priority;
+                CooldownConsumption = cooldownConsumption;
+                EnergyCost = energyCost;
+                ExtraCostCheckers = extraCostCheckers ?? new();
+            }
         }
+
+        [SerializeField] protected float Cooldown;
 
         [ShowInInspector]
         [ListDrawerSettings(ShowFoldout = true)]
-        [OdinSerialize] protected List<CheckerCostTuple> Checkers;
+        [OdinSerialize] protected List<CheckerCostTuple> CostCheckers;
+
+        [ShowInInspector]
+        [ListDrawerSettings(ShowFoldout = true)]
+        [OdinSerialize] protected List<ITargetChecker> TargetCheckers;
+
+        [ShowInInspector]
+        [ListDrawerSettings(ShowFoldout = true)]
+        [OdinSerialize] protected List<ICastEffect> Effects;
+
+        [ShowInInspector]
+        [ListDrawerSettings(ShowFoldout = true)]
+        [OdinSerialize] protected Dictionary<int, int> costToTarget = new();
+
+        [ShowInInspector]
+        [ListDrawerSettings(ShowFoldout = true)]
+        [OdinSerialize] protected Dictionary<int, int> targetToEffect = new();
+
+        [SerializeField] protected List<int> startCheckers = new();
+        [SerializeField] protected Dictionary<int, int> finalCheckers = new();
+        [SerializeField] protected Dictionary<int, int> updateCheckers = new();
+        [SerializeField] protected Dictionary<int, int> fixedUpdateCheckers = new();
 
         public override Ability CreateAbility()
         {
-            float maxCD = Checkers.Max((x) => x.Cooldown);
-            if (maxCD > 0)
-                return new CooldownAbility(GetCheckers(), maxCD, TargetOnStart);
+            var costCheckers = GetCheckers().Select((value, index) => (value, index)).ToDictionary(pair => pair.index, pair => pair.value.Clone());
+            var targetCheckers = TargetCheckers.Select((value, index) => (value, index)).ToDictionary(pair => pair.index, pair => pair.value.Clone());
+            var effects = Effects.Select((value, index) => (value, index)).ToDictionary(pair => pair.index, pair => pair.value.Clone());
+            if (Cooldown > 0)
+                return new CooldownAbility(Cooldown, 1, false, endlag, queueFor, costCheckers, targetCheckers, effects, costToTarget, targetToEffect, startCheckers, finalCheckers, updateCheckers, fixedUpdateCheckers);
             else
-                return new Ability(GetCheckers(), TargetOnStart);
+                return new GenericAbility(1, false, endlag, queueFor, costCheckers, targetCheckers, effects, costToTarget, targetToEffect, startCheckers, finalCheckers, updateCheckers, fixedUpdateCheckers);
         }
 
-        public override IEnumerable<ICastCostChecker> GetCheckers()
+        public List<ICastCostChecker> GetCheckers()
         {
             List<ICastCostChecker> clonedCheckers = new();
-            foreach (var checker in Checkers)
+            foreach (var checker in CostCheckers)
             {
                 List<ICastCostChecker> baseChecks = new();
                 if (checker.EnergyCost > 0)
-                    baseChecks.Add(new EnergyChecker(checker.EnergyCost));
-                if (checker.Cooldown > 0)
-                    baseChecks.Add(new CooldownChecker());
+                    baseChecks.Add(new EnergyChecker(checker.EnergyCost, 0));
+                if (Cooldown > 0)
+                    baseChecks.Add(new CooldownChecker(checker.CooldownConsumption, 0));
                 if (checker.ExtraCostCheckers != null)
                     baseChecks.AddRange(checker.ExtraCostCheckers.Select((x) => x.Clone()));
 
                 if (baseChecks.Count > 1)
                 {
-                    MultiCostChecker multiChecker = new(baseChecks, checker.TargetChecker.Clone(), checker.priority);
+                    MultiCostChecker multiChecker = new(baseChecks, checker.priority);
                     clonedCheckers.Add(multiChecker);
                 }
                 else if (baseChecks.Count == 1)
                 {
-                    baseChecks[0].TargetChecker = checker.TargetChecker.Clone();
-                    clonedCheckers.Add(baseChecks[0]);
+                    clonedCheckers.Add(baseChecks[0].Clone());
                 }
-                else if (checker.TargetChecker != null)
+                else
                 {
-                    clonedCheckers.Add(new NoCheck(checker.priority, checker.TargetChecker.Clone()));
+                    clonedCheckers.Add(new NoCheck(checker.priority));
                 }
             }
             return clonedCheckers;

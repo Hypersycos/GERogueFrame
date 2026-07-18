@@ -14,42 +14,20 @@ namespace Hypersycos.GERogueFrame
         [ListDrawerSettings(ShowFoldout = true)]
         [OdinSerialize] protected List<ICastCostChecker> costCheckerList;
 
-        [ShowInInspector]
-        [OdinSerialize] protected ITargetChecker targetChecker;
-
         protected int _priority;
 
-        public MultiCostChecker(List<ICastCostChecker> costCheckerList, ITargetChecker targetChecker, int priority)
+        public MultiCostChecker(List<ICastCostChecker> costCheckerList, int priority)
         {
             this.costCheckerList = costCheckerList;
-            this.targetChecker = targetChecker;
             _priority = priority;
         }
 
         public MultiCostChecker()
         {
             costCheckerList = new();
-            targetChecker = null;
         }
 
         public int Priority => _priority;
-
-        public ICastEffect Effect { get => targetChecker.Effect; set => targetChecker.Effect = value; }
-        public ITargetChecker TargetChecker { get => targetChecker; set => targetChecker = value; }
-
-        public bool CanCast(CharacterState state, Ability ability, out ITargetChecker checker)
-        {
-            foreach (ICastCostChecker c in costCheckerList)
-            {
-                if (!c.CanCast(state, ability))
-                {
-                    checker = null;
-                    return false;
-                }
-            }
-            checker = targetChecker;
-            return true;
-        }
 
         public bool CanCast(CharacterState state, Ability ability)
         {
@@ -71,7 +49,7 @@ namespace Hypersycos.GERogueFrame
 
         public ICastCostChecker Clone()
         {
-            return new MultiCostChecker(costCheckerList.Select(c => c.Clone()).ToList(), targetChecker.Clone(), _priority);
+            return new MultiCostChecker(costCheckerList.Select(c => c.Clone()).ToList(), _priority);
         }
     }
 }

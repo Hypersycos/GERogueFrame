@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67a31573560f2df4799a0fc994984ffa, type: 3}
+  m_Name: RangedDummyProj
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.NonNetworkedProjectile
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
+  UUID: 
+  ItemName: RangedDummyProj
+  projectileObj: {fileID: 4314035031300602450, guid: 4ec67b52a8feb6b4ea6f43dce99e3fd6, type: 3}

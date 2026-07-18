@@ -12,11 +12,18 @@ namespace Hypersycos.GERogueFrame
     {
         public string AbilityName;
         public string AbilityDescription;
-        public Texture2D AbilityIcon;
+        public Sprite AbilityIcon;
+        public float endlag;
+        public float queueFor;
+        public AbilityIcon IconPrefab;
 
-        public bool TargetOnStart = false;
+        public string Name => AbilityName;
 
         public abstract Ability CreateAbility();
-        public abstract IEnumerable<ICastCostChecker> GetCheckers();
+
+        public AbilityIcon CreateIcon(Transform parent)
+        {
+            return GameObject.Instantiate(IconPrefab, parent);
+        }
     }
 }

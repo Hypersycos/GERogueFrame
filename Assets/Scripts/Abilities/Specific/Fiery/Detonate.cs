@@ -53,6 +53,10 @@ namespace Hypersycos.GERogueFrame
         public LayerMask EnemyLayerMask;
         [SerializeField] AreaOfEffectVisual detonateVisual;
 
+        public bool HasClientCast => true;
+
+        public bool HasOwnerClientCast => true;
+
         public Detonate(float explosionRange, LayerMask enemyLayerMask, AreaOfEffectVisual detonateVisual)
         {
             ExplosionRange = explosionRange;
@@ -65,16 +69,12 @@ namespace Hypersycos.GERogueFrame
             return new Detonate(ExplosionRange, EnemyLayerMask, detonateVisual);
         }
 
-        AbilityPayload ICastEffect.OwnerCastEnd(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
-        {
-            var payloadIn = target as ListTarget<CharacterState>;
-            return new DetonatePayload(payloadIn);
-        }
+        AbilityPayload ICastEffect.OwnerCast(ITargetPayload target, CharacterState myState) => null;
 
-        AbilityPayload ICastEffect.ServerCastEnd(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        AbilityPayload ICastEffect.ServerCast(ITargetPayload target, AbilityPayload payload, CharacterState myState)
         {
             List<CharacterState> affectedStates = new();
-            foreach(CharacterState state in (payload as DetonatePayload).victims)
+            foreach(CharacterState state in (target as IListTarget<CharacterState>).List)
             {
                 IList<StatusInstance> HeatInstances = state.GetStatusInstances(HeatStatusInstance.Heat);
                 if (HeatInstances == null) continue;
@@ -112,7 +112,7 @@ namespace Hypersycos.GERogueFrame
             return new DetonatePayload(affectedStates);
         }
 
-        void ICastEffect.ClientCastEnd(AbilityPayload payload)
+        void ICastEffect.ClientCast(AbilityPayload payload)
         {
             var det = payload as DetonatePayload;
             foreach(CharacterState state in det.victims)
@@ -120,20 +120,33 @@ namespace Hypersycos.GERogueFrame
                 if (state != null)
                 {
                     AreaOfEffectVisual visual = GameObject.Instantiate(detonateVisual, state.transform.position, Quaternion.identity);
+                    visual.endR = ExplosionRange;
                 }
             }
+        }
+
+        public void OwnerClientCast(AbilityPayload networkPayload)
+        {
+            throw new NotImplementedException();
         }
     }
 
     class DetonateFilter : ISecondaryTargetChecker
     {
+        //TODO: LoS?
         public ISecondaryTargetChecker Clone()
         {
             return this;
         }
 
-        public bool HasValidTarget(TargetPayload target, CharacterState myState, out TargetPayload hit)
+        public bool HasValidTarget(ITargetPayload target, CharacterState myState, out ITargetPayload hit)
         {
+            if (!myState.IsServer)
+            {
+                hit = null;
+                return true;
+            }
+
             var payload = target as AreaPayload;
 
             Collider[] colliders = payload.colliders;

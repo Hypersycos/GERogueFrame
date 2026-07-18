@@ -1,67 +1,92 @@
-﻿using Sirenix.Serialization;
+﻿using Hypersycos.Utils;
+using Sirenix.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects
 {
     class CreateDumbProjectile : ICastEffect
     {
-        [SerializeField] ProjectileScript obj;
-        [SerializeField] Vector3 spawnOffset;
+        [SerializeField] NonNetworkedProjectile obj;
         [SerializeField] LayerMask mask;
         [SerializeField] float velocity;
         [SerializeField] float maxRange = 10000;
+        [SerializeField] float lifetime = 10;
 
         public CreateDumbProjectile()
         {
 
         }
 
-        public CreateDumbProjectile(ProjectileScript obj, Vector3 spawnOffset, LayerMask mask, float velocity, float maxRange)
+        public CreateDumbProjectile(NonNetworkedProjectile obj, LayerMask mask, float velocity, float maxRange, float lifetime)
         {
             this.obj = obj;
-            this.spawnOffset = spawnOffset;
             this.mask = mask;
             this.velocity = velocity;
             this.maxRange = maxRange;
+            this.lifetime = lifetime;
+        }
+
+        public bool HasClientCast => false;
+
+        public bool HasOwnerClientCast => false;
+
+        public void ClientCast(AbilityPayload networkPayload)
+        {
+            return;
         }
 
         public ICastEffect Clone()
         {
-            return new CreateDumbProjectile(obj, spawnOffset, mask, velocity, maxRange);
+            return new CreateDumbProjectile(obj, mask, velocity, maxRange, lifetime);
         }
 
-        AbilityPayload ICastEffect.OwnerCastEnd(TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        public AbilityPayload OwnerCast(ITargetPayload targetPayload, CharacterState myState)
         {
-            Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, direction);
-            Vector3 fakePos = rotation * spawnOffset + position;
+            var target = targetPayload as IDumbProjectileTarget;
+            Vector3 fakePos = target.fakePos;
             Vector3 convergePos;
-            if (Physics.Raycast(cameraPosition, direction, out RaycastHit hitInfo, maxRange, mask, QueryTriggerInteraction.Ignore))
+            Vector3 offsetCameraStart = target.camPosition + target.camForward * Vector3.Dot(fakePos - target.camPosition, target.camForward);
+
+            if (Physics.Raycast(offsetCameraStart, target.camForward, out RaycastHit hitInfo, maxRange, mask, QueryTriggerInteraction.Ignore))
             {
                 convergePos = hitInfo.point;
             }
             else
             {
-                convergePos = cameraPosition + direction * maxRange;
+                convergePos = target.camPosition + target.camForward * maxRange;
             }
             Quaternion fakeRotation = Quaternion.FromToRotation(Vector3.forward, convergePos - fakePos);
-            ProjectileSpawnParams spawnParams = new(fakePos, cameraPosition, rotation, fakeRotation, convergePos, velocity);
-            if (ProjectileManager.Singleton.AnticipateDumbProjectile(spawnParams, obj.gameObject, out uint spawnID, out int projectileID, out GameObject spawned))
+            Quaternion camRotation = Quaternion.FromToRotation(Vector3.forward, target.camForward);
+            ProjectileSpawnParams spawnParams = new(fakePos, offsetCameraStart, camRotation, fakeRotation, convergePos, velocity, lifetime);
+            if (ProjectileManager.Singleton.AnticipateDumbProjectile(spawnParams, obj, out uint spawnID, out int projectileID))
             {
                 return new ProjectilePayload(spawnParams, projectileID, new(NetworkManager.Singleton.LocalClientId, spawnID));
             }
             return null;
         }
 
-        AbilityPayload ICastEffect.ServerCastEnd(AbilityPayload payload, TargetPayload target, Vector3 position, Vector3 cameraPosition, Vector3 direction, CharacterState myState)
+        public void OwnerClientCast(AbilityPayload networkPayload)
         {
-            IProjectilePayload projPayload = payload as IProjectilePayload;
+            return;
+        }
+
+        public AbilityPayload ServerCast(ITargetPayload targetPayload, AbilityPayload networkPayload, CharacterState myState)
+        {
+            var target = targetPayload as IDumbProjectileTarget;
+            var projPayload = networkPayload as IProjectilePayload;
             if (projPayload == null)
                 return null;
-            ProjectileManager.Singleton.SpawnDumbProjectile(projPayload.SpawnID, projPayload.ObjectID, projPayload.SpawnParams);
+            var spawnParams = projPayload.SpawnParams;
+            spawnParams.velocity = velocity;
+            spawnParams.lifetime = lifetime;
+            spawnParams.fakePosition = target.fakePos;
+            spawnParams.fakeRotation = Quaternion.FromToRotation(Vector3.forward, spawnParams.focusPoint - spawnParams.fakePosition);
+            ProjectileManager.Singleton.SpawnDumbProjectile(projPayload.SpawnID, obj, spawnParams);
             return null;
         }
     }

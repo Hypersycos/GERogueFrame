@@ -11,16 +11,9 @@ namespace Hypersycos.GERogueFrame
         protected int _priority;
         public int Priority => _priority;
 
-        public ICastEffect Effect { get => TargetChecker.Effect; set => TargetChecker.Effect = value; }
-        ITargetChecker ICastCostChecker.TargetChecker { get => TargetChecker; set => TargetChecker = value; }
-
-        [ShowInInspector]
-        [OdinSerialize] protected ITargetChecker TargetChecker;
-
-        public NoCheck(int priority, ITargetChecker targetChecker)
+        public NoCheck(int priority)
         {
             _priority = priority;
-            TargetChecker = targetChecker;
         }
 
         public NoCheck()
@@ -29,17 +22,11 @@ namespace Hypersycos.GERogueFrame
 
         public bool CanCast(CharacterState state, Ability ability) => true;
 
-        public bool CanCast(CharacterState state, Ability ability, out ITargetChecker checker)
-        {
-            checker = TargetChecker;
-            return true;
-        }
-
         public void Charge(CharacterState state, Ability ability) { }
 
         public ICastCostChecker Clone()
         {
-            NoCheck clone = new(_priority, TargetChecker.Clone());
+            NoCheck clone = new(_priority);
             return clone;
         }
     }

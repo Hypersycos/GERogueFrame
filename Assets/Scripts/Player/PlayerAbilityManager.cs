@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Hypersycos.Utils;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Hypersycos.Utils;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -13,26 +14,45 @@ namespace Hypersycos.GERogueFrame
         protected Ability _weapon;
         public Ability weapon { get => _weapon; set { _weapon = value; AssignAbility(value, controls.Player.Fire, 0); } }
         protected Ability _weaponAlt;
-        public Ability weaponAlt { get => _weapon; set { _weaponAlt = value; AssignAbility(value, controls.Player.Altfire, 1); } }
+        public Ability weaponAlt { get => _weaponAlt; set { _weaponAlt = value; AssignAbility(value, controls.Player.Altfire, 1); } }
 
-        public Ability ability1 { get => _weapon; set { _ability1 = value; AssignAbility(value, controls.Player.Ability1, 2); } }
+        public Ability ability1 { get => _ability1; set { _ability1 = value; AssignAbility(value, controls.Player.Ability1, 2); } }
         protected Ability _ability1;
-        public Ability ability2 { get => _weapon; set { _ability2 = value; AssignAbility(value, controls.Player.Ability2, 3); } }
+        public Ability ability2 { get => _ability2; set { _ability2 = value; AssignAbility(value, controls.Player.Ability2, 3); } }
         protected Ability _ability2;
-        public Ability ability3 { get => _weapon; set { _ability3 = value; AssignAbility(value, controls.Player.Ability3, 4); } }
+        public Ability ability3 { get => _ability3; set { _ability3 = value; AssignAbility(value, controls.Player.Ability3, 4); } }
         protected Ability _ability3;
-        public Ability ability4 { get => _weapon; set { _ability4 = value; AssignAbility(value, controls.Player.Ability4, 5); } }
+        public Ability ability4 { get => _ability4; set { _ability4 = value; AssignAbility(value, controls.Player.Ability4, 5); } }
         protected Ability _ability4;
 
         protected Ability _ultimate;
-        public Ability ultimate { get => _weapon; set { _ultimate = value; AssignAbility(value, controls.Player.Ultimate, 6); } }
+        public Ability ultimate { get => _ultimate; set { _ultimate = value; AssignAbility(value, controls.Player.Ultimate, 6); } }
 
         PlayerState myState;
         ControlsWrapper controlWrapper;
+        Animator animator;
         Controls controls => controlWrapper.controls;
         GameObject playerCamera;
 
-        Ability currentlyCasting = null;
+        Ability _currentlyCasting;
+        Ability currentlyCasting
+        {
+            get
+            {
+                return _currentlyCasting;
+            }
+            set
+            {
+                _currentlyCasting = value;
+                if (IsOwner)
+                {
+                    if (value == null)
+                        animator.SetInteger("Ability", -1);
+                    else
+                        animator.SetInteger("Ability", (int)abilityMap[value]);
+                }
+            }
+        }
 
         TwoWayDictionary<Ability, uint> abilityMap = new();
 
@@ -41,13 +61,29 @@ namespace Hypersycos.GERogueFrame
         private void Awake()
         {
             myState = GetComponent<PlayerState>();
-            playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
+            if (IsOwner)
+                playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
+            else
+                playerCamera = transform.Find("CameraPos").gameObject;
+
+            if (IsServer)
+                myState.OnKilled.AddListener((_, _) => { if (currentlyCasting != null) ServerEndCastAbilityWrapper(0, null, null); });
 
             controlWrapper = ControlsWrapper.Singleton;
+            animator = GetComponent<Animator>();
+            animator.SetInteger("Ability", -1);
         }
 
         private void AssignAbility(Ability ability, InputAction action, uint id)
         {
+            if (!IsOwner)
+            {
+                abilityMap.Remove(id);
+                if (ability != null)
+                    abilityMap.Add(ability, id);
+                return;
+            }
+
             if (actionMap.TryGetValue(action, out var actionPair))
             {
                 action.started -= actionPair.Item1;
@@ -56,23 +92,30 @@ namespace Hypersycos.GERogueFrame
             }
             if (ability != null)
             {
-                actionMap[action] = new((_) => CastAbility(ability), (_) => EndCast(ability));
+                actionMap[action] = new((_) => CastAbilityWrapper(ability, false), (_) => EndCastAbilityWrapper(ability));
                 action.started += actionMap[action].Item1;
                 action.canceled += actionMap[action].Item2;
                 abilityMap.Add(ability, id);
             }
         }
 
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+            foreach(var map in actionMap)
+            {
+                map.Key.started -= map.Value.Item1;
+                map.Key.canceled -= map.Value.Item2;
+            }
+        }
+
         private void Update()
         {
-            if (currentlyCasting != null && currentlyCasting.currentEffect != null)
+            if (currentlyCasting != null)
             {
-                if (IsOwner)
-                    currentlyCasting.currentEffect.OwnerCastUpdate();
-                if (IsServer)
-                    currentlyCasting.currentEffect.ServerCastUpdate();
-                if (IsClient)
-                    currentlyCasting.currentEffect.ClientCastUpdate();
+                Vector3 cameraForward = playerCamera.transform.forward;
+                Vector3 cameraPos = playerCamera.transform.position;
+                currentlyCasting.CastingUpdate(cameraForward, transform.position, cameraPos, myState);
             }
 
             foreach (Ability ability in abilityMap.Keys)
@@ -83,75 +126,152 @@ namespace Hypersycos.GERogueFrame
 
         private void FixedUpdate()
         {
-            if (currentlyCasting != null && currentlyCasting.currentEffect != null)
+            if (currentlyCasting != null)
             {
-                if (IsOwner)
-                    currentlyCasting.currentEffect.OwnerCastFixedUpdate();
-                if (IsServer)
-                    currentlyCasting.currentEffect.ServerCastFixedUpdate();
-                if (IsClient)
-                    currentlyCasting.currentEffect.ClientCastFixedUpdate();
+                Vector3 cameraForward = playerCamera.transform.forward;
+                Vector3 cameraPos = playerCamera.transform.position;
+                try
+                {
+                    currentlyCasting.CastingFixedUpdate(cameraForward, transform.position, cameraPos, myState);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Exception occured while running CastingFixedUpdate for currentCast {cameraForward}, {transform?.position}, {cameraPos}, {myState}");
+                    Debug.LogException(e);
+                }
             }
 
             foreach (Ability ability in abilityMap.Keys)
             {
-                ability.FixedUpdate(myState);
+                try
+                {
+                    ability.FixedUpdate(myState);
+                    if (ability.IsDirty)
+                    {
+                        SyncAbilityRpc(abilityMap[ability], ability.Sync());
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Exception occured while running FixedUpdate for currentCast");
+                    Debug.LogException(e);
+                }
             }
         }
 
-        #region CastAbility
-        private void CastAbility(Ability ability)
+        [Rpc(SendTo.ClientsAndHost)]
+        private void SyncAbilityRpc(uint id, AbilityNetworkPayload payload)
         {
+            Ability ability = abilityMap[id];
+            ability.SyncClient(payload);
+            if (IsOwner && ability.HasOwnerSync)
+                ability.SyncOwner(payload);
+        }
+
+        #region CastAbility
+        private void CastAbilityWrapper(Ability ability, bool isEnd)
+        {
+            if (!myState.HitPoints.IsActive)
+                return;
+
+            try
+            {
+                CastAbility(ability, isEnd);
+            }
+            catch (Exception e)
+            {
+                currentlyCasting = null;
+                Debug.LogError($"Exception occured casting ability");
+                Debug.LogException(e);
+            }
+        }
+        private void CastAbility(Ability ability, bool isEnd)
+        {
+            if (!ability.chargeAtStart && !isEnd)
+                return;
+
             if (currentlyCasting == null)
                 currentlyCasting = ability;
+            else if (!isEnd || currentlyCasting != ability)
+                return;
+
+            if (!ability.chargeAtStart && !isEnd)
+            {
+                if (!ability.CanCast(myState))
+                    currentlyCasting = null;
+                return;
+            }
 
             Vector3 cameraForward = playerCamera.transform.forward;
             Vector3 cameraPos = playerCamera.transform.position;
-            bool success = ability.OwnerCast(cameraForward, transform.position, cameraPos, myState, out AbilityPayload payload);
+            bool success = ability.OwnerCast(cameraForward, transform.position, cameraPos, myState, out int chosenEffect, out AbilityPayload verifyData, out AbilityPayload abilityPayload);
             if (success)
             {
                 if (IsHost)
                 {
-                    success = ability.ServerCast(payload, cameraForward, transform.position, cameraPos, myState, out payload);
-                    if (success)
-                    {
-                        if (payload != null)
-                            AbilityCastPayloadRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial, payload);
-                        else
-                            AbilityCastRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial);
-                    }
+                    ServerCastAbility(abilityMap[ability], chosenEffect, NetworkManager.ServerTime.TickWithPartial, verifyData, abilityPayload);
                 }
                 else
                 {
-                    if (payload != null)
-                        CastAbilityPayloadRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime.TickWithPartial, payload);
+                    if (abilityPayload != null)
+                        if (verifyData != null)
+                            CastAbilityRpc(abilityMap[ability], chosenEffect, NetworkManager.ServerTime.TickWithPartial, verifyData, abilityPayload);
+                        else
+                            CastAbilityPayloadRpc(abilityMap[ability], chosenEffect, NetworkManager.ServerTime.TickWithPartial, abilityPayload);
                     else
-                        CastAbilityRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime.TickWithPartial);
+                        if (verifyData != null)
+                            CastAbilityVerifyRpc(abilityMap[ability], chosenEffect, NetworkManager.ServerTime.TickWithPartial, verifyData);
+                        else
+                            CastAbilityRpc(abilityMap[ability], chosenEffect, NetworkManager.ServerTime.TickWithPartial);
                 }
             }
-            else
+            
+            if (!success || isEnd)
                 currentlyCasting = null;
         }
 
-        [Rpc(SendTo.Server)]
-        private void CastAbilityRpc(uint id, uint effectID, Vector3 cameraPos, Vector3 cameraForward, double time)
+        private void ServerCastAbilityWrapper(uint id, int effectID, double time, AbilityPayload verifyData, AbilityPayload abilityPayload)
         {
-            Ability ability = abilityMap[id];
-            if (currentlyCasting == null)
-                currentlyCasting = ability;
-            else
+            try
+            {
+                ServerCastAbility(id, effectID, time, verifyData, abilityPayload);
+            }
+            catch (Exception e)
+            {
+                currentlyCasting = null;
+                Debug.LogError($"Exception occured casting ability");
+                Debug.LogException(e);
+                CastFailedRpc(id);
+            }
+        }
+
+        private void ServerCastAbility(uint id, int effectID, double time, AbilityPayload verifyData, AbilityPayload abilityPayload)
+        {
+            if (!myState.HitPoints.IsActive)
             {
                 CastFailedRpc(id);
                 return;
             }
 
-            bool success = ability.ServerCast(null, cameraForward, transform.position, cameraPos, myState, out AbilityPayload payload);
+            Ability ability = abilityMap[id];
+            if (currentlyCasting == null)
+                currentlyCasting = ability;
+            else if (!IsHost || currentlyCasting != ability)
+            {
+                CastFailedRpc(id);
+                return;
+            }
+
+            bool success = ability.ServerCast(effectID, verifyData, abilityPayload, myState, out int chosenEffect, out AbilityPayload payload);
             if (success)
             {
                 if (payload != null)
-                    AbilityCastPayloadRpc(abilityMap[ability], ability.currentID, time, payload);
+                    AbilityCastPayloadRpc(abilityMap[ability], chosenEffect, time, payload);
                 else
-                    AbilityCastRpc(abilityMap[ability], ability.currentID, time);
+                    AbilityCastRpc(abilityMap[ability], chosenEffect, time);
+
+                if (!ability.chargeAtStart)
+                    currentlyCasting = null;
             }
             else
             {
@@ -161,30 +281,27 @@ namespace Hypersycos.GERogueFrame
         }
 
         [Rpc(SendTo.Server)]
-        private void CastAbilityPayloadRpc(uint id, uint effectID, Vector3 cameraPos, Vector3 cameraForward, double time, AbilityNetworkPayload payloadIn)
+        private void CastAbilityRpc(uint id, int effectID, double time)
         {
-            Ability ability = abilityMap[id];
-            if (currentlyCasting == null)
-                currentlyCasting = ability;
-            else
-            {
-                CastFailedRpc(id);
-                return;
-            }
+            ServerCastAbilityWrapper(id, effectID, time, null, null);
+        }
 
-            bool success = ability.ServerCast(payloadIn, cameraForward, transform.position, cameraPos, myState, out AbilityPayload payload);
-            if (success)
-            {
-                if (payload != null)
-                    AbilityCastPayloadRpc(abilityMap[ability], ability.currentID, time, payload);
-                else
-                    AbilityCastRpc(abilityMap[ability], ability.currentID, time);
-            }
-            else
-            {
-                currentlyCasting = null;
-                CastFailedRpc(id);
-            }
+        [Rpc(SendTo.Server)]
+        private void CastAbilityRpc(uint id, int effectID, double time, AbilityNetworkPayload verifyData, AbilityNetworkPayload abilityPayload)
+        {
+            ServerCastAbilityWrapper(id, effectID, time, verifyData, abilityPayload);
+        }
+
+        [Rpc(SendTo.Server)]
+        private void CastAbilityPayloadRpc(uint id, int effectID, double time, AbilityNetworkPayload abilityPayload)
+        {
+            ServerCastAbilityWrapper(id, effectID, time, null, abilityPayload);
+        }
+
+        [Rpc(SendTo.Server)]
+        private void CastAbilityVerifyRpc(uint id, int effectID, double time, AbilityNetworkPayload verifyData)
+        {
+            ServerCastAbilityWrapper(id, effectID, time, verifyData, null);
         }
 
         [Rpc(SendTo.Owner)]
@@ -194,160 +311,192 @@ namespace Hypersycos.GERogueFrame
             throw new NotImplementedException();
         }
 
-        [Rpc(SendTo.ClientsAndHost)]
-        private void AbilityCastRpc(uint id, uint effectID, double time)
+        private void AbilityCastWrapper(uint id, int effectID, double time, AbilityPayload payload)
         {
-            Ability ability = abilityMap[id];
-            if (IsOwner)
+            try
             {
-                //TODO: actually handle this case
-                if (ability.currentID != effectID)
-                    throw new Exception("ohno");
+                AbilityCast(id, effectID, time, payload);
             }
-            else
+            catch (Exception e)
             {
-                ability.targets[(int)effectID].Effect.ClientCastStart(null);
+                currentlyCasting = null;
+                Debug.LogError($"Exception occured casting ability");
+                Debug.LogException(e);
             }
         }
 
-        [Rpc(SendTo.ClientsAndHost)]
-        private void AbilityCastPayloadRpc(uint id, uint effectID, double time, AbilityNetworkPayload payload)
+        private void AbilityCast(uint id, int effectID, double time, AbilityPayload payload)
         {
             Ability ability = abilityMap[id];
-            if (IsOwner)
-            {
-                //TODO: actually handle this case
-                if (ability.currentID != effectID)
-                    throw new Exception("ohno");
-            }
-            else
-            {
-                ability.targets[(int)effectID].Effect.ClientCastStart(payload);
-            }
+            if (ability.chargeAtStart)
+                currentlyCasting = ability;
+            ability.ClientCast(effectID, payload, myState);
+        }
+
+        [Rpc(SendTo.ClientsAndHost)]
+        private void AbilityCastRpc(uint id, int effectID, double time)
+        {
+            AbilityCastWrapper(id, effectID, time, null);
+        }
+
+        [Rpc(SendTo.ClientsAndHost)]
+        private void AbilityCastPayloadRpc(uint id, int effectID, double time, AbilityNetworkPayload payload)
+        {
+            AbilityCastWrapper(id, effectID, time, payload);
         }
         #endregion
 
         #region EndCast
-        private void EndCast(Ability ability)
+        private void EndCastAbilityWrapper(Ability ability)
         {
+            try
+            {
+                EndCastAbility(ability);
+            }
+            catch (Exception e)
+            {
+                currentlyCasting = null;
+                Debug.LogError($"Exception occured end-casting ability");
+                Debug.LogException(e);
+                EndCastAbilityRpc(NetworkManager.ServerTime.TickWithPartial);
+            }
+        }
+        private void EndCastAbility(Ability ability)
+        {
+            if (!ability.chargeAtStart && currentlyCasting == null)
+            {
+                CastAbility(ability, true);
+                return;
+            }
+
             if (currentlyCasting != ability)
                 return;
-            currentlyCasting = null;
 
             Vector3 cameraForward = playerCamera.transform.forward;
             Vector3 cameraPos = playerCamera.transform.position;
-            bool success = ability.OwnerCastEnd(cameraForward, transform.position, cameraPos, myState, out AbilityPayload payload);
+            bool success = ability.OwnerCastEnd(cameraForward, transform.position, cameraPos, myState, out AbilityPayload verifyData, out AbilityPayload abilityPayload);
             if (success)
             {
                 if (IsHost)
                 {
-                    success = ability.ServerCastEnd(payload, cameraForward, transform.position, cameraPos, myState, out payload);
-                    if (success)
-                    {
-                        if (payload != null)
-                            EndAbilityCastPayloadRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial, payload);
-                        else
-                            EndAbilityCastRpc(abilityMap[ability], ability.currentID, NetworkManager.ServerTime.TickWithPartial);
-                    }
+                    ServerEndCastAbility(NetworkManager.ServerTime.TickWithPartial, verifyData, abilityPayload);
                 }
                 else
                 {
-                    if (payload != null)
-                        EndCastAbilityPayloadRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime.TickWithPartial, payload);
+                    if (abilityPayload != null)
+                        if (verifyData != null)
+                            EndCastAbilityRpc(NetworkManager.ServerTime.TickWithPartial, verifyData, abilityPayload);
+                        else
+                            EndCastAbilityPayloadRpc(NetworkManager.ServerTime.TickWithPartial, abilityPayload);
                     else
-                        EndCastAbilityRpc(abilityMap[ability], ability.currentID, cameraPos, cameraForward, NetworkManager.ServerTime.TickWithPartial);
+                        if (verifyData != null)
+                            EndCastAbilityVerifyRpc(NetworkManager.ServerTime.TickWithPartial, verifyData);
+                        else
+                            EndCastAbilityRpc(NetworkManager.ServerTime.TickWithPartial);
                 }
             }
-            currentlyCasting = null;
+            else
+                currentlyCasting = null;
         }
-        [Rpc(SendTo.Server)]
-        private void EndCastAbilityRpc(uint id, uint effectID, Vector3 cameraPos, Vector3 cameraForward, double time)
-        {
-            Ability ability = abilityMap[id];
-            if (currentlyCasting != ability)
-            { 
-                EndCastFailedRpc(id);
-                return;
-            }
-            currentlyCasting = null;
 
-            bool success = ability.ServerCastEnd(null, playerCamera.transform.forward, transform.position, playerCamera.transform.position, myState, out AbilityPayload payload);
+        private void ServerEndCastAbilityWrapper(double time, AbilityPayload verifyData, AbilityPayload abilityPayload)
+        {
+            try
+            {
+                ServerEndCastAbility(time, verifyData, abilityPayload);
+            }
+            catch (Exception e)
+            {
+                EndCastFailedRpc(abilityMap[currentlyCasting]);
+                currentlyCasting = null;
+                Debug.LogError($"Exception occured end-casting ability");
+                Debug.LogException(e);
+            }
+        }
+
+        private void ServerEndCastAbility(double time, AbilityPayload verifyData, AbilityPayload abilityPayload)
+        {
+            Ability ability = currentlyCasting;
+
+            bool success = ability.ServerCastEnd(verifyData, abilityPayload, myState, out AbilityPayload payload);
             if (success)
             {
                 if (payload != null)
-                    EndAbilityCastPayloadRpc(abilityMap[ability], ability.currentID, time, payload);
+                    AbilityCastEndPayloadRpc(time, payload);
                 else
-                    EndAbilityCastRpc(abilityMap[ability], ability.currentID, time);
+                    AbilityCastEndRpc(time);
             }
             else
-                EndCastFailedRpc(id);
-            currentlyCasting = null;
+            {
+                EndCastFailedRpc(abilityMap[ability]);
+            }
+
+            if (!IsHost)
+                currentlyCasting = null;
         }
 
         [Rpc(SendTo.Server)]
-        private void EndCastAbilityPayloadRpc(uint id, uint effectID, Vector3 cameraPos, Vector3 cameraForward, double time, AbilityNetworkPayload payloadIn)
+        private void EndCastAbilityRpc(double time)
         {
-            Ability ability = abilityMap[id];
-            if (currentlyCasting != ability)
-            {
-                EndCastFailedRpc(id);
-                return;
-            }
-
-            bool success = ability.ServerCastEnd(payloadIn, playerCamera.transform.forward, transform.position, playerCamera.transform.position, myState, out AbilityPayload payload);
-            if (success)
-            {
-                if (payload != null)
-                    EndAbilityCastPayloadRpc(abilityMap[ability], ability.currentID, time, payload);
-                else
-                    EndAbilityCastRpc(abilityMap[ability], ability.currentID, time);
-            }
-            else
-                EndCastFailedRpc(id);
-            currentlyCasting = null;
+            ServerEndCastAbilityWrapper(time, null, null);
         }
 
-        [Rpc(SendTo.Owner)]
+        [Rpc(SendTo.Server)]
+        private void EndCastAbilityRpc(double time, AbilityNetworkPayload verifyData, AbilityNetworkPayload abilityPayload)
+        {
+            ServerEndCastAbilityWrapper(time, verifyData, abilityPayload);
+        }
+
+        [Rpc(SendTo.Server)]
+        private void EndCastAbilityPayloadRpc(double time, AbilityNetworkPayload abilityPayload)
+        {
+            ServerEndCastAbilityWrapper(time, null, abilityPayload);
+        }
+
+        [Rpc(SendTo.Server)]
+        private void EndCastAbilityVerifyRpc(double time, AbilityNetworkPayload verifyData)
+        {
+            ServerEndCastAbility(time, verifyData, null);
+        }
+
+        [Rpc(SendTo.NotServer)]
         private void EndCastFailedRpc(uint id)
         {
+            AbilityCastEndWrapper(-1, null);
+        }
+
+        private void AbilityCastEndWrapper(double time, AbilityPayload payload)
+        {
+            try
+            {
+                AbilityCastEnd(time, payload);
+            }
+            catch (Exception e)
+            {
+                currentlyCasting = null;
+                Debug.LogError($"Exception occured end-casting ability");
+                Debug.LogException(e);
+            }
+        }
+
+        private void AbilityCastEnd(double time, AbilityPayload payload)
+        {
+            var ability = currentlyCasting;
+            ability.ClientCastEnd(payload, myState);
             currentlyCasting = null;
-            throw new NotImplementedException();
         }
 
         [Rpc(SendTo.ClientsAndHost)]
-        private void EndAbilityCastRpc(uint id, uint effectID, double time)
+        private void AbilityCastEndRpc(double time)
         {
-            Ability ability = abilityMap[id];
-            if (IsOwner)
-            {
-                //TODO: actually handle this case
-                if (ability.currentID != effectID)
-                    throw new Exception("ohno");
-                ability.targets[(int)effectID].Effect.ClientCastEnd(null);
-            }
-            else
-            {
-                ability.targets[(int)effectID].Effect.ClientCastEnd(null);
-            }
+            AbilityCastEndWrapper(time, null);
         }
 
         [Rpc(SendTo.ClientsAndHost)]
-        private void EndAbilityCastPayloadRpc(uint id, uint effectID, double time, AbilityNetworkPayload payload)
+        private void AbilityCastEndPayloadRpc(double time, AbilityNetworkPayload payload)
         {
-            Ability ability = abilityMap[id];
-            if (IsOwner)
-            {
-                //TODO: actually handle this case
-                if (ability.currentID != effectID)
-                    throw new Exception("ohno");
-                ability.targets[(int)effectID].Effect.ClientCastEnd(payload);
-            }
-            else
-            {
-                ability.targets[(int)effectID].Effect.ClientCastEnd(payload);
-            }
+            AbilityCastEndWrapper(time, payload);
         }
-
         #endregion
     }
 }

@@ -26,40 +26,29 @@ MonoBehaviour:
     SerializationNodes:
     - Name: AbilityData
       Entry: 7
-      Data: 0|Hypersycos.GERogueFrame.StandardAbilityData, Assembly-CSharp
+      Data: 0|Hypersycos.GERogueFrame.FlamethrowerData, Assembly-CSharp
     - Name: AbilityName
-      Entry: 6
-      Data: 
+      Entry: 1
+      Data: Flamethrower
     - Name: AbilityDescription
-      Entry: 6
-      Data: 
+      Entry: 1
+      Data: Deals 15dps within 10m in a 30 degree cone. Applies 30dps over 3s as
+        a {{S|Heat}} status effect. Damage falls off to 30% at maximum range.
     - Name: AbilityIcon
       Entry: 6
       Data: 
-    - Name: TargetOnStart
-      Entry: 5
-      Data: true
-    - Name: Cooldown
+    - Name: endlag
       Entry: 4
       Data: 0
-    - Name: EnergyCost
+    - Name: queueFor
       Entry: 4
       Data: 0
-    - Name: priority
-      Entry: 3
-      Data: 0
-    - Name: ExtraCheckers
+    - Name: IconPrefab
       Entry: 6
       Data: 
-    - Name: TargetChecker
-      Entry: 7
-      Data: 1|Hypersycos.GERogueFrame.NoTarget, Assembly-CSharp
-    - Name: _effect
-      Entry: 7
-      Data: 2|Hypersycos.GERogueFrame.Flamethrower, Assembly-CSharp
     - Name: dps
       Entry: 4
-      Data: 30
+      Data: 15
     - Name: range
       Entry: 4
       Data: 10
@@ -68,16 +57,16 @@ MonoBehaviour:
       Data: 30
     - Name: speed
       Entry: 4
-      Data: 15
+      Data: 10
     - Name: tickrate
       Entry: 4
-      Data: 20
-    - Name: timeCount
-      Entry: 4
       Data: 0
+    - Name: falloff
+      Entry: 4
+      Data: 0.3
     - Name: dot
       Entry: 7
-      Data: 3|Hypersycos.GERogueFrame.HeatStatusInstance, Assembly-CSharp
+      Data: 1|Hypersycos.GERogueFrame.HeatStatusInstance, Assembly-CSharp
     - Name: <StatusEffect>k__BackingField
       Entry: 10
       Data: 0
@@ -86,7 +75,7 @@ MonoBehaviour:
       Data: 30
     - Name: OneTimeEffects
       Entry: 7
-      Data: 4|System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core
+      Data: 2|System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core
     - Name: 
       Entry: 12
       Data: 0
@@ -104,34 +93,34 @@ MonoBehaviour:
       Data: 1
     - Name: ValidStatTypes
       Entry: 7
-      Data: 5|Hypersycos.GERogueFrame.StatTypeTarget, Assembly-CSharp
-    - Name: IsExclusive
-      Entry: 5
-      Data: false
-    - Name: Types
-      Entry: 6
-      Data: 
+      Data: 3|Hypersycos.GERogueFrame.AllValidStatTarget, Assembly-CSharp
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 8
       Data: 
-    - Name: falloff
+    - Name: fakeRange
       Entry: 4
-      Data: 0.3
+      Data: 0.75
+    - Name: fakeRadius
+      Entry: 4
+      Data: 0.75
+    - Name: fakeMask
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 128
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: projectile
       Entry: 10
       Data: 1
     - Name: vfx
       Entry: 10
       Data: 2
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: 
       Entry: 8
       Data: 

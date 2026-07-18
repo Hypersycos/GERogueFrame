@@ -8,10 +8,10 @@ namespace Hypersycos.GERogueFrame
     public class DefensePool
     {
         [SerializeField] List<DefenseStatInstance> DefenseInstances = new();
-        [SerializeField, ReadOnly] protected readonly Dictionary<BoundedStatModifier, StatTypeTarget> BoundedModifiers = new();
-        [SerializeField, ReadOnly] protected readonly Dictionary<StatGainModifier, StatTypeTarget> PositiveGainModifiers = new ();
-        [SerializeField, ReadOnly] protected readonly Dictionary<StatGainModifier, StatTypeTarget> NegativeGainModifiers = new ();
-        [SerializeField, ReadOnly] protected readonly Dictionary<StatRegenerationModifier, StatTypeTarget> StatRegenerationModifiers = new();
+        [SerializeField, ReadOnly] protected readonly Dictionary<BoundedStatModifier, IStatTypeTarget> BoundedModifiers = new();
+        [SerializeField, ReadOnly] protected readonly Dictionary<StatGainModifier, IStatTypeTarget> PositiveGainModifiers = new ();
+        [SerializeField, ReadOnly] protected readonly Dictionary<StatGainModifier, IStatTypeTarget> NegativeGainModifiers = new ();
+        [SerializeField, ReadOnly] protected readonly Dictionary<StatRegenerationModifier, IStatTypeTarget> StatRegenerationModifiers = new();
         CharacterState Owner;
 
         public bool IsActive
@@ -101,11 +101,11 @@ namespace Hypersycos.GERogueFrame
             { //do specific regens & dots first
                 defenseInstance.Tick(deltaTime);
             }
-            foreach(KeyValuePair<StatRegenerationModifier,StatTypeTarget> pair in StatRegenerationModifiers)
+            foreach(KeyValuePair<StatRegenerationModifier, IStatTypeTarget> pair in StatRegenerationModifiers)
             { //DoTs could kill between applications, need to keep checking
                 if (!IsActive) return;
                 StatRegenerationModifier regenerator = pair.Key;
-                StatTypeTarget validTargets = pair.Value;
+                IStatTypeTarget validTargets = pair.Value;
                 float change = regenerator.Tick(deltaTime, MaxValue, Value);
                 if (change > 0)
                 {
@@ -124,7 +124,7 @@ namespace Hypersycos.GERogueFrame
             float amount = instance.ActualAmount;
             float dealt = 0;
 
-            foreach (KeyValuePair<StatRegenerationModifier, StatTypeTarget> pair in StatRegenerationModifiers)
+            foreach (KeyValuePair<StatRegenerationModifier, IStatTypeTarget> pair in StatRegenerationModifiers)
             {
                 if (pair.Key.Value > 0)
                     pair.Key.Interrupt();
@@ -155,7 +155,7 @@ namespace Hypersycos.GERogueFrame
             float amount = instance.ActualAmount;
             float dealt = 0;
 
-            foreach (KeyValuePair<StatRegenerationModifier, StatTypeTarget> pair in StatRegenerationModifiers)
+            foreach (KeyValuePair<StatRegenerationModifier, IStatTypeTarget> pair in StatRegenerationModifiers)
             {
                 if (pair.Key.Value < 0)
                     pair.Key.Interrupt();
@@ -180,7 +180,7 @@ namespace Hypersycos.GERogueFrame
             instance.ActualAmount = dealt;
         }
 
-        public void AddModifier(StatModifier modifier, StatTypeTarget validTargets)
+        public void AddModifier(StatModifier modifier, IStatTypeTarget validTargets)
         {
             switch (modifier)
             {
@@ -230,7 +230,7 @@ namespace Hypersycos.GERogueFrame
             {
                 case BoundedStatModifier bModifier:
                     {
-                        StatTypeTarget validTargets = BoundedModifiers[bModifier];
+                        IStatTypeTarget validTargets = BoundedModifiers[bModifier];
                         foreach (DefenseStatInstance inst in DefenseInstances)
                         {
                             if (validTargets.IsValid(inst.StatType))
@@ -246,7 +246,7 @@ namespace Hypersycos.GERogueFrame
                     break;
                 case StatGainModifier sModifier:
                     {
-                        StatTypeTarget validTargets = StatTypeTarget.AllValid;
+                        IStatTypeTarget validTargets = StatTypeTarget.AllValid;
                         switch (sModifier.GainDirection)
                         {
                             case StatGainModifier.Direction.Negative:

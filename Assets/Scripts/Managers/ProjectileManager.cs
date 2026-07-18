@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hypersycos.Utils;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Unity.Netcode;
@@ -7,7 +8,7 @@ using UnityEngine.UIElements;
 
 namespace Hypersycos.GERogueFrame
 {
-    struct ProjectileID : INetworkSerializable
+    public struct ProjectileID : INetworkSerializable
     {
         public ulong ownerID;
         public uint id;
@@ -25,16 +26,17 @@ namespace Hypersycos.GERogueFrame
         }
     }
 
-    struct ProjectileSpawnParams : INetworkSerializable
+    public struct ProjectileSpawnParams : INetworkSerializable
     {
         public Vector3 fakePosition;
         public Vector3 position;
         public Quaternion rotation;
         public Quaternion fakeRotation;
         public Vector3 focusPoint;
+        public float lifetime;
         public float velocity;
 
-        public ProjectileSpawnParams(Vector3 fakePosition, Vector3 position, Quaternion rotation, Quaternion fakeRotation, Vector3 focusPoint, float velocity)
+        public ProjectileSpawnParams(Vector3 fakePosition, Vector3 position, Quaternion rotation, Quaternion fakeRotation, Vector3 focusPoint, float velocity, float lifetime)
         {
             this.fakePosition = fakePosition;
             this.position = position;
@@ -42,6 +44,7 @@ namespace Hypersycos.GERogueFrame
             this.fakeRotation = fakeRotation;
             this.focusPoint = focusPoint;
             this.velocity = velocity;
+            this.lifetime = lifetime;
         }
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -52,6 +55,7 @@ namespace Hypersycos.GERogueFrame
             serializer.SerializeValue(ref fakeRotation);
             serializer.SerializeValue(ref focusPoint);
             serializer.SerializeValue(ref velocity);
+            serializer.SerializeValue(ref lifetime);
         }
     }
 
@@ -60,7 +64,11 @@ namespace Hypersycos.GERogueFrame
         public static ProjectileManager Singleton;
 
         uint myCount;
-        [SerializeField] ProjectileDatabase projectiles;
+
+        TwoWayDictionary<string, int> Dumb => SODatabase.NetworkedDB.NonNetworkedProjectileIDs;
+        NonNetworkedProjectile GetDumb(int id) => SODatabase.NetworkedDB.NonNetworkedProjectiles[id];
+        TwoWayDictionary<string, int> Networked => SODatabase.NetworkedDB.NetworkedProjectileIDs;
+        NetworkedProjectile GetNetworked(int id) => SODatabase.NetworkedDB.NetworkedProjectiles[id];
 
         Dictionary<uint, GameObject> anticipated = new();
         Dictionary<ProjectileID, GameObject> clientProjectiles = new();
@@ -71,40 +79,36 @@ namespace Hypersycos.GERogueFrame
             Singleton = this;
         }
 
-        public bool AnticipateDumbProjectile(ProjectileSpawnParams spawnParams, GameObject obj, out uint spawnID, out int projectileID, out GameObject spawned)
+        public bool AnticipateDumbProjectile(ProjectileSpawnParams spawnParams, NonNetworkedProjectile obj, out uint spawnID, out int projectileID)
         {
-            if (projectiles.dumbIDs.TryGetValue(obj, out projectileID))
+            if (Dumb.TryGetValue(obj.UUID, out projectileID))
             {
                 spawnID = myCount++;
-                spawned = Instantiate(obj, spawnParams.fakePosition, spawnParams.fakeRotation);
-                ProjectileScript ps = spawned.GetComponent<ProjectileScript>();
-                ps.Anticipate(spawnParams);
-                anticipated.Add(spawnID, spawned);
+                var spawned = Instantiate(obj.projectileObj, spawnParams.fakePosition, spawnParams.fakeRotation);
+                spawned.Anticipate(spawnParams);
+                anticipated.Add(spawnID, spawned.gameObject);
                 return true;
             }
             else
             {
                 spawnID = 0;
-                spawned = null;
                 return false;
             }
         }
 
-        public bool AnticipateSmartProjectile(ProjectileSpawnParams spawnParams, GameObject obj, out uint spawnID, out int projectileID, out GameObject spawned)
+        public bool AnticipateSmartProjectile(ProjectileSpawnParams spawnParams, NetworkedProjectile obj, out uint spawnID, out int projectileID)
         {
-            if (projectiles.networkedIDs.TryGetValue(obj, out projectileID))
+            if (Networked.TryGetValue(obj.UUID, out projectileID))
             {
                 spawnID = myCount++;
-                spawned = Instantiate(obj, spawnParams.fakePosition, spawnParams.fakeRotation);
-                ProjectileScript ps = spawned.GetComponent<ProjectileScript>();
-                ps.Anticipate(spawnParams);
-                anticipated.Add(spawnID, spawned);
+                var spawned = Instantiate(obj.projectileObj, spawnParams.fakePosition, spawnParams.fakeRotation);
+                spawned.Anticipate(spawnParams);
+                anticipated.Add(spawnID, spawned.gameObject);
                 return true;
             }
             else
             {
                 spawnID = 0;
-                spawned = null;
                 return false;
             }
         }
@@ -121,14 +125,22 @@ namespace Hypersycos.GERogueFrame
             }
         }
 
-        public void SpawnDumbProjectile(ProjectileID id, int prefabID, ProjectileSpawnParams spawnParams)
+        public void SpawnAIDumbProjectile(NonNetworkedProjectile obj, CharacterState owner, Vector3 source, Quaternion rotation, float velocity, float lifetime)
         {
-            SpawnClientProjectileRpc(id, prefabID, spawnParams);
-            GameObject obj = projectiles.dumbProjectileList[prefabID];
-            GameObject spawned = Instantiate(obj, spawnParams.position, spawnParams.rotation);
-            ProjectileScript ps = spawned.GetComponent<ProjectileScript>();
-            ps.Server(id, spawnParams);
-            serverProjectiles.Add(id, spawned);
+            ProjectileSpawnParams spawnParams = new(source, source, rotation, rotation, source + rotation * Vector3.forward, velocity, lifetime);
+            ProjectileID id = new(ulong.MaxValue, myCount++);
+            SpawnClientProjectileRpc(id, Dumb[obj.UUID], spawnParams);
+            var spawned = Instantiate(obj.projectileObj, spawnParams.position, spawnParams.rotation);
+            spawned.ServerAI(id, owner, spawnParams);
+            serverProjectiles.Add(id, spawned.gameObject);
+        }
+
+        public void SpawnDumbProjectile(ProjectileID id, NonNetworkedProjectile obj, ProjectileSpawnParams spawnParams)
+        {
+            SpawnClientProjectileRpc(id, Dumb[obj.UUID], spawnParams);
+            var spawned = Instantiate(obj.projectileObj, spawnParams.position, spawnParams.rotation);
+            spawned.Server(id, spawnParams);
+            serverProjectiles.Add(id, spawned.gameObject);
         }
 
         [Rpc(SendTo.ClientsAndHost, InvokePermission = RpcInvokePermission.Everyone)]
@@ -138,24 +150,29 @@ namespace Hypersycos.GERogueFrame
             {
                 return;
             }
-            GameObject obj = projectiles.dumbProjectileList[prefabID];
-            GameObject spawned = Instantiate(obj, spawnParams.fakePosition, spawnParams.fakeRotation);
-            ProjectileScript ps = spawned.GetComponent<ProjectileScript>();
-            ps.Dummy(id, spawnParams);
-            clientProjectiles.Add(id, spawned);
+            NonNetworkedProjectile obj = GetDumb(prefabID);
+            var spawned = Instantiate(obj.projectileObj, spawnParams.fakePosition, spawnParams.fakeRotation);
+            spawned.Dummy(id, spawnParams);
+            clientProjectiles.Add(id, spawned.gameObject);
         }
 
         [Rpc(SendTo.ClientsAndHost, InvokePermission = RpcInvokePermission.Everyone)]
-        public void DespawnClientProjectileRpc(ProjectileID id, Vector3 position)
+        private void DespawnClientProjectileRpc(ProjectileID id, Vector3 position)
         {
             if (clientProjectiles.Remove(id, out GameObject toDestroy))
             {
-                toDestroy.GetComponent<ProjectileScript>().DespawnVisual(position);
+                toDestroy.GetComponent<NonNetworkedProjectileScript>().DespawnVisual(position);
             }
             else if (id.ownerID == NetworkManager.Singleton.LocalClientId && anticipated.Remove(id.id, out GameObject ant))
             {
-                ant.GetComponent<ProjectileScript>().DespawnVisual(position);
+                ant.GetComponent<NonNetworkedProjectileScript>().DespawnVisual(position);
             }
+        }
+
+        public void DespawnMe(ProjectileID myID, Vector3 position)
+        {
+            serverProjectiles.Remove(myID);
+            DespawnClientProjectileRpc(myID, position);
         }
     }
 }

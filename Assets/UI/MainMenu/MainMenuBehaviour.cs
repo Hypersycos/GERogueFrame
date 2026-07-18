@@ -71,6 +71,11 @@ namespace Hypersycos.GERogueFrame
             this.error.text = "";
         }
 
+        private void Start()
+        {
+            ModLoader.RegisterPrefabs();
+        }
+
         private void PlayClicked()
         {
             JoinOrHost.style.display = DisplayStyle.Flex;
@@ -84,7 +89,7 @@ namespace Hypersycos.GERogueFrame
 
         private void SettingsClicked()
         {
-
+            ControlsWrapper.Singleton.OpenMenu(default);
         }
 
         private void BackClicked()

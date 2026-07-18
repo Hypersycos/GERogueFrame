@@ -13,16 +13,19 @@ namespace Hypersycos.GERogueFrame
         [ShowInInspector]
         [OdinSerialize] ITargetChecker TargetChecker;
 
-        public ICastEffect Effect { get => TargetChecker.Effect; set => TargetChecker.Effect = value; }
-
         public ITargetChecker Clone()
         {
             return TargetChecker.Clone();
         }
 
-        public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out TargetPayload hit, out ICastEffect castEffect)
+        public bool HasValidTarget(Vector3 direction, Vector3 position, Vector3 camPosition, CharacterState myState, out ITargetPayload hit, out AbilityPayload verifyData)
         {
-            return TargetChecker.HasValidTarget(direction, position, camPosition, myState, out hit, out castEffect);
+            return TargetChecker.HasValidTarget(direction, position, camPosition, myState, out hit, out verifyData);
+        }
+
+        public bool VerifyTarget(AbilityPayload target, CharacterState myState, out ITargetPayload hit)
+        {
+            return TargetChecker.VerifyTarget(target, myState, out hit);
         }
     }
 }

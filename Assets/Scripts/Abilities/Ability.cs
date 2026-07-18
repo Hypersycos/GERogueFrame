@@ -16,148 +16,35 @@ namespace Hypersycos.GERogueFrame
         public int ServerTick { get; }
     }
 
-    public class Ability
+    public abstract class Ability
     {
-        [ShowInInspector]
-        [ListDrawerSettings(ShowFoldout = true)]
-        [OdinSerialize]
-        public List<ICastCostChecker> targets;
+        public int priority { get; protected set; }
+        public float endlag { get; protected set; }
+        public float queueFor { get; protected set; }
+        public bool chargeAtStart { get; protected set; }
 
-        public Ability(IEnumerable<ICastCostChecker> targets, bool targetOnStart)
+        public Ability(int priority, bool chargeAtStart, float endlag, float queueFor)
         {
-            this.targets = targets.OrderBy(target => target.Priority).ToList();
-            TargetOnStart = targetOnStart;
+            this.priority = priority;
+            this.chargeAtStart = chargeAtStart;
+            this.endlag = endlag;
+            this.queueFor = queueFor;
         }
-
-        public bool TargetOnStart { get; protected set; } = false;
-
-        public ICastEffect currentEffect { get; protected set; }
-        public uint currentID { get; protected set; }
-
-        public virtual void Update(CharacterState myState) { }
-
-        public virtual void FixedUpdate(CharacterState myState) { }
-        public virtual bool IsDirty { get => false; }
-        public virtual AbilityPayload Sync() => null;
-        public virtual void SyncClient(AbilityPayload payload) { }
-        public virtual void SyncOwner(AbilityPayload payload) { }
-
-        public bool OwnerCast(Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState, out AbilityPayload payload)
-        {
-            if (!TargetOnStart)
-            {
-                payload = null;
-                return true;
-            }
-
-            currentEffect = null;
-            currentID = 0;
-            foreach (ICastCostChecker checker in targets)
-            {
-                if (checker.CanCast(myState, this, out ITargetChecker targetChecker))
-                {
-                    targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out TargetPayload target, out ICastEffect effect);
-                    currentEffect = effect;
-                    if (currentEffect != null)
-                    {
-                        payload = currentEffect.OwnerCastStart(target, position, cameraPosition, direction, myState);
-                        return true;
-                    }
-                }
-                currentID++;
-            }
-            payload = null;
-            return false;
-        }
-
-        public bool ServerCast(AbilityPayload payloadIn, Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState, out AbilityPayload payload)
-        {
-            if (!TargetOnStart)
-            {
-                payload = null;
-                return true;
-            }
-
-            currentEffect = null;
-            currentID = 0;
-            foreach (ICastCostChecker checker in targets)
-            {
-                if (checker.CanCast(myState, this, out ITargetChecker targetChecker))
-                {
-                    targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out TargetPayload target, out ICastEffect effect);
-                    currentEffect = effect;
-                    if (currentEffect != null)
-                    {
-                        checker.Charge(myState, this);
-                        payload = currentEffect.ServerCastStart(payloadIn, target, position, cameraPosition, direction, myState);
-                        return true;
-                    }
-                }
-                currentID++;
-            }
-            payload = null;
-            return false;
-        }
-
-        public bool OwnerCastEnd(Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState, out AbilityPayload payload)
-        {
-            if (TargetOnStart)
-            {
-                payload = currentEffect.OwnerCastEnd(null, position, cameraPosition, direction, myState);
-                return true;
-            }
-            else
-            {
-                currentEffect = null;
-                currentID = 0;
-                foreach (ICastCostChecker checker in targets)
-                {
-                    if (checker.CanCast(myState, this, out ITargetChecker targetChecker))
-                    {
-                        targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out TargetPayload target, out ICastEffect effect);
-                        currentEffect = effect;
-                        if (currentEffect != null)
-                        {
-                            payload = currentEffect.OwnerCastEnd(target, position, cameraPosition, direction, myState);
-                            return true;
-                        }
-                    }
-                    currentID++;
-                }
-                payload = null;
-                return false;
-            }
-        }
-
-        public bool ServerCastEnd(AbilityPayload payloadIn, Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState, out AbilityPayload payload)
-        {
-            if (TargetOnStart)
-            {
-                payload = currentEffect.ServerCastEnd(payloadIn, null, position, cameraPosition, direction, myState);
-                return true;
-            }
-            else
-            {
-                currentEffect = null;
-                currentID = 0;
-                foreach (ICastCostChecker checker in targets)
-                {
-                    if (checker.CanCast(myState, this, out ITargetChecker targetChecker))
-                    {
-                        targetChecker.HasValidTarget(direction, position, cameraPosition, myState, out TargetPayload target, out ICastEffect effect);
-                        currentEffect = effect;
-                        if (effect != null)
-                        {
-                            checker.Charge(myState, this);
-                            payload = effect.ServerCastEnd(payloadIn, target, position, cameraPosition, direction, myState);
-                            return true;
-                        }
-                        currentID++;
-                    }
-                }
-                payload = null;
-                return false;
-            }
-        }
+        public abstract void Update(CharacterState myState);
+        public abstract void FixedUpdate(CharacterState myState);
+        public abstract bool CastingUpdate(Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState);
+        public abstract bool CastingFixedUpdate(Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState);
+        public abstract bool IsDirty { get; protected set; }
+        public abstract bool HasOwnerSync { get; }
+        public abstract AbilityPayload Sync();
+        public abstract void SyncClient(AbilityPayload payload);
+        public abstract void SyncOwner(AbilityPayload payload);
+        public abstract bool CanCast(CharacterState myState);
+        public abstract bool OwnerCast(Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState, out int chosenEffect, out AbilityPayload verifyData, out AbilityPayload abilityPayload);
+        public abstract bool ServerCast(int desiredEffect, AbilityPayload verifyData, AbilityPayload abilityPayload, CharacterState myState, out int chosenEffect, out AbilityPayload payload);
+        public abstract void ClientCast(int effectID, AbilityPayload payload, CharacterState myState);
+        public abstract bool OwnerCastEnd(Vector3 direction, Vector3 position, Vector3 cameraPosition, CharacterState myState, out AbilityPayload verifyData, out AbilityPayload abilityPayload);
+        public abstract bool ServerCastEnd(AbilityPayload verifyData, AbilityPayload abilityPayload, CharacterState myState, out AbilityPayload payload);
+        public abstract void ClientCastEnd(AbilityPayload payload, CharacterState myState);
     }
 }

@@ -16,7 +16,9 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
-    - {fileID: 4314035031300602450, guid: f551747c1f93bc043a0b06f13db3b9a5, type: 3}
+    - {fileID: 21300000, guid: d295faed927aba044b0cb94a9913c909, type: 3}
+    - {fileID: 732674372557605872, guid: b033b66049208f54c8c5b4d4a8a21473, type: 3}
+    - {fileID: 11400000, guid: 26ccba738a326934ba11d7dfb9e99495, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -26,17 +28,23 @@ MonoBehaviour:
       Entry: 7
       Data: 0|Hypersycos.GERogueFrame.StandardAbilityData, Assembly-CSharp
     - Name: AbilityName
-      Entry: 6
-      Data: 
+      Entry: 1
+      Data: Airburst
     - Name: AbilityDescription
-      Entry: 6
-      Data: 
+      Entry: 1
+      Data: Applies a 30 damage {{S|Heat}} status effect over 6 seconds
     - Name: AbilityIcon
-      Entry: 6
-      Data: 
-    - Name: TargetOnStart
-      Entry: 5
-      Data: false
+      Entry: 10
+      Data: 0
+    - Name: endlag
+      Entry: 4
+      Data: 1
+    - Name: queueFor
+      Entry: 4
+      Data: 0
+    - Name: IconPrefab
+      Entry: 10
+      Data: 1
     - Name: Cooldown
       Entry: 4
       Data: 5
@@ -51,15 +59,11 @@ MonoBehaviour:
       Data: 
     - Name: TargetChecker
       Entry: 7
-      Data: 1|Hypersycos.GERogueFrame.NoTarget, Assembly-CSharp
-    - Name: _effect
-      Entry: 7
-      Data: 2|Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects.CreateDumbProjectile,
-        Assembly-CSharp
-    - Name: obj
-      Entry: 10
-      Data: 0
-    - Name: spawnOffset
+      Data: 1|Hypersycos.GERogueFrame.DumbProjectileChecker, Assembly-CSharp
+    - Name: spawnObjectPath
+      Entry: 1
+      Data: CameraTarget
+    - Name: offset
       Entry: 7
       Data: UnityEngine.Vector3, UnityEngine.CoreModule
     - Name: 
@@ -67,13 +71,23 @@ MonoBehaviour:
       Data: 0
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0
     - Name: 
       Entry: 8
       Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: CastEffect
+      Entry: 7
+      Data: 2|Hypersycos.GERogueFrame.Assets.Scripts.Abilities.Effects.CreateDumbProjectile,
+        Assembly-CSharp
+    - Name: obj
+      Entry: 10
+      Data: 2
     - Name: mask
       Entry: 7
       Data: UnityEngine.LayerMask, UnityEngine.CoreModule
@@ -85,13 +99,13 @@ MonoBehaviour:
       Data: 
     - Name: velocity
       Entry: 4
-      Data: 15
+      Data: 30
     - Name: maxRange
       Entry: 4
       Data: 15
-    - Name: 
-      Entry: 8
-      Data: 
+    - Name: lifetime
+      Entry: 4
+      Data: 0.5
     - Name: 
       Entry: 8
       Data: 

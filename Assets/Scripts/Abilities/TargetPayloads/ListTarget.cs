@@ -21,7 +21,7 @@ namespace Hypersycos.GERogueFrame
         IList IListTarget.List => (IList)List;
     }
 
-    public record ListTarget : TargetPayload, IListTarget
+    public record ListTarget : ITargetPayload, IListTarget
     {
         private List<object> results;
 
@@ -33,7 +33,7 @@ namespace Hypersycos.GERogueFrame
         public IList List => results;
     }
 
-    public record ListTarget<T> : TargetPayload, IListTarget<T>
+    public record ListTarget<T> : ITargetPayload, IListTarget<T>
     {
         private List<T> results;
 

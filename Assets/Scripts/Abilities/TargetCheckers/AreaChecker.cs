@@ -1,12 +1,7 @@
-﻿using Sirenix.Serialization;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -30,7 +25,7 @@ namespace Hypersycos.GERogueFrame
             return new AreaChecker(Radius, Mask, TriggerInteraction, EmptyIsSuccess);
         }
 
-        public bool HasValidTarget(TargetPayload payload, CharacterState myState, out TargetPayload hit)
+        public bool HasValidTarget(ITargetPayload payload, CharacterState myState, out ITargetPayload hit)
         {
             Collider[] colliders = Physics.OverlapSphere((payload as IVec3Payload).Target, Radius, Mask);
             if (colliders.Length == 0)
@@ -68,7 +63,7 @@ namespace Hypersycos.GERogueFrame
             return new FilteredAreaChecker(Radius, Mask, TriggerInteraction, EmptyIsSuccess, Filter);
         }
 
-        public bool HasValidTarget(TargetPayload payload, CharacterState myState, out TargetPayload hit)
+        public bool HasValidTarget(ITargetPayload payload, CharacterState myState, out ITargetPayload hit)
         {
             Collider[] colliders = Physics.OverlapSphere((payload as IVec3Payload).Target, Radius, Mask);
             colliders = colliders.Where(x => Filter.HasValidTarget(new ComponentPayload<Collider>(x), myState, out _)).ToArray();
@@ -107,13 +102,13 @@ namespace Hypersycos.GERogueFrame
             return new FilteredPayloadAreaChecker(Radius, Mask, TriggerInteraction, EmptyIsSuccess, Filter);
         }
 
-        public bool HasValidTarget(TargetPayload payload, CharacterState myState, out TargetPayload hit)
+        public bool HasValidTarget(ITargetPayload payload, CharacterState myState, out ITargetPayload hit)
         {
             Collider[] colliders = Physics.OverlapSphere((payload as IVec3Payload).Target, Radius, Mask);
-            List<TargetPayload> result = new();
+            List<ITargetPayload> result = new();
             foreach(Collider coll in colliders)
             {
-                if (Filter.HasValidTarget(new ComponentPayload<Collider>(coll), myState, out TargetPayload outPayload))
+                if (Filter.HasValidTarget(new ComponentPayload<Collider>(coll), myState, out ITargetPayload outPayload))
                     result.Add(outPayload);
             }
             if (result.Count == 0)
@@ -123,13 +118,13 @@ namespace Hypersycos.GERogueFrame
             }
             else
             {
-                hit = new ListTarget<TargetPayload>(result);
+                hit = new ListTarget<ITargetPayload>(result);
                 return true;
             }
         }
     }
 
-    public record AreaPayload : TargetPayload, IListTarget<Collider>, IListTarget<ComponentPayload<Collider>>
+    public record AreaPayload : ITargetPayload, IListTarget<Collider>, IListTarget<ComponentPayload<Collider>>
     {
         public Collider[] colliders;
 
