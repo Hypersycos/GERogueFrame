@@ -19,6 +19,7 @@ namespace Hypersycos.GERogueFrame
         public float damageScalingCoeff;
         public float healthScalingCoeff;
         public float moveSpeedCoeff;
+        public float deathTimer;
 
         public void Apply(EnemyState state)
         {
@@ -59,6 +60,8 @@ namespace Hypersycos.GERogueFrame
                     aManager.AddAbility(ability);
                 }
             }
+
+            state.deathAnimationTimer = deathTimer;
         }
 
 #if false && UNITY_EDITOR

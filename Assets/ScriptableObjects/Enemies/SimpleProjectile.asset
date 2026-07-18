@@ -69,3 +69,4 @@ MonoBehaviour:
   damageScalingCoeff: 0.4
   healthScalingCoeff: 0.1
   moveSpeedCoeff: 0
+  deathTimer: 1

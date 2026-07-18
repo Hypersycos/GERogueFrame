@@ -105,7 +105,6 @@ namespace Hypersycos.GERogueFrame
                 spawnedState.OnKilled.AddListener((x, _) => ambientSpawnCount--);
             else
                 spawnedState.OnKilled.AddListener((x, _) => spawnedEnemyCount--);
-            spawnedState.OnKilled.AddListener((x, _) => Destroy(x.gameObject));
         }
 
         private bool GetNavmeshPosition(Vector3 position, EnemySO enemy, float maxDist, float maxHDist, float maxVDist, out Vector3 result)

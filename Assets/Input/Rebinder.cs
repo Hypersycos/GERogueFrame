@@ -70,11 +70,14 @@ namespace Hypersycos.GERogueFrame
             {
                 btn.GetComponentInChildren<TextMeshProUGUI>().text = actionToRebind.GetBindingDisplayString(group: group);
                 op.Dispose();
+                actionToRebind.Enable();
             }
 
             btn.GetComponentInChildren<TextMeshProUGUI>().text = "<ESC>";
+            actionToRebind.Disable();
             var rebindOp = actionToRebind.PerformInteractiveRebinding()
                                          .WithBindingGroup(group)
+                                         //.WithControlsExcluding("Mouse")
                                          .WithCancelingThrough("<Keyboard>/escape")
                                          .OnComplete(OnComplete)
                                          .OnCancel(OnComplete)
@@ -83,16 +86,22 @@ namespace Hypersycos.GERogueFrame
 
         private void Rebind(Button btn, InputAction actionToRebind, string target)
         {
+            int index = actionToRebind.bindings.IndexOf((x) => x.name == target && x.groups.Contains(group));
+
             void OnComplete(InputActionRebindingExtensions.RebindingOperation op)
             {
-                btn.GetComponentInChildren<TextMeshProUGUI>().text = actionToRebind.bindings.First((x) => x.name == target && x.groups.Contains(group)).ToDisplayString();
+                btn.GetComponentInChildren<TextMeshProUGUI>().text = actionToRebind.bindings[index].ToDisplayString();
                 op.Dispose();
+                actionToRebind.Enable();
             }
 
+            Debug.Log(target);
             btn.GetComponentInChildren<TextMeshProUGUI>().text = "<ESC>";
-            var rebindOp = actionToRebind.PerformInteractiveRebinding()
+            actionToRebind.Disable();
+            var rebindOp = actionToRebind.PerformInteractiveRebinding(index)
                              .WithBindingMask(new() { name = target })
                              .WithBindingGroup(group)
+                             //.WithControlsExcluding("Mouse")
                              .WithCancelingThrough("<Keyboard>/escape")
                              .OnComplete(OnComplete)
                              .OnCancel(OnComplete)

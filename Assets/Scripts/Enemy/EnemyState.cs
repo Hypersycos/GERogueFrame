@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -26,6 +27,8 @@ namespace Hypersycos.GERogueFrame
 
         public Transform bar;
 
+        public float deathAnimationTimer;
+
         public void ApplyDefensePool()
         {
             HitPoints = new DefensePool(Defenses, this);
@@ -46,8 +49,26 @@ namespace Hypersycos.GERogueFrame
                 transform.position = hit.position;
                 agent.enabled = true;
                 GetComponent<AIState>().enabled = true;
+                OnKilled.AddListener(Died);
             }
             PersistentStateManager.Singleton.mapState.so.generator.ModifyEnemy(gameObject);
+        }
+
+        public virtual void Died(CharacterState _, DamageInstance __)
+        {
+            foreach (var coll in GetComponents<Collider>())
+            {
+                coll.enabled = false;
+            }
+
+            agent.enabled = false;
+            GetComponent<AIState>().enabled = false;
+
+            if (IsHost)
+                GetComponent<NetworkAnimator>().Animator.SetTrigger("Died");
+            GetComponent<NetworkAnimator>().SetTrigger("Died");
+
+            Destroy(gameObject, deathAnimationTimer);
         }
     }
 }
