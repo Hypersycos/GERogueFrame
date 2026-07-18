@@ -97,6 +97,7 @@ namespace Hypersycos.GERogueFrame
             if (Singleton != null)
             {
                 Singleton.FadeOut();
+                PersistentAudioManager.PlayMusic(true);
             }
             Singleton = this;
         }
@@ -142,12 +143,17 @@ namespace Hypersycos.GERogueFrame
                 ControlsWrapper.Singleton.SetUIState(false);
             else
                 ControlsWrapper.Singleton.SetUIState(true);
+
+            if (newValue == GameState.Playing)
+                PersistentAudioManager.PlayMusic(false);
         }
 
         public override void OnNetworkDespawn()
         {
             NetworkManager.SceneManager.OnLoad -= SceneChangeStarted;
             NetworkManager.SceneManager.OnLoadComplete -= SceneChangeCompleted;
+
+            PersistentAudioManager.PlayMusic(true);
         }
 
         void SceneChangeStarted(ulong clientId, string sceneName, LoadSceneMode loadSceneMode, AsyncOperation asyncOperation)

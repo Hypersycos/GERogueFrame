@@ -81,7 +81,7 @@ AudioMixerController:
   - guid: d868c936cc477434bbf8e6913e2fdec1
     name: Master
   - guid: b9d23e84cb79b694abe533808538278e
-    name: MyExposedParam 6
+    name: Music
   - guid: 2a3633b7367d3af4b918a392b2182a6a
     name: PlayerSFX
   - guid: 71596697236746c4f8b3fc4e7da526c7
@@ -142,7 +142,9 @@ AudioMixerSnapshotController:
   m_Name: Snapshot
   m_AudioMixer: {fileID: 24100000}
   m_SnapshotID: e0656f1f2c7c75e438fb89b467155743
-  m_FloatValues: {}
+  m_FloatValues:
+    eb53f184254933b46aea42563f56c167: 0.05
+    e775410d741030846b12dbe4f38b2cf3: 5
   m_TransitionOverrides: {}
 --- !u!243 &640216624648647964
 AudioMixerGroupController:

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c241b54fa0b859748acdac691320bc63, type: 3}
+  m_Name: Music
+  m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.FloatSetting
+  _IsEphemeral: 0
+  RegisteredSerializers: []
+  ValueUpdated:
+    m_PersistentCalls:
+      m_Calls: []
+  DefaultValue: 0.5
+  DefaultGenerator: {fileID: 0}
+  validators:
+  - {fileID: 11400000, guid: e73099f76890c004789cb5c823ca5b2b, type: 2}
+  SerializedValue: 0
+  IsNetworked: 0
+  ServerValue: 0
+  FriendlyName: 
+  ShortDescription: 
+  LongDescription: 
