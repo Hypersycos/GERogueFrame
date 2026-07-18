@@ -94,6 +94,14 @@ namespace Hypersycos.Utils
             AddOperation(Operation.OP_ADD, key, value, default, true);
         }
 
+        public new bool TryAdd(TKey key, TValue value)
+        {
+            bool result = base.TryAdd(key, value);
+            if (result)
+                AddOperation(Operation.OP_ADD, key, value, default, true);
+            return result;
+        }
+
         public new bool Remove(TKey key)
         {
             if (TryGetValue(key, out TValue oldItem) && base.Remove(key))

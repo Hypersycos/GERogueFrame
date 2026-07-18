@@ -1,3 +1,4 @@
+using Hypersycos.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -31,13 +32,28 @@ namespace Hypersycos.GERogueFrame
         }
     }
 
+    public class NetworkDict
+    {
+        public enum EventType
+        {
+            Add,
+            Change,
+            Remove,
+            Clear
+        }
+    }
+
     [GenerateSerializationForGenericParameterAttribute(0)]
     [GenerateSerializationForGenericParameterAttribute(1)]
     public class NetworkDict<K,V> : IDictionary, IDictionary<K,V> where K : unmanaged, IEquatable<K>, IComparable, IComparable<K>, IConvertible where V : unmanaged, IEquatable<V>
     {
-        Dictionary<K, int> keyMap;
+
+
+        EventDict<K, int> keyMap;
         BetterNetworkList<KeyIndexPair<K>> keys;
         BetterNetworkList<V> values;
+
+        public event Action<NetworkDict.EventType, K, V> OnDictionaryChanged;
 
         public NetworkDict()
         {
@@ -53,10 +69,33 @@ namespace Hypersycos.GERogueFrame
 
             if (isClient)
                 keys.OnListChanged += OnKeysChanged;
+            
+            keyMap.OnChange += OnKeyMapChanged;
 
             foreach (KeyIndexPair<K> key in keys)
             {
                 keyMap.Add(key.Key, key.index);
+            }
+        }
+
+        private void OnKeyMapChanged(EventDict<K, int>.Operation operation, K key, int index)
+        {
+            switch (operation)
+            {
+                case EventDict<K, int>.Operation.OP_ADD:
+                    OnDictionaryChanged?.Invoke(NetworkDict.EventType.Add, key, values[index]);
+                    break;
+                case EventDict<K, int>.Operation.OP_CLEAR:
+                    OnDictionaryChanged?.Invoke(NetworkDict.EventType.Clear, default, default);
+                    break;
+                case EventDict<K, int>.Operation.OP_REMOVE:
+                    OnDictionaryChanged?.Invoke(NetworkDict.EventType.Remove, key, values[index]);
+                    break;
+                case EventDict<K, int>.Operation.OP_SET:
+                    OnDictionaryChanged?.Invoke(NetworkDict.EventType.Change, key, values[index]);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -91,9 +130,25 @@ namespace Hypersycos.GERogueFrame
         bool CanClientRead => isValid && keys.CanClientRead(NetworkManager.Singleton.LocalClientId) && values.CanClientRead(NetworkManager.Singleton.LocalClientId);
         bool CanClientWrite => isValid && values.CanClientWrite(NetworkManager.Singleton.LocalClientId) && keys.CanClientWrite(NetworkManager.Singleton.LocalClientId);
 
-        public V this[K key] { get => values[keyMap[key]]; set => values[keyMap[key]] = value; }
+        public V this[K key]
+        {
+            get => values[keyMap[key]];
+            set
+            {
+                values[keyMap[key]] = value;
+                OnDictionaryChanged?.Invoke(NetworkDict.EventType.Change, key, value);
+            }
+        }
 
-        object IDictionary.this[object key] { get => this[(K)key]; set => this[(K)key] = (V)value; }
+        object IDictionary.this[object key]
+        {
+            get => values[keyMap[(K)key]];
+            set
+            {
+                values[keyMap[(K)key]] = (V)value;
+                OnDictionaryChanged?.Invoke(NetworkDict.EventType.Change, (K)key, (V)value);
+            }
+        }
 
         public ICollection<K> Keys => keys.Select((KeyIndexPair<K> pair) => pair.Key).ToList();
 

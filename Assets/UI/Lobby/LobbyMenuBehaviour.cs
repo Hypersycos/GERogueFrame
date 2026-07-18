@@ -68,7 +68,7 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] Sprite readyCheck;
         [SerializeField] Sprite notReadyCheck;
 
-        List<GameObject> playerIcons = new();
+        Dictionary<ulong, GameObject> playerIcons = new();
 
         [SerializeField] Transform characterHolder;
         [SerializeField] GameObject characterPrefab;
@@ -119,51 +119,43 @@ namespace Hypersycos.GERogueFrame
             SetReadyServerRpc(!readyData[networkManager.LocalClientId].isReady);
         }
 
-        private void RefreshList(NetworkListEvent<LobbyPlayerState> changeEvent)
+        private void RefreshList(NetworkDict.EventType type, ulong key, LobbyPlayerState newValue)
         {
-            switch (changeEvent.Type)
+            switch (type)
             {
-                case NetworkListEvent<LobbyPlayerState>.EventType.Add:
+                case NetworkDict.EventType.Add:
                     var inst = Instantiate(playerPrefab, playerHolder);
-                    inst.transform.GetChild(2).GetComponent<Image>().color = notReadyColour;
-                    inst.transform.GetChild(2).GetChild(0).GetComponent<Image>().sprite = notReadyCheck;
-                    playerIcons.Add(inst);
-                    break;
-                case NetworkListEvent<LobbyPlayerState>.EventType.Insert:
-                    inst = Instantiate(playerPrefab, playerHolder);
-                    playerIcons.Insert(changeEvent.Index, inst);
-                    break;
-                case NetworkListEvent<LobbyPlayerState>.EventType.Remove:
-                case NetworkListEvent<LobbyPlayerState>.EventType.RemoveAt:
-                    playerIcons.RemoveAt(changeEvent.Index);
-                    break;
-                case NetworkListEvent<LobbyPlayerState>.EventType.Value:
-                    if (changeEvent.Value.isReady)
+                    playerIcons.Add(key, inst);
+                    goto case NetworkDict.EventType.Change;
+                case NetworkDict.EventType.Change:
+                    if (newValue.isReady)
                     {
-                        playerIcons[changeEvent.Index].transform.GetChild(2).GetComponent<Image>().color = readyColour;
-                        playerIcons[changeEvent.Index].transform.GetChild(2).GetChild(0).GetComponent<Image>().sprite = readyCheck;
+                        playerIcons[key].transform.GetChild(2).GetComponent<Image>().color = readyColour;
+                        playerIcons[key].transform.GetChild(2).GetChild(0).GetComponent<Image>().sprite = readyCheck;
                     }
                     else
                     {
-                        playerIcons[changeEvent.Index].transform.GetChild(2).GetComponent<Image>().color = notReadyColour;
-                        playerIcons[changeEvent.Index].transform.GetChild(2).GetChild(0).GetComponent<Image>().sprite = notReadyCheck;
+                        playerIcons[key].transform.GetChild(2).GetComponent<Image>().color = notReadyColour;
+                        playerIcons[key].transform.GetChild(2).GetChild(0).GetComponent<Image>().sprite = notReadyCheck;
                     }
-                    if (changeEvent.Value.characterID >= 0)
+                    if (newValue.characterID >= 0)
                     {
-                        playerIcons[changeEvent.Index].transform.GetChild(1).GetComponent<Image>().sprite = SODatabase.NetworkedDB.PlayerCharacters[changeEvent.Value.characterID].Icon;
-                        playerIcons[changeEvent.Index].transform.GetChild(1).GetComponent<Image>().enabled = true;
+                        playerIcons[key].transform.GetChild(1).GetComponent<Image>().sprite = SODatabase.NetworkedDB.PlayerCharacters[newValue.characterID].Icon;
+                        playerIcons[key].transform.GetChild(1).GetComponent<Image>().enabled = true;
                     }
                     else
-                        playerIcons[changeEvent.Index].transform.GetChild(1).GetComponent<Image>().enabled = false;
+                        playerIcons[key].transform.GetChild(1).GetComponent<Image>().enabled = false;
                     break;
-                case NetworkListEvent<LobbyPlayerState>.EventType.Clear:
-                    foreach(GameObject obj in playerIcons)
+                case NetworkDict.EventType.Remove:
+                    Destroy(playerIcons[key]);
+                    playerIcons.Remove(key);
+                    break;
+                case NetworkDict.EventType.Clear:
+                    foreach(GameObject obj in playerIcons.Values)
                     {
                         Destroy(obj);
                     }
                     playerIcons.Clear();
-                    break;
-                case NetworkListEvent<LobbyPlayerState>.EventType.Full:
                     break;
                 default:
                     break;
@@ -186,14 +178,12 @@ namespace Hypersycos.GERogueFrame
                 }
             }
 
-            int i = 0;
-            foreach(var id in readyData.Keys)
+            foreach(var pair in readyData)
             {
-                RefreshList(new() { Type = NetworkListEvent<LobbyPlayerState>.EventType.Add });
-                RefreshList(new() { Type = NetworkListEvent<LobbyPlayerState>.EventType.Value, Index = i++, Value = readyData[id] });
+                RefreshList(NetworkDict.EventType.Add, pair.Key, pair.Value);
             }
 
-            readyValues.OnListChanged += RefreshList;
+            readyData.OnDictionaryChanged += RefreshList;
 
             StartCoroutine(CreateCharacterIcons());
         }
