@@ -7819,6 +7819,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   projectileSource: {fileID: 0}
+  audioSource: {fileID: 0}
   id:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -7840,7 +7841,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hypersycos.GERogueFrame.SimpleMeleeAI
   attackWindup: 0.66
-  attackLockout: 0.5
+  attackLockout: 0.75
   attackDistance: 1
   attackRange: 2
   horizontalArc: 120

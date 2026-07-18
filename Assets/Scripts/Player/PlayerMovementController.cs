@@ -14,6 +14,7 @@ namespace Hypersycos.GERogueFrame
         InputAction move;
         ControlsWrapper controlWrapper;
         Controls controls => controlWrapper.controls;
+        PlayerState myState;
 
         [Header("Stats")]
         [SerializeField] public float movementSpeed = 4f;
@@ -87,6 +88,7 @@ namespace Hypersycos.GERogueFrame
 
             move = controls.Player.Move;
             velocityAvgCount = Mathf.CeilToInt(velocityAvgPeriod / Time.fixedDeltaTime);
+            myState = GetComponent<PlayerState>();
         }
 
         public override void OnDestroy()
@@ -233,6 +235,9 @@ namespace Hypersycos.GERogueFrame
         {
             Vector3 inputForce = Vector3.zero;
             Vector2 moveInput = move.ReadValue<Vector2>();
+
+            if (!myState.HitPoints.IsActive)
+                moveInput = Vector2.zero;
 
             if (moveInput.magnitude > 1)
                 moveInput = moveInput.normalized;

@@ -66,6 +66,9 @@ namespace Hypersycos.GERogueFrame
             else
                 playerCamera = transform.Find("CameraPos").gameObject;
 
+            if (IsServer)
+                myState.OnKilled.AddListener((_, _) => { if (currentlyCasting != null) ServerEndCastAbilityWrapper(0, null, null); });
+
             controlWrapper = ControlsWrapper.Singleton;
             animator = GetComponent<Animator>();
             animator.SetInteger("Ability", -1);
@@ -168,6 +171,9 @@ namespace Hypersycos.GERogueFrame
         #region CastAbility
         private void CastAbilityWrapper(Ability ability, bool isEnd)
         {
+            if (!myState.HitPoints.IsActive)
+                return;
+
             try
             {
                 CastAbility(ability, isEnd);
@@ -241,6 +247,12 @@ namespace Hypersycos.GERogueFrame
 
         private void ServerCastAbility(uint id, int effectID, double time, AbilityPayload verifyData, AbilityPayload abilityPayload)
         {
+            if (!myState.HitPoints.IsActive)
+            {
+                CastFailedRpc(id);
+                return;
+            }
+
             Ability ability = abilityMap[id];
             if (currentlyCasting == null)
                 currentlyCasting = ability;
@@ -447,11 +459,10 @@ namespace Hypersycos.GERogueFrame
             ServerEndCastAbility(time, verifyData, null);
         }
 
-        [Rpc(SendTo.Owner)]
+        [Rpc(SendTo.NotServer)]
         private void EndCastFailedRpc(uint id)
         {
-            currentlyCasting = null;
-            throw new NotImplementedException();
+            AbilityCastEndWrapper(-1, null);
         }
 
         private void AbilityCastEndWrapper(double time, AbilityPayload payload)

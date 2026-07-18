@@ -121,6 +121,7 @@ namespace Hypersycos.GERogueFrame
                 else
                     Singleton.currentClip = Singleton.gameClips.TakeRandom();
                 Singleton.StartCoroutine(Fade(Singleton.altSource, Singleton.currentSource));
+                Singleton.inMenu = menu;
             }
         }
     }

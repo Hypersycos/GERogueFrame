@@ -299,8 +299,11 @@ namespace Hypersycos.GERogueFrame
             ulong senderID = rpcParams.Receive.SenderClientId;
 
             LobbyPlayerState state = readyData[senderID];
+
+            ready = ready && state.characterID >= 0;
+
             bool oldReady = state.isReady;
-            state.isReady = ready && state.characterID != int.MaxValue;
+            state.isReady = ready && state.characterID != int.MinValue;
 
             if (oldReady != state.isReady)
             {

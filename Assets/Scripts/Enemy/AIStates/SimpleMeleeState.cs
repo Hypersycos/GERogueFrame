@@ -80,7 +80,8 @@ namespace Hypersycos.GERogueFrame
             {
                 name = "PostAttack",
                 duration = attackLockout,
-                behaviour = null,
+                behaviour = PostAttack,
+                IsOneShot = true,
                 transitions = new() { new() { condition = null, target = "Hunt" } }
             });
 
@@ -142,6 +143,11 @@ namespace Hypersycos.GERogueFrame
         {
             SetAnim("Attack");
             agent.destination = transform.position;
+        }
+
+        private void PostAttack(CharacterState state, float arg2)
+        {
+            SetAnim("Idle");
         }
 
         private bool CanAttack(CharacterState state)

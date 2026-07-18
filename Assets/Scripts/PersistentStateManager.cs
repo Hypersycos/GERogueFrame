@@ -239,6 +239,7 @@ namespace Hypersycos.GERogueFrame
             NetworkManager.SceneManager.LoadScene("LobbyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
 
+        [Rpc(SendTo.ClientsAndHost)]
         public void BackToLobbyRpc()
         {
             loadingScreen.BackToLobby();
