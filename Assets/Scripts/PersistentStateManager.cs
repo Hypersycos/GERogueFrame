@@ -296,7 +296,7 @@ namespace Hypersycos.GERogueFrame
             AllPlayersLoaded.RemoveListener(StartRound);
             SpawnPlayers();
             GameObject.FindWithTag("Managers").GetComponent<EnemySpawnManager>().enabled = true;
-            GameObject.FindWithTag("Managers").GetComponent<ObjectiveManager>().roundEndTime.Value = (float)(NetworkManager.ServerTime.Time + 250f - 10 * rounds);
+            GameObject.FindWithTag("Managers").GetComponent<ObjectiveManager>().roundEndTime.Value = (float)(Time.time + 250f - 10 * rounds);
         }
 
         private void SpawnPlayers()

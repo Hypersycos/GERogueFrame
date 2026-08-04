@@ -88,14 +88,14 @@ namespace Hypersycos.GERogueFrame
 
         private void Update()
         {
-            float rem = (float)(roundEndTime.Value - NetworkManager.ServerTime.Time);
+            float rem = (float)(roundEndTime.Value - Time.time);
             TimeSpan time = TimeSpan.FromSeconds(rem);
             timer.text = time.ToString(@"mm\:ss");
         }
 
         private void FixedUpdate()
         {
-            if (IsServer && roundEndTime.Value - NetworkManager.ServerTime.Time <= 0)
+            if (IsServer && roundEndTime.Value - Time.time <= 0)
                 PersistentStateManager.Singleton.EndGame(GameEndReason.Time);
         }
 
