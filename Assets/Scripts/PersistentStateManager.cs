@@ -138,7 +138,9 @@ namespace Hypersycos.GERogueFrame
         private void HandleGameStateValueChange(GameState previousValue, GameState newValue)
         {
             if (previousValue == GameState.LoadingGame && newValue != GameState.LoadingGame)
+            {
                 loadingScreen.Hide();
+            }
             if (newValue == GameState.Playing)
                 ControlsWrapper.Singleton.SetUIState(false);
             else
@@ -295,8 +297,6 @@ namespace Hypersycos.GERogueFrame
         {
             AllPlayersLoaded.RemoveListener(StartRound);
             SpawnPlayers();
-            GameObject.FindWithTag("Managers").GetComponent<EnemySpawnManager>().enabled = true;
-            GameObject.FindWithTag("Managers").GetComponent<ObjectiveManager>().roundEndTime.Value = (float)(Time.time + 250f - 10 * rounds);
         }
 
         private void SpawnPlayers()

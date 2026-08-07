@@ -1,3 +1,4 @@
+using Hypersycos.SaveSystem;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -13,6 +14,9 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] TextMeshProUGUI aboveFPS;
         [SerializeField] TextMeshProUGUI belowFPS;
 
+        [SerializeField] TypedRegisteredValueSO<int> MinVRRSetting;
+        [SerializeField] TypedRegisteredValueSO<int> MaxVRRSetting;
+
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         float minFrameTime;
         float maxFrameTime;
@@ -21,15 +25,15 @@ namespace Hypersycos.GERogueFrame
 
         float timer = 0;
         int frameCounter = 0;
-        float maxFPS = 0;
+        int maxFPS => MaxVRRSetting.Value;
+        int minFPS => MinVRRSetting.Value;
 
         void Awake()
         {
-            maxFPS = (float)Screen.currentResolution.refreshRateRatio.value;
             QualitySettings.vSyncCount = 0;
             canvasGroup = GetComponent<CanvasGroup>();
 
-            StartExperiment(Mathf.FloorToInt(maxFPS), Mathf.FloorToInt(maxFPS), 15, 5, 0, false);
+            //StartExperiment(maxFPS, maxFPS, 15, 5, 0, false);
         }
 
         public void SetTarget(int targetRate)
@@ -77,12 +81,12 @@ namespace Hypersycos.GERogueFrame
             if (Time.deltaTime < minFrameTime)
             {
                 tooFast.Add(timer);
-                Debug.Log($"Fast: {Time.deltaTime} / {minFrameTime}");
+                //Debug.Log($"Fast: {Time.deltaTime} / {minFrameTime}");
             }
             else if (Time.deltaTime > maxFrameTime)
             {
                 tooSlow.Add(timer);
-                Debug.Log($"Slow: {Time.deltaTime} / {maxFrameTime}");
+                //Debug.Log($"Slow: {Time.deltaTime} / {maxFrameTime}");
             }
             timer += Time.deltaTime;
             frameCounter++;
@@ -115,9 +119,9 @@ namespace Hypersycos.GERogueFrame
             DoNext();
         }
 
-        void DoNext()
+        public void DoNext(bool fadeOut = true)
         {
-            StartExperiment(Mathf.RoundToInt(Random.Range(15, maxFPS)), Mathf.RoundToInt(Random.Range(15, maxFPS)), 20, Random.Range(5f, 15f), Random.Range(0f, 2f));
+            StartExperiment(Random.Range(minFPS, maxFPS+1), Random.Range(minFPS, maxFPS + 1), 20, Random.Range(5f, 15f), Random.Range(0f, 2f), fadeOut);
         }
 
         void StartExperiment(int startFPS, int endFPS, float duration, float transitionPoint, float transitionDuration, bool fadeOut = true)

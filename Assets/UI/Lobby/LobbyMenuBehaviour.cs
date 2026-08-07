@@ -8,6 +8,7 @@ using UnityEngine;
 using Unity.VisualScripting;
 using Hypersycos.Utils;
 using System.Linq;
+using Hypersycos.SaveSystem;
 //using UnityEngine.UIElements;
 
 namespace Hypersycos.GERogueFrame
@@ -26,6 +27,13 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] Transform descriptionHolder;
         [SerializeField] GameObject descriptionPrefab;
 
+        [SerializeField] TypedRegisteredValueSO<int> MinVRRSetting;
+        [SerializeField] Slider MinVRRSlider;
+        [SerializeField] TMP_InputField MinTextValue;
+        [SerializeField] TypedRegisteredValueSO<int> MaxVRRSetting;
+        [SerializeField] Slider MaxVRRSlider;
+        [SerializeField] TMP_InputField MaxTextValue;
+
         public override void OnNetworkSpawn()
         {
             //Set character
@@ -34,6 +42,8 @@ namespace Hypersycos.GERogueFrame
             //Add scrollbar hook
             readyButton.onClick.AddListener(StartGame);
             settingsButton.onClick.AddListener(OpenSettings);
+
+            UpdateSliderParams();
         }
 
         private void OpenSettings()
@@ -87,6 +97,50 @@ namespace Hypersycos.GERogueFrame
             }
 
             readyButton.interactable = true;
+        }
+
+        public void UpdateSliderParams()
+        {
+            MinVRRSlider.maxValue = (float)Screen.currentResolution.refreshRateRatio.value;
+            MaxVRRSlider.maxValue = (float)Screen.currentResolution.refreshRateRatio.value;
+
+            MaxVRRSlider.value = (float)Screen.currentResolution.refreshRateRatio.value;
+            UpdateMaximum((float)Screen.currentResolution.refreshRateRatio.value);
+
+            MinVRRSlider.value = 0;
+            UpdateMinimum(0);
+        }
+
+        public void UpdateMinimum(int iValue)
+        {
+            MinTextValue.SetTextWithoutNotify(iValue.ToString());
+            MinVRRSlider.SetValueWithoutNotify(iValue);
+            MinVRRSetting.Value = iValue;
+        }
+
+        public void UpdateMinimum(float value) => UpdateMinimum(Mathf.RoundToInt(value));
+        public void UpdateMinimum(string value)
+        {
+            if (int.TryParse(value, out int iValue) && iValue >= 0 && iValue <= MinVRRSlider.maxValue)
+                UpdateMinimum(int.Parse(value));
+            else
+                MinTextValue.SetTextWithoutNotify(Mathf.RoundToInt(MinVRRSlider.value).ToString());
+        }
+
+        public void UpdateMaximum(int iValue)
+        {
+            MaxTextValue.SetTextWithoutNotify(iValue.ToString());
+            MaxVRRSlider.SetValueWithoutNotify(iValue);
+            MaxVRRSetting.Value = iValue;
+        }
+
+        public void UpdateMaximum(float value) => UpdateMaximum(Mathf.RoundToInt(value));
+        public void UpdateMaximum(string value)
+        {
+            if (int.TryParse(value, out int iValue) && iValue >= 0 && iValue <= MaxVRRSlider.maxValue)
+                UpdateMaximum(int.Parse(value));
+            else
+                MaxTextValue.SetTextWithoutNotify(Mathf.RoundToInt(MaxVRRSlider.value).ToString());
         }
     }
 }

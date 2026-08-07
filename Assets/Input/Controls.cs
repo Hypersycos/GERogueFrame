@@ -268,7 +268,7 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""name"": ""Interact"",
                     ""type"": ""Button"",
                     ""id"": ""97869d8d-75ae-47d8-afdc-65bc24f87613"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -305,6 +305,15 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""type"": ""Button"",
                     ""id"": ""f860b727-c2e8-45d2-acd0-ecdc0da11661"",
                     ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Start Experiment"",
+                    ""type"": ""Button"",
+                    ""id"": ""00f2d849-7361-4123-a92d-11fbe2291018"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -629,6 +638,17 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""action"": ""Use Ability"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""59947887-2eff-4e9f-97d9-dd187d98fde1"",
+                    ""path"": ""<Keyboard>/g"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""Start Experiment"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -717,6 +737,7 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         m_Player_ToggleCrouch = m_Player.FindAction("Toggle Crouch", throwIfNotFound: true);
         m_Player_ChangeAbility = m_Player.FindAction("Change Ability", throwIfNotFound: true);
         m_Player_UseAbility = m_Player.FindAction("Use Ability", throwIfNotFound: true);
+        m_Player_StartExperiment = m_Player.FindAction("Start Experiment", throwIfNotFound: true);
         // MenuScreen
         m_MenuScreen = asset.FindActionMap("MenuScreen", throwIfNotFound: true);
         m_MenuScreen_OpenMenu = m_MenuScreen.FindAction("Open Menu", throwIfNotFound: true);
@@ -919,6 +940,7 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_ToggleCrouch;
     private readonly InputAction m_Player_ChangeAbility;
     private readonly InputAction m_Player_UseAbility;
+    private readonly InputAction m_Player_StartExperiment;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1015,6 +1037,10 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @UseAbility => m_Wrapper.m_Player_UseAbility;
         /// <summary>
+        /// Provides access to the underlying input action "Player/StartExperiment".
+        /// </summary>
+        public InputAction @StartExperiment => m_Wrapper.m_Player_StartExperiment;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1103,6 +1129,9 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             @UseAbility.started += instance.OnUseAbility;
             @UseAbility.performed += instance.OnUseAbility;
             @UseAbility.canceled += instance.OnUseAbility;
+            @StartExperiment.started += instance.OnStartExperiment;
+            @StartExperiment.performed += instance.OnStartExperiment;
+            @StartExperiment.canceled += instance.OnStartExperiment;
         }
 
         /// <summary>
@@ -1177,6 +1206,9 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             @UseAbility.started -= instance.OnUseAbility;
             @UseAbility.performed -= instance.OnUseAbility;
             @UseAbility.canceled -= instance.OnUseAbility;
+            @StartExperiment.started -= instance.OnStartExperiment;
+            @StartExperiment.performed -= instance.OnStartExperiment;
+            @StartExperiment.canceled -= instance.OnStartExperiment;
         }
 
         /// <summary>
@@ -1501,6 +1533,13 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnUseAbility(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Start Experiment" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnStartExperiment(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "MenuScreen" which allows adding and removing callbacks.

@@ -182,7 +182,7 @@
                     "name": "Interact",
                     "type": "Button",
                     "id": "97869d8d-75ae-47d8-afdc-65bc24f87613",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -219,6 +219,15 @@
                     "type": "Button",
                     "id": "f860b727-c2e8-45d2-acd0-ecdc0da11661",
                     "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Start Experiment",
+                    "type": "Button",
+                    "id": "00f2d849-7361-4123-a92d-11fbe2291018",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -541,6 +550,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Use Ability",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "59947887-2eff-4e9f-97d9-dd187d98fde1",
+                    "path": "<Keyboard>/g",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard",
+                    "action": "Start Experiment",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

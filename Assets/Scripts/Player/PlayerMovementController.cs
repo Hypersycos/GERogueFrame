@@ -86,9 +86,20 @@ namespace Hypersycos.GERogueFrame
             controls.Player.Crouch.canceled += DoCrouch;
             controls.Player.ToggleCrouch.started += DoCrouch;
 
+            controls.Player.StartExperiment.started += StartExperiment;
+
             move = controls.Player.Move;
             velocityAvgCount = Mathf.CeilToInt(velocityAvgPeriod / Time.fixedDeltaTime);
             myState = GetComponent<PlayerState>();
+        }
+
+        private void StartExperiment(InputAction.CallbackContext context)
+        {
+            GameObject.FindWithTag("ExperimentUI").GetComponent<FPSTracker>().DoNext(false);
+            GameObject.FindGameObjectWithTag("Managers").GetComponent<EnemySpawnManager>().enabled = true;
+
+            GameObject.FindGameObjectWithTag("Managers").GetComponent<ObjectiveManager>().roundEndTime.Value = Time.time + 60 * 10;
+            GameObject.FindGameObjectWithTag("Managers").GetComponent<ObjectiveManager>().enabled = true;
         }
 
         public override void OnDestroy()
