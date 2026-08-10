@@ -62,7 +62,7 @@ namespace Hypersycos.GERogueFrame
 
         private void CheckForScroll(float arg0)
         {
-            if (arg0 >= 0.99)
+            if (arg0 <= 0.01 && MinVRRSetting.Value != 0)
                 readyButton.interactable = true;
         }
 
@@ -92,11 +92,11 @@ namespace Hypersycos.GERogueFrame
                 {
                     var inst = Instantiate(descriptionPrefab, descriptionHolder);
                     inst.GetComponentInChildren<Image>().sprite = baseData.AbilityIcon;
-                    inst.GetComponentInChildren<TextMeshProUGUI>().text = $"<b>{baseData.AbilityName} ({typeNames[i]}): </b>{baseData.AbilityDescription}";
+                    string formattedDesc = baseData.AbilityDescription.Replace("{{S|", "<b><i>");
+                    formattedDesc = formattedDesc.Replace("}}", "</i></b>");
+                    inst.GetComponentInChildren<TextMeshProUGUI>().text = $"<b>{baseData.AbilityName} ({typeNames[i]}): </b>{formattedDesc}";
                 }
             }
-
-            readyButton.interactable = true;
         }
 
         public void UpdateSliderParams()
@@ -116,6 +116,8 @@ namespace Hypersycos.GERogueFrame
             MinTextValue.SetTextWithoutNotify(iValue.ToString());
             MinVRRSlider.SetValueWithoutNotify(iValue);
             MinVRRSetting.Value = iValue;
+            if (iValue != 0)
+                readyButton.interactable = true;
         }
 
         public void UpdateMinimum(float value) => UpdateMinimum(Mathf.RoundToInt(value));

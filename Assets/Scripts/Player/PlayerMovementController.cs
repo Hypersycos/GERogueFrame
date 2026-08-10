@@ -95,11 +95,11 @@ namespace Hypersycos.GERogueFrame
 
         private void StartExperiment(InputAction.CallbackContext context)
         {
-            GameObject.FindWithTag("ExperimentUI").GetComponent<FPSTracker>().DoNext(false);
-            GameObject.FindGameObjectWithTag("Managers").GetComponent<EnemySpawnManager>().enabled = true;
+            GameObject.FindWithTag("ExperimentUI").GetComponent<FPSTracker>().StartRun();
+            GameObject.FindWithTag("Managers").GetComponent<EnemySpawnManager>().enabled = true;
 
-            GameObject.FindGameObjectWithTag("Managers").GetComponent<ObjectiveManager>().roundEndTime.Value = Time.time + 60 * 10;
-            GameObject.FindGameObjectWithTag("Managers").GetComponent<ObjectiveManager>().enabled = true;
+            GameObject.FindWithTag("Managers").GetComponent<ObjectiveManager>().roundEndTime.Value = Time.time + 60 * 10;
+            GameObject.FindWithTag("Managers").GetComponent<ObjectiveManager>().enabled = true;
         }
 
         public override void OnDestroy()

@@ -119,7 +119,12 @@ namespace Hypersycos.GERogueFrame
             DoNext();
         }
 
-        public void DoNext(bool fadeOut = true)
+        public void StartRun()
+        {
+            DoNext(false);
+        }
+
+        void DoNext(bool fadeOut = true)
         {
             StartExperiment(Random.Range(minFPS, maxFPS+1), Random.Range(minFPS, maxFPS + 1), 20, Random.Range(5f, 15f), Random.Range(0f, 2f), fadeOut);
         }
