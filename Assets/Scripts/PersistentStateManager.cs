@@ -214,18 +214,9 @@ namespace Hypersycos.GERogueFrame
 
         public void PlayerDied(CharacterState player, DamageInstance _)
         {
-            bool alive = false;
-            foreach(var client in NetworkManager.ConnectedClientsList)
-            {
-                if (client.PlayerObject.GetComponent<PlayerState>().HitPoints.IsActive)
-                {
-                    alive = true;
-                    break;
-                }
-            }
+            mapState.so.generator.GetSpawnPoint(1, out Vector3[] positions, out Quaternion[] rotations);
 
-            if (!alive)
-                EndGame(GameEndReason.Death);
+            player.Teleport(positions[0] + new Vector3(0, 2, 0));
         }
 
         public void EndGame(GameEndReason reason)

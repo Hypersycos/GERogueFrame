@@ -1,8 +1,11 @@
 using Hypersycos.SaveSystem;
+using Hypersycos.Utils;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
@@ -10,6 +13,29 @@ namespace Hypersycos.GERogueFrame
 {
     public class FPSTracker : MonoBehaviour
     {
+        public class ExperimentTracker
+        {
+            public int test;
+            public int target;
+            public int minRange;
+            public int maxRange;
+        }
+
+        public struct SingleExperimentTracker
+        {
+            public int start;
+            public int end;
+            public float transitionPoint;
+            public ChangeType decision;
+
+            public int tooSlowCount;
+            public int tooFastCount;
+
+            public float tooSlowTime;
+            public float tooFastTime;
+        }
+
+
         [SerializeField] CanvasGroup canvasGroup;
         [SerializeField] TextMeshProUGUI aboveFPS;
         [SerializeField] TextMeshProUGUI belowFPS;
@@ -23,10 +49,17 @@ namespace Hypersycos.GERogueFrame
         List<float> tooSlow = new();
         List<float> tooFast = new();
 
+        Dictionary<int, ExperimentTracker> runningExperiments;
+        List<ExperimentTracker> finishedExperiments;
+        List<SingleExperimentTracker> experiments;
+        SingleExperimentTracker currentExperiment;
+
         float timer = 0;
         int frameCounter = 0;
         int maxFPS => MaxVRRSetting.Value;
         int minFPS => MinVRRSetting.Value;
+
+        static readonly int[] targets = { 30, 40, 50, 60, 70, 80, 100, 120, 140, 170, 200, 240 };
 
         void Awake()
         {
@@ -34,6 +67,16 @@ namespace Hypersycos.GERogueFrame
             canvasGroup = GetComponent<CanvasGroup>();
 
             //StartExperiment(maxFPS, maxFPS, 15, 5, 0, false);
+            foreach(int target in targets)
+            {
+                if (target < minFPS)
+                    continue;
+
+                if (target > maxFPS)
+                    break;
+
+                runningExperiments.Add(target, new() { test = target, minRange = target, maxRange = maxFPS, target = (maxFPS - target) / 2 + target});
+            }
         }
 
         public void SetTarget(int targetRate)
@@ -96,26 +139,44 @@ namespace Hypersycos.GERogueFrame
         public void DownChange() => RecordChange(ChangeType.Down);
         public void NoChange() => RecordChange(ChangeType.None);
 
-        enum ChangeType
+        public enum ChangeType
         {
             None = 0,
             Up = 1,
-            Down = 2
+            Down = 2,
         }
 
         void RecordChange(ChangeType type)
         {
-            switch (type)
+            var test = runningExperiments[currentExperiment.start];
+            if (currentExperiment.start != currentExperiment.end)
             {
-                case ChangeType.None:
-                    break;
-                case ChangeType.Up:
-                    break;
-                case ChangeType.Down:
-                    break;
-                default:
-                    break;
+                switch (type)
+                {
+                    case ChangeType.None:
+                        test.minRange = (test.minRange + test.maxRange) / 2;
+                        break;
+                    case ChangeType.Up:
+                    case ChangeType.Down:
+                        test.maxRange = (test.minRange + test.maxRange) / 2;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (test.maxRange - test.minRange < 3)
+                {
+                    runningExperiments.Remove(currentExperiment.start);
+                    finishedExperiments.Add(test);
+                }
+                else
+                {
+                    test.target = (test.maxRange - test.minRange) / 2 + test.minRange;
+                }
             }
+
+            currentExperiment.decision = type;
+            experiments.Add(currentExperiment);
             DoNext();
         }
 
@@ -126,12 +187,20 @@ namespace Hypersycos.GERogueFrame
 
         void DoNext(bool fadeOut = true)
         {
-            StartExperiment(Random.Range(minFPS, maxFPS+1), Random.Range(minFPS, maxFPS + 1), 20, Random.Range(5f, 15f), Random.Range(0f, 2f), fadeOut);
+            bool dummy = Random.Range(0f,100f) < 5f;
+            int start = runningExperiments.Keys.ToList().TakeRandomFromReadOnly();
+            int end;
+            if (dummy)
+                end = start;
+            else
+                end = runningExperiments[start].target;
+            StartExperiment(start, end, 15, Random.Range(5f, 10f), Random.Range(0.25f, 0.5f), fadeOut);
         }
 
         void StartExperiment(int startFPS, int endFPS, float duration, float transitionPoint, float transitionDuration, bool fadeOut = true)
         {
             Debug.Log($"Experiment: {duration}s of {startFPS}->{endFPS} @ {transitionPoint}s over {transitionDuration}s");
+            currentExperiment = new() { start = startFPS, end = endFPS, transitionPoint = transitionPoint };
             IEnumerator coroutine()
             {
                 float startFade, endFade;
@@ -183,15 +252,20 @@ namespace Hypersycos.GERogueFrame
 
                 enabled = false;
 
-                if (tooFast.Count > 0)
+                /*if (tooFast.Count > 0)
                     aboveFPS.text = $"{tooFast.Count * 100 / frameCounter}% of frames were above the expected frame rate";
-                else
+                else*/
                     aboveFPS.text = "";
 
-                if (tooSlow.Count > 0)
-                    belowFPS.text = $"{tooSlow.Count * 100 / frameCounter}% of frames were below the expected frame rate";
-                else
+                /*if (tooSlow.Count > 0)
+                    //belowFPS.text = $"{tooSlow.Count * 100 / frameCounter}% of frames were below the expected frame rate";
+                else*/
                     belowFPS.text = "";
+
+                currentExperiment.tooSlowCount = tooSlow.Count;
+                currentExperiment.tooFastCount = tooFast.Count;
+                currentExperiment.tooSlowTime = tooSlow.Sum();
+                currentExperiment.tooFastTime = tooFast.Sum();
 
                 startFade = Time.realtimeSinceStartup;
                 endFade = startFade + 2;
