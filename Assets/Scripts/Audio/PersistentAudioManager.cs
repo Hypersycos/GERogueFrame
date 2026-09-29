@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -26,6 +27,15 @@ namespace Hypersycos.GERogueFrame
 
         bool inMenu = true;
         bool usingClip1;
+        float changeTime = 10000;
+
+        private void Update()
+        {
+            if (Time.unscaledTime > changeTime)
+            {
+                PlayMusic(inMenu);
+            }
+        }
 
         AudioSource currentSource => usingClip1 ? musicSource1 : musicSource2;
         AudioSource altSource => usingClip1 ? musicSource2 : musicSource1;
@@ -93,10 +103,10 @@ namespace Hypersycos.GERogueFrame
         {
             IEnumerator Fade(AudioSource from, AudioSource to, float fadeTime = 2)
             {
-                float start = Time.time;
-                while (Time.time < start + fadeTime / 2)
+                float start = Time.unscaledTime;
+                while (Time.unscaledTime < start + fadeTime / 2)
                 {
-                    from.volume = Mathf.Clamp01(1 - (Time.time - start) * 2 / fadeTime);
+                    from.volume = Mathf.Clamp01(1 - (Time.unscaledTime - start) * 2 / fadeTime);
                     yield return null;
                 }
                 from.volume = 0;
@@ -105,9 +115,9 @@ namespace Hypersycos.GERogueFrame
                 to.volume = 0;
                 to.Play();
                 start += fadeTime / 2;
-                while (Time.time < start + fadeTime / 2)
+                while (Time.unscaledTime < start + fadeTime / 2)
                 {
-                    to.volume = Mathf.Clamp01((Time.time - start) * 2 / fadeTime);
+                    to.volume = Mathf.Clamp01((Time.unscaledTime - start) * 2 / fadeTime);
                     yield return null;
                 }
                 to.volume = 1;
@@ -121,6 +131,7 @@ namespace Hypersycos.GERogueFrame
                 else
                     Singleton.currentClip = Singleton.gameClips.TakeRandom();
                 Singleton.StartCoroutine(Fade(Singleton.altSource, Singleton.currentSource));
+                Singleton.changeTime = Singleton.currentClip.length * 2 + Time.unscaledTime - 1;
                 Singleton.inMenu = menu;
             }
         }

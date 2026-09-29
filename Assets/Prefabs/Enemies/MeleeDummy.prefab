@@ -2207,6 +2207,7 @@ MonoBehaviour:
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 1
   SpawnWithObservers: 1
@@ -2287,6 +2288,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   projectileSource: {fileID: 0}
+  audioSource: {fileID: 0}
   id:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -2295,6 +2297,7 @@ MonoBehaviour:
   Resources: []
   Defenses: []
   bar: {fileID: 2711580408271609876}
+  deathAnimationTimer: 0
 --- !u!114 &6022044970565978511
 MonoBehaviour:
   m_ObjectHideFlags: 0

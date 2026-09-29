@@ -8,6 +8,8 @@ TagManager:
   - Terrain
   - Managers
   - ExperimentUI
+  - PressGToStart
+  - EndExperimentUI
   layers:
   - Default
   - TransparentFX

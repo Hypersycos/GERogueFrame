@@ -59,7 +59,7 @@ namespace Hypersycos.GERogueFrame
         NetworkList<NetworkBehaviourReference> activeObjectives = new();
 
         [SerializeField] RectTransform objectiveHolder;
-        [SerializeField] ProgressBar objectiveProgress;
+        [SerializeField] TextMeshProUGUI objectiveProgress;
         [SerializeField] AudioClip objectiveComplete;
         [SerializeField] AudioClip allObjectivesComplete;
 
@@ -80,8 +80,6 @@ namespace Hypersycos.GERogueFrame
         {
             if (IsClient || IsHost)
             {
-                currentPoints.OnValueChanged += (_, n) => objectiveProgress.SetProgress(n / (float)requiredPoints.Value, n, requiredPoints.Value);
-                requiredPoints.OnValueChanged += (_, n) => objectiveProgress.SetProgress(0, 0, n);
                 activeObjectives.OnListChanged += OnObjectiveListChange;
             }
         }
@@ -91,12 +89,14 @@ namespace Hypersycos.GERogueFrame
             float rem = (float)(roundEndTime.Value - Time.time);
             TimeSpan time = TimeSpan.FromSeconds(rem);
             timer.text = time.ToString(@"mm\:ss");
+
+            objectiveProgress.text = $"Score: {currentPoints.Value}";
         }
 
         private void FixedUpdate()
         {
-            if (IsServer && roundEndTime.Value - Time.time <= 0)
-                PersistentStateManager.Singleton.EndGame(GameEndReason.Time);
+/*            if (IsServer && roundEndTime.Value - Time.time <= 0)
+                PersistentStateManager.Singleton.EndGame(GameEndReason.Time);*/
         }
 
         private void OnObjectiveListChange(NetworkListEvent<NetworkBehaviourReference> changeEvent)
@@ -112,7 +112,9 @@ namespace Hypersycos.GERogueFrame
                     case NetworkListEvent<NetworkBehaviourReference>.EventType.Remove:
                     case NetworkListEvent<NetworkBehaviourReference>.EventType.RemoveAt:
                         obj.DestroyUI();
-                        if (obj.Completed && currentPoints.Value < requiredPoints.Value)
+                        if (!obj.Completed)
+                            break;
+                        if (currentPoints.Value < requiredPoints.Value)
                             PersistentAudioManager.PlayInteract(objectiveComplete);
                         else
                             PersistentAudioManager.PlayInteract(allObjectivesComplete);
@@ -178,7 +180,7 @@ namespace Hypersycos.GERogueFrame
                 var objective = spawned.GetComponent<Objective>();
 
                 float chosenDiff = UnityEngine.Random.Range(difficulty * 0.85f, difficulty * 1.15f);
-                int reward = 2 * Mathf.RoundToInt(difficulty);
+                int reward = 2 * Mathf.RoundToInt(difficulty) * 20;
                 if (chosenEasy.Contains(i))
                 {
                     chosenDiff *= 0.7f;
@@ -214,8 +216,18 @@ namespace Hypersycos.GERogueFrame
         {
             currentPoints.Value += obj.Reward;
             activeObjectives.Remove(obj);
-            if (currentPoints.Value >= requiredPoints.Value)
-                PersistentStateManager.Singleton.NextRound();
+            /*if (currentPoints.Value >= requiredPoints.Value)
+                PersistentStateManager.Singleton.NextRound();*/
+        }
+
+        internal void OnPlayerKill(CharacterState arg0, DamageInstance arg1)
+        {
+            currentPoints.Value += (int)(arg0 as EnemyState).so.spawnCost;
+        }
+
+        internal void OnPlayerDied(CharacterState arg0, DamageInstance arg1)
+        {
+            currentPoints.Value -= 100;
         }
     }
 }

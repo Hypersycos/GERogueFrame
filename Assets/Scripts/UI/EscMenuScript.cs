@@ -2,6 +2,7 @@ using Hypersycos.SaveSystem;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 namespace Hypersycos.GERogueFrame
 {
@@ -24,36 +25,44 @@ namespace Hypersycos.GERogueFrame
             ControlsWrapper.Singleton.MenuOpened += MenuOpened;
             ControlsWrapper.Singleton.MenuClosed += MenuClosed;
             singleton = this;
-            gameObject.SetActive(false);
-            if (transform.parent.GetChild(1).gameObject.activeSelf)
+            gameMenu.SetActive(false);
+            if (settings.activeSelf)
             {
                 SaveSettings();
-                transform.parent.GetChild(1).gameObject.SetActive(false);
+                settings.SetActive(false);
             }
         }
 
         public void MenuOpened()
         {
-            gameObject.SetActive(true);
-            if (PersistentStateManager.Singleton != null)
+            if (SceneManager.GetActiveScene().name == "LobbyScene")
             {
-                if (PersistentStateManager.Singleton.gameState == GameState.Lobby || !PersistentStateManager.Singleton.IsServer)
-                    quitToLobby.SetActive(false);
-                else
-                    quitToLobby.SetActive(true);
-                gameMenu.SetActive(true);
-                settings.SetActive(false);
+                settings.SetActive(true);
             }
             else
             {
-                gameMenu.SetActive(false);
-                settings.SetActive(true);
+                settings.SetActive(false);
+                gameMenu.SetActive(true);
+                if (PersistentStateManager.Singleton != null)
+                {
+                    if (PersistentStateManager.Singleton.gameState == GameState.Lobby || !PersistentStateManager.Singleton.IsServer)
+                        quitToLobby.SetActive(false);
+                    else
+                        quitToLobby.SetActive(true);
+                    gameMenu.SetActive(true);
+                    settings.SetActive(false);
+                }
+                else
+                {
+                    gameMenu.SetActive(false);
+                    settings.SetActive(true);
+                }
             }
         }
 
         public void MenuClosed()
         {
-            gameObject.SetActive(false);
+            gameMenu.SetActive(false);
         }
 
         public void QuitToLobby()

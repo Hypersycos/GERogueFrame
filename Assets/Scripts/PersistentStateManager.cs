@@ -1,5 +1,6 @@
 using Hypersycos.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -217,6 +218,14 @@ namespace Hypersycos.GERogueFrame
             mapState.so.generator.GetSpawnPoint(1, out Vector3[] positions, out Quaternion[] rotations);
 
             player.Teleport(positions[0] + new Vector3(0, 2, 0));
+
+            IEnumerator ReviveAfterDelay(float delay)
+            {
+                yield return new WaitForSeconds(delay);
+                player.ApplyHealInstance(new DamageInstance(false, player.HitPoints.MaxValue, AllValidStatTarget.AllValid));
+            }
+
+            StartCoroutine(ReviveAfterDelay(2));
         }
 
         public void EndGame(GameEndReason reason)

@@ -59,6 +59,10 @@ namespace Hypersycos.GERogueFrame
                     }
                 };
             }
+
+            ObjectiveManager man = ObjectiveManager.Singleton;
+            OnKill.AddListener(man.OnPlayerKill);
+            OnKilled.AddListener(man.OnPlayerDied);
         }
 
         public void ApplyDefensePool(List<DefenseStatInstance> stats)

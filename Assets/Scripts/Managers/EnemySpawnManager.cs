@@ -98,6 +98,7 @@ namespace Hypersycos.GERogueFrame
         private void SpawnEnemy(Vector3 position, Quaternion rotation, EnemySO enemy, bool isAmbient)
         {
             var spawned = NetworkManager.Singleton.SpawnManager.InstantiateAndSpawn(enemy.NetworkPrefab, destroyWithScene: true, position: position, rotation: rotation);
+            spawned.GetComponent<EnemyState>().id.Value = SODatabase.NetworkedDB.EnemyIDs[enemy.UUID];
             var spawnedState = spawned.GetComponent<CharacterState>();
             spawnedEnemies.Add(spawnedState);
             spawnedState.OnKilled.AddListener((x, _) => spawnedEnemies.Remove(x));

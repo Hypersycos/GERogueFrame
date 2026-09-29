@@ -34,6 +34,8 @@ namespace Hypersycos.GERogueFrame
         [SerializeField] Slider MaxVRRSlider;
         [SerializeField] TMP_InputField MaxTextValue;
 
+        private double lastRefreshRate;
+
         public override void OnNetworkSpawn()
         {
             //Set character
@@ -43,7 +45,23 @@ namespace Hypersycos.GERogueFrame
             readyButton.onClick.AddListener(StartGame);
             settingsButton.onClick.AddListener(OpenSettings);
 
+            lastRefreshRate = Screen.currentResolution.refreshRateRatio.value;
             UpdateSliderParams();
+        }
+
+        private void Update()
+        {
+            if (IsSpawned)
+            {
+                double currentRate = Screen.currentResolution.refreshRateRatio.value;
+
+                // Compare using a tiny epsilon to handle minor floating point differences
+                if (Math.Abs(currentRate - lastRefreshRate) > 0.01)
+                {
+                    lastRefreshRate = currentRate;
+                    UpdateSliderParams();
+                }
+            }
         }
 
         private void OpenSettings()
@@ -109,6 +127,8 @@ namespace Hypersycos.GERogueFrame
 
             MinVRRSlider.value = 0;
             UpdateMinimum(0);
+
+            readyButton.interactable = false;
         }
 
         public void UpdateMinimum(int iValue)
@@ -144,5 +164,7 @@ namespace Hypersycos.GERogueFrame
             else
                 MaxTextValue.SetTextWithoutNotify(Mathf.RoundToInt(MaxVRRSlider.value).ToString());
         }
+
+        public void Quit() => Application.Quit();
     }
 }

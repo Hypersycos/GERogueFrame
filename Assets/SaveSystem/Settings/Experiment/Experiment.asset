@@ -14,5 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SaveSystem::Hypersycos.SaveSystem.RegisteredCategorySO
   _IsEphemeral: 0
   RegisteredSerializers: []
-  _Values: []
+  _Values:
+  - {fileID: 11400000, guid: 3e25124af779ed54ea8ee9f2453f386e, type: 2}
+  - {fileID: 11400000, guid: 50b1e27d0db9ec148b0c20cd94b318db, type: 2}
   _SubCategories: []

@@ -28,11 +28,19 @@ namespace Hypersycos.GERogueFrame
             public float transitionPoint;
             public ChangeType decision;
 
-            public int tooSlowCount;
-            public int tooFastCount;
+            public int tooSlowBeforeCount;
+            public int tooFastBeforeCount;
+            public int totalBeforeCount;
 
-            public float tooSlowTime;
-            public float tooFastTime;
+            public float tooSlowBeforeTime;
+            public float tooFastBeforeTime;
+
+            public int tooSlowAfterCount;
+            public int tooFastAfterCount;
+            public int totalAfterCount;
+
+            public float tooSlowAfterTime;
+            public float tooFastAfterTime;
         }
 
 
@@ -46,20 +54,27 @@ namespace Hypersycos.GERogueFrame
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         float minFrameTime;
         float maxFrameTime;
-        List<float> tooSlow = new();
-        List<float> tooFast = new();
+        List<float> tooSlowBefore = new();
+        List<float> tooFastBefore = new();
+        List<float> tooSlowAfter = new();
+        List<float> tooFastAfter = new();
 
-        Dictionary<int, ExperimentTracker> runningExperiments;
-        List<ExperimentTracker> finishedExperiments;
-        List<SingleExperimentTracker> experiments;
-        SingleExperimentTracker currentExperiment;
+        Dictionary<int, ExperimentTracker> runningExperiments = new();
+        public List<ExperimentTracker> finishedExperiments = new();
+        public List<SingleExperimentTracker> experiments = new();
+        SingleExperimentTracker currentExperiment = new();
 
         float timer = 0;
-        int frameCounter = 0;
+        int frameCounterBefore = 0;
+        int frameCounterAfter = 0;
         int maxFPS => MaxVRRSetting.Value;
         int minFPS => MinVRRSetting.Value;
 
         static readonly int[] targets = { 30, 40, 50, 60, 70, 80, 100, 120, 140, 170, 200, 240 };
+
+        bool paused = false;
+        bool running = true;
+        int recordingType;
 
         void Awake()
         {
@@ -72,11 +87,16 @@ namespace Hypersycos.GERogueFrame
                 if (target < minFPS)
                     continue;
 
-                if (target > maxFPS)
+                if (target >= maxFPS || (float)target / maxFPS > 0.9f)
+                {
                     break;
+                }
 
                 runningExperiments.Add(target, new() { test = target, minRange = target, maxRange = maxFPS, target = (maxFPS - target) / 2 + target});
             }
+
+            ControlsWrapper.Singleton.MenuOpened += Pause;
+            ControlsWrapper.Singleton.MenuClosed += Unpause;
         }
 
         public void SetTarget(int targetRate)
@@ -91,10 +111,14 @@ namespace Hypersycos.GERogueFrame
         public void ResetStats(int targetRate)
         {
             SetTarget(targetRate);
-            tooSlow.Clear();
-            tooFast.Clear();
-            frameCounter = 0;
+            tooSlowBefore.Clear();
+            tooFastBefore.Clear();
+            tooSlowAfter.Clear();
+            tooFastAfter.Clear();
+            frameCounterBefore = 0;
+            frameCounterAfter = 0;
             timer = 0;
+            recordingType = 0;
         }
 
         public void LerpTarget(int targetRate, float duration)
@@ -105,6 +129,7 @@ namespace Hypersycos.GERogueFrame
             {
                 float start = Time.time;
                 float targetTime = Time.time + duration;
+                recordingType = 1;
 
                 while (Time.time < targetTime)
                 {
@@ -112,6 +137,7 @@ namespace Hypersycos.GERogueFrame
                     SetTarget(Mathf.RoundToInt(target));
                     yield return new WaitForEndOfFrame();
                 }
+                recordingType = 2;
                 SetTarget(Mathf.RoundToInt(targetRate));
             }
 
@@ -123,50 +149,96 @@ namespace Hypersycos.GERogueFrame
         {
             if (Time.deltaTime < minFrameTime)
             {
-                tooFast.Add(timer);
-                //Debug.Log($"Fast: {Time.deltaTime} / {minFrameTime}");
+                switch (recordingType)
+                {
+                    case 0:
+                        tooFastBefore.Add(Time.deltaTime);
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        tooFastAfter.Add(Time.deltaTime);
+                        break;
+                }
             }
             else if (Time.deltaTime > maxFrameTime)
             {
-                tooSlow.Add(timer);
-                //Debug.Log($"Slow: {Time.deltaTime} / {maxFrameTime}");
+                switch (recordingType)
+                {
+                    case 0:
+                        tooSlowBefore.Add(Time.deltaTime);
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        tooSlowAfter.Add(Time.deltaTime);
+                        break;
+                }
             }
             timer += Time.deltaTime;
-            frameCounter++;
+            switch (recordingType)
+            {
+                case 0:
+                    frameCounterBefore++;
+                    break;
+                case 2:
+                    frameCounterAfter++;
+                    break;
+            }
+        }
+
+        public void Pause()
+        {
+            paused = true;
+            enabled = false;
+            Time.timeScale = 0;
+        }
+
+        public void Unpause()
+        {
+            paused = false;
+            enabled = running;
+            Time.timeScale = running ? 1 : 0;
         }
 
         public void UpChange() => RecordChange(ChangeType.Up);
         public void DownChange() => RecordChange(ChangeType.Down);
-        public void NoChange() => RecordChange(ChangeType.None);
+        public void NoChange() => RecordChange(ChangeType.NoChange);
+        public void Changed() => RecordChange(ChangeType.Changed);
 
         public enum ChangeType
         {
-            None = 0,
+            NoChange = 0,
             Up = 1,
             Down = 2,
+            Changed = 3
         }
 
         void RecordChange(ChangeType type)
         {
+            Debug.Log(type);
             var test = runningExperiments[currentExperiment.start];
+
+            switch (type)
+            {
+                case ChangeType.NoChange:
+                    test.minRange = test.target + 1;
+                    break;
+                case ChangeType.Up:
+                case ChangeType.Down:
+                case ChangeType.Changed:
+                    test.maxRange = test.target - 1;
+                    break;
+                default:
+                    break;
+            }
+
             if (currentExperiment.start != currentExperiment.end)
             {
-                switch (type)
-                {
-                    case ChangeType.None:
-                        test.minRange = (test.minRange + test.maxRange) / 2;
-                        break;
-                    case ChangeType.Up:
-                    case ChangeType.Down:
-                        test.maxRange = (test.minRange + test.maxRange) / 2;
-                        break;
-                    default:
-                        break;
-                }
-
                 if (test.maxRange - test.minRange < 3)
                 {
                     runningExperiments.Remove(currentExperiment.start);
+                    test.target = Mathf.RoundToInt((test.minRange + test.maxRange) / 2);
                     finishedExperiments.Add(test);
                 }
                 else
@@ -182,12 +254,33 @@ namespace Hypersycos.GERogueFrame
 
         public void StartRun()
         {
+            int numExperiments = 0;
+            foreach (var experiment in runningExperiments.Values)
+            {
+                numExperiments += Mathf.CeilToInt(Mathf.Log(experiment.maxRange - experiment.minRange, 2)) - 1;
+            }
+
+            numExperiments += 2;
+            numExperiments = Mathf.CeilToInt(numExperiments / 0.9f);
+
+            GameObject.FindWithTag("Managers").GetComponent<ObjectiveManager>().roundEndTime.Value = Time.time + numExperiments * 15;
             DoNext(false);
+        }
+
+        void DisplayResults()
+        {
+            Time.timeScale = 0;
+            GameObject.FindWithTag("EndExperimentUI").GetComponent<EndExperimentUI>().DisplayResults(this, minFPS, maxFPS);
         }
 
         void DoNext(bool fadeOut = true)
         {
-            bool dummy = Random.Range(0f,100f) < 5f;
+            bool dummy = Random.Range(0f,100f) < 10f;
+            if (runningExperiments.Count == 0)
+            {
+                DisplayResults();
+                return;
+            }
             int start = runningExperiments.Keys.ToList().TakeRandomFromReadOnly();
             int end;
             if (dummy)
@@ -204,35 +297,40 @@ namespace Hypersycos.GERogueFrame
             IEnumerator coroutine()
             {
                 float startFade, endFade;
+                const float fadeDuration = 0.25f;
+                const float timeScaleDuration = 0.5f;
+
+                SetTarget(startFPS);
+
                 if (fadeOut)
                 {
-                    SetTarget(startFPS);
                     ControlsWrapper.Singleton.SetUIState(false);
 
                     startFade = Time.realtimeSinceStartup;
-                    endFade = startFade + 1;
+                    endFade = startFade + fadeDuration;
                     canvasGroup.interactable = false;
                     canvasGroup.blocksRaycasts = false;
 
                     while (Time.realtimeSinceStartup < endFade)
                     {
-                        canvasGroup.alpha = 1 - (Time.realtimeSinceStartup - startFade);
+                        canvasGroup.alpha = 1 - (Time.realtimeSinceStartup - startFade) / fadeDuration;
                         yield return null;
                     }
                     canvasGroup.alpha = 0;
 
 
                     startFade = Time.realtimeSinceStartup;
-                    endFade = startFade + 2;
+                    endFade = startFade + timeScaleDuration;
                     while (Time.realtimeSinceStartup < endFade)
                     {
-                        Time.timeScale = (Time.realtimeSinceStartup - startFade) / 2;
+                        Time.timeScale = paused ? 0 : (Time.realtimeSinceStartup - startFade) / timeScaleDuration;
                         yield return null;
                     }
-                    Time.timeScale = 1;
+                    Time.timeScale = paused ? 0 : 1;
                 }
                 ResetStats(startFPS);
-                enabled = true;
+                running = true;
+                enabled = !paused;
 
                 if (endFPS != startFPS)
                 {
@@ -241,7 +339,10 @@ namespace Hypersycos.GERogueFrame
                     if (transitionDuration > 0)
                         LerpTarget(endFPS, transitionDuration);
                     else
+                    {
+                        recordingType = 2;
                         SetTarget(endFPS);
+                    }
 
                     yield return new WaitForSecondsRealtime(duration - transitionPoint + transitionDuration / 2);
                 }
@@ -250,6 +351,7 @@ namespace Hypersycos.GERogueFrame
                     yield return new WaitForSecondsRealtime(duration);
                 }
 
+                running = false;
                 enabled = false;
 
                 /*if (tooFast.Count > 0)
@@ -262,29 +364,48 @@ namespace Hypersycos.GERogueFrame
                 else*/
                     belowFPS.text = "";
 
-                currentExperiment.tooSlowCount = tooSlow.Count;
-                currentExperiment.tooFastCount = tooFast.Count;
-                currentExperiment.tooSlowTime = tooSlow.Sum();
-                currentExperiment.tooFastTime = tooFast.Sum();
+                currentExperiment.tooSlowBeforeCount = tooSlowBefore.Count;
+                currentExperiment.tooFastBeforeCount = tooFastBefore.Count;
+                currentExperiment.tooSlowBeforeTime = tooSlowBefore.Sum() * 1000;
+                currentExperiment.tooFastBeforeTime = tooFastBefore.Sum() * 1000;
+                currentExperiment.totalBeforeCount = frameCounterBefore;
+
+                currentExperiment.tooSlowAfterCount = tooSlowAfter.Count;
+                currentExperiment.tooFastAfterCount = tooFastAfter.Count;
+                currentExperiment.tooSlowAfterTime = tooSlowAfter.Sum() * 1000;
+                currentExperiment.tooFastAfterTime = tooFastAfter.Sum() * 1000;
+                currentExperiment.totalAfterCount = frameCounterAfter;
 
                 startFade = Time.realtimeSinceStartup;
-                endFade = startFade + 2;
+                endFade = startFade + timeScaleDuration;
                 while (Time.realtimeSinceStartup < endFade)
                 {
-                    Time.timeScale = 1 - (Time.realtimeSinceStartup - startFade) / 2;
+                    Time.timeScale = 1 - (Time.realtimeSinceStartup - startFade) / timeScaleDuration;
                     yield return null;
                 }
                 Time.timeScale = 0;
 
+                startFade = Time.realtimeSinceStartup;
+                endFade = startFade + fadeDuration;
+
                 ControlsWrapper.Singleton.SetUIState(true);
                 while (Time.realtimeSinceStartup < endFade)
                 {
-                    canvasGroup.alpha = (Time.realtimeSinceStartup - startFade);
+                    canvasGroup.alpha = (Time.realtimeSinceStartup - startFade) / fadeDuration;
                     yield return null;
                 }
                 canvasGroup.alpha = 1;
                 canvasGroup.interactable = true;
                 canvasGroup.blocksRaycasts = true;
+
+                SetTarget(maxFPS);
+
+/*                yield return new WaitForSecondsRealtime(0.5f);
+
+                if (Random.Range(0, 20) < currentExperiment.end - currentExperiment.start)
+                    Changed();
+                else
+                    NoChange();*/
             }
 
             StartCoroutine(coroutine());
